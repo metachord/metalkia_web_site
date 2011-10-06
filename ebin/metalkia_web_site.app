@@ -5,4 +5,6 @@
               {applications,[kernel,stdlib]},
               {mod,{mtws_app,[]}},
               {env,[]},
-              {modules,[mtws_app,mtws_sup]}]}.
+              {modules,[mtws_app,mtws_sup,nitrogen_app,nitrogen_init,
+                        nitrogen_sup,nitrogen_webmachine,static_resource,
+                        static_route_handler]}]}.
