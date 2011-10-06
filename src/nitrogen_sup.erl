@@ -44,8 +44,8 @@ init([]) ->
 dispatch() ->
     [
         %% Static content handlers...
-        {["css", '*'], static_resource, [{root, "./site/static/css"}]},
-        {["images", '*'], static_resource, [{root, "./site/static/images"}]},
+        {["css", '*'], static_resource, [{root, "./site/static/metalkia/css"}]},
+        {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},
         {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
         {["metalkia", '*'], static_resource, [{root, "./site/static/metalkia"}]},
 
