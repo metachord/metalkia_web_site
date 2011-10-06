@@ -10,7 +10,8 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    mtws_sup:start_link().
+  nitrogen_sup:start_link(),
+  mtws_sup:start_link().
 
 stop(_State) ->
     ok.
