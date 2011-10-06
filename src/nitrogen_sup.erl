@@ -33,7 +33,7 @@ init([]) ->
     io:format("Starting Webmachine Server on ~s:~p~n", [BindAddress, Port]),
 
     Options = [
-        {ip, BindAddress}, 
+        {ip, BindAddress},
         {port, Port},
         {dispatch, dispatch()}
     ],
@@ -41,12 +41,13 @@ init([]) ->
 
     {ok, { {one_for_one, 5, 10}, []} }.
 
-dispatch() -> 
+dispatch() ->
     [
         %% Static content handlers...
         {["css", '*'], static_resource, [{root, "./site/static/css"}]},
         {["images", '*'], static_resource, [{root, "./site/static/images"}]},
         {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
+        {["metalkia", '*'], static_resource, [{root, "./site/static/metalkia"}]},
 
         %% Add routes to your modules here. The last entry makes the
         %% system use the dynamic_route_handler, which determines the
@@ -56,7 +57,7 @@ dispatch() ->
         %%
         %% p.s. - Remember that you will need to RESTART THE VM for
         %%        dispatch changes to take effect!!!
-        %% 
+        %%
         %% {["path","to","module1",'*'], nitrogen_webmachine, module_name_1}
         %% {["path","to","module2",'*'], nitrogen_webmachine, module_name_2}
         %% {["path","to","module3",'*'], nitrogen_webmachine, module_name_3}
