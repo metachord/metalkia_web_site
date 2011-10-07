@@ -5,6 +5,6 @@
               {applications,[kernel,stdlib,metalkia_riak]},
               {mod,{mtws_app,[]}},
               {env,[]},
-              {modules,[index,mtws_app,mtws_sup,nitrogen_app,nitrogen_init,
-                        nitrogen_sup,nitrogen_webmachine,static_resource,
-                        static_route_handler]}]}.
+              {modules,[index,mt_post,mtws_app,mtws_sup,nitrogen_app,
+                        nitrogen_init,nitrogen_sup,nitrogen_webmachine,
+                        static_resource,static_route_handler]}]}.
