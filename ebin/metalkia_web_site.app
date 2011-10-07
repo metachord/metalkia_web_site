@@ -2,7 +2,7 @@
              [{description,"Web-interface for Metalkia"},
               {vsn,"0.1"},
               {registered,[]},
-              {applications,[kernel,stdlib]},
+              {applications,[kernel,stdlib,metalkia_riak]},
               {mod,{mtws_app,[]}},
               {env,[]},
               {modules,[index,mtws_app,mtws_sup,nitrogen_app,nitrogen_init,

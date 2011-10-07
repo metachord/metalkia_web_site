@@ -5,7 +5,8 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  metalkia_riak
                  ]},
   {mod, { mtws_app, []}},
   {env, []}
