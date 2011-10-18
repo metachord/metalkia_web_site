@@ -48,6 +48,7 @@ dispatch() ->
         {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},
         {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
         {["metalkia", '*'], static_resource, [{root, "./site/static/metalkia"}]},
+        {["post", post_id], mt_post, []},
 
         %% Add routes to your modules here. The last entry makes the
         %% system use the dynamic_route_handler, which determines the
