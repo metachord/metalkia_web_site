@@ -27,8 +27,12 @@
 
 -include_lib("metalkia_core/include/mt_records.hrl").
 -include_lib("metalkia_core/include/mt_log.hrl").
+-include_lib("metalkia_core/include/mt_util.hrl").
+
+-include("mtws.hrl").
 
 -record(comment, {
+  post_id,
   id,
   path = "",
   parents = [],
@@ -136,7 +140,8 @@ body() ->
 
 inner_body(Path) ->
   Id = Path, % FIXME
-  case mtriak:get_post(Id) of
+  ?DBG("PostId: ~p", [Id]),
+  case mtc_entry:sget(mt_post, ?a2b(Id)) of
     #mt_post{} = Post ->
       ?DBG("Post:~n~p", [Post]),
       [
@@ -166,26 +171,25 @@ comment_tree(Comments) ->
 
 comment_tree([], Tree) ->
   Tree;
-comment_tree([#mt_comment{parents = Parents, body = Body}|Comments], Tree) ->
-  Path = parents_to_path(Parents),
-  [CID|_] = lists:reverse(Path),
+comment_tree([#mt_comment{post_id = PostId, id = CID, parents = Parents, body = Body}|Comments], Tree) ->
+  Path = parents_to_path(PostId, Parents),
+  %%[CID|_] = lists:reverse(Path),
   E = comment_body(#comment{
+    post_id = PostId,
     id = CID,
     parents = Parents,
     path = Path,
-    level = length(Parents)-1,
+    level = length(Parents),
     body = Body}),
   comment_tree(Comments, Tree ++ [E]).
 
 
-comment_body(#comment{id = _Id, parents = Parents, path = Path, level = Level, body = Body}) ->
-  [PostId|_] = Parents,
-  [CommentId|_] = lists:reverse(Parents),
+comment_body(#comment{post_id = PostId, id = Id, parents = Parents, path = _Path, level = Level, body = Body}) ->
   Margin = Level*50+50,
-  Anchor = integer_to_list(CommentId),
+  Anchor = integer_to_list(Id),
   [
-    #panel{style="margin-left: "++integer_to_list(Margin)++"px;", body = [
-      #hidden{id="level-"++Path, text=Level},
+    #panel{style="position:relative; margin-left: "++integer_to_list(Margin)++"px;", body = [
+      #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
       #panel{body = [
         #span{
           style="color:#ff0000;",
@@ -197,15 +201,15 @@ comment_body(#comment{id = _Id, parents = Parents, path = Path, level = Level, b
           "<a href=\"#" ++ Anchor ++ "\" "
           "id=\"" ++ Anchor ++ "\" "
           "class=\"comment-anchor-link link\" "
-          "target=\"_self\">" ++ "#"++integer_to_list(PostId)++"/"++Anchor ++ "</a>"
+          "target=\"_self\">" ++ "#"++binary_to_list(PostId)++"/"++Anchor ++ "</a>"
         },
         #br{},
         #span{body = Body}
       ]},
-      default_items(Path),
+      default_items(parents_to_path(PostId, Parents)),
       #hr{}
     ]},
-    #panel{id="pan-"++Path}
+    #panel{id="pan-"++parents_to_path(PostId, Parents)}
   ].
 
 default_items(Path) ->
@@ -229,7 +233,16 @@ comment_post_items(Id) ->
 event("add-post") ->
   Text = wf:q("textarea"),
   ?PRINT(Text),
-  Id = integer_to_list(mtriak:add_post(#mt_post{body = Text})),
+  Author = #mt_person{
+    id = 1,
+    name = <<"Zert">>
+  },
+  IdBin = mtc_entry:sput(#mt_post{
+    author = Author,
+    body = Text,
+    origin = ?MT_ORIGIN
+  }),
+  Id = binary_to_list(IdBin),
   wf:replace("comment-items",
     #panel{body = [
       #hidden{id="post-id", text=Id},
@@ -244,16 +257,27 @@ event("add-comment-" ++ Path) ->
   Text = wf:q("textarea-"++Path),
   PostId = wf:q("post-id"),
   ?PRINT([{path, Path}, {post_id, PostId}, {level, Level}, {text, Text}]),
-  %%NewId = integer_to_list(mtriak:new_id(<<"comments">>)),
   Parents = path_to_parents(Path),
-  NewCID = mtriak:add_comment(PostId, Path, #mt_comment{body = Text, parents = Parents}),
-  CID = integer_to_list(NewCID),
+
+  Author = #mt_person{
+    id = 1,
+    name = <<"Zert">>
+  },
+  Comment = #mt_comment{
+    post_id = ?a2b(PostId),
+    author = Author,
+    body = Text,
+    parents = Parents
+  },
+  NewCID = mtc_entry:sput(Comment),
+  CID = list_to_integer(binary_to_list(NewCID)),
   NewId = Path++"-"++CID,
   ?PRINT(NewId),
   wf:insert_bottom("pan-"++Path,
     comment_body(#comment{
+      post_id = ?a2b(PostId),
       id = CID,
-      parents = Parents ++ [NewCID],
+      parents = Parents ++ [CID],
       path = NewId,
       level = list_to_integer(Level)+1,
       body = Text}
@@ -263,7 +287,8 @@ event(("comment-" ++ Id) = Target) ->
   wf:replace(Target, comment_post_items(Id)).
 
 path_to_parents(Path) ->
-  [list_to_integer(I) || I <- string:tokens(Path, "-")].
+  [_PostId|Result] = string:tokens(Path, "-"),
+  [list_to_integer(L) || L <- Result].
 
-parents_to_path(Parents) ->
-  string:join([integer_to_list(P) || P <- Parents], "-").
+parents_to_path(PostId, Parents) ->
+  binary_to_list(PostId) ++ "-" ++ string:join([integer_to_list(P) || P <- Parents], "-").
