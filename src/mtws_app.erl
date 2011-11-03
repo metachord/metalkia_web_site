@@ -19,7 +19,7 @@ start(_StartType, _StartArgs) ->
 
 %% TODO: remove this
 start() ->
-  [application:start(A) || A <- [gproc, riakc, metalkia_riak, metalkia_web_site, exmpp, metalkia_xmpp]].
+  [application:start(A) || A <- [gproc, riakc, metalkia_core, metalkia_riak, metalkia_web_site, exmpp, metalkia_xmpp]].
 
 
 stop(_State) ->

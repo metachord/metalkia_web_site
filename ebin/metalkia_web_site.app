@@ -2,7 +2,7 @@
              [{description,"Web-interface for Metalkia"},
               {vsn,"0.1"},
               {registered,[]},
-              {applications,[kernel,stdlib,metalkia_riak]},
+              {applications,[kernel,stdlib,metalkia_core]},
               {mod,{mtws_app,[]}},
               {env,[]},
               {modules,[index,mt_facebook,mt_identity_handler,mt_logoff,
