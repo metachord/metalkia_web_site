@@ -97,7 +97,10 @@ do_nitrogen(PageModule, Req) ->
 %%
 
 app_id() ->
-  mtc:get_env(facebook_app_id, "").
+  mtc:get_env(facebook_app_id, "dummy_app_id").
+
+app_secret() ->
+  mtc:get_env(facebook_app_secret, "dummy_app_secret").
 
 data_perms() ->
   "email".
@@ -106,5 +109,36 @@ login_redirect_uri() ->
   mtc:get_env(url, "http://metalkia.com") ++ "/facebook".
 
 main() ->
-  ?DBG("Code: ~p", [wf:q(code)]),
+  Code = wf:q(code),
+  Req =
+    "https://graph.facebook.com/oauth/access_token?"
+    "client_id=" ++ app_id() ++ "&"
+    "redirect_uri=" ++ mtc_util:uri_encode(login_redirect_uri()) ++ "&"
+    "client_secret=" ++ app_secret() ++ "&"
+    "code="++Code
+    ,
+  case httpc:request(Req) of
+    {ok,{{"HTTP/1.1",200,"OK"}, Headers, Body}} ->
+      ?DBG("Facebook reply:~n~p~n~p", [Headers, Body]),
+      Params = [list_to_tuple(re:split(PV, "=", [{return, list}])) || PV <- re:split(Body, "&", [{return, list}])],
+      MeReq =
+        "https://graph.facebook.com/me?"
+        "access_token=" ++ proplists:get_value("access_token", Params, "") ++ "&"
+        "client_id=" ++ app_id() ++ "&"
+        "redirect_uri=" ++ mtc_util:uri_encode(login_redirect_uri()) ++ "&"
+        "code="++Code
+        ,
+      case httpc:request(MeReq) of
+        {ok,{{"HTTP/1.1",200,"OK"}, MeHeaders, MeBody}} ->
+          ?DBG("Facebook Me reply:~n~p~n~p", [MeHeaders, MeBody]),
+          ok;
+        MeError ->
+          ?ERR("Facebook Me error:~n~p", [MeError]),
+          error
+      end;
+    Error ->
+      ?ERR("Facebook error:~n~p", [Error]),
+      error
+  end,
+
   wf:redirect(mtc:get_env(url, "http://metalkia.com")).
