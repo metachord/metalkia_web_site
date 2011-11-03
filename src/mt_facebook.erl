@@ -16,7 +16,8 @@
 -export([
   app_id/0,
   data_perms/0,
-  login_redirect_uri/0
+  login_redirect_uri/0,
+  main/0
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -74,13 +75,20 @@ do_nitrogen(PageModule, Req) ->
   RequestBridge = simple_bridge:make_request(webmachine_request_bridge, Req),
   ResponseBridge = simple_bridge:make_response(webmachine_response_bridge, Req),
   nitrogen:init_request(RequestBridge, ResponseBridge),
-  nitrogen:handler(mt_session_handler, PageModule),
-  nitrogen:handler(mt_security_handler, PageModule),
-  nitrogen:handler(mt_route_handler, PageModule),
-  nitrogen:handler(mt_identity_handler, PageModule),
 
-  Params = RequestBridge:post_params(),
-  ?DBG("POST Params:~n~p", [Params]),
+  [nitrogen:handler(Handler, PageModule) ||
+  Handler <- [
+      mt_session_handler,
+      mt_security_handler,
+      mt_route_handler,
+      mt_identity_handler
+  ]],
+
+  PostParams = RequestBridge:post_params(),
+  ?DBG("POST Params:~n~p", [PostParams]),
+
+  GetParams = RequestBridge:query_params(),
+  ?DBG("GET Params:~n~p", [GetParams]),
 
   PathInfo = wrq:path_info(Req),
   wf_context:path_info(PathInfo),
@@ -96,3 +104,7 @@ data_perms() ->
 
 login_redirect_uri() ->
   mtc:get_env(url, "http://metalkia.com") ++ "/facebook".
+
+main() ->
+  ?DBG("Code: ~p", [wf:q(code)]),
+  wf:redirect(mtc:get_env(url, "http://metalkia.com")).
