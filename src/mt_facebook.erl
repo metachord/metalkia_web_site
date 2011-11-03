@@ -89,10 +89,10 @@ do_nitrogen(PageModule, Req) ->
 %%
 
 app_id() ->
-  "255033837865445".
+  mtc:get_env(facebook_app_id, "").
 
 data_perms() ->
-  "email,user_checkins".
+  "email".
 
 login_redirect_uri() ->
-  "http://metalkia.com/facebook".
+  mtc:get_env(url, "http://metalkia.com") ++ "/facebook".
