@@ -6,6 +6,9 @@
   {applications, [
                   kernel,
                   stdlib,
+                  public_key,
+                  ssl,
+                  inets,
                   metalkia_core
                  ]},
   {mod, { mtws_app, []}},
