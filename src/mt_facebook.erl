@@ -109,36 +109,42 @@ login_redirect_uri() ->
   mtc:get_env(url, "http://metalkia.com") ++ "/facebook".
 
 main() ->
-  Code = wf:q(code),
-  Req =
-    "https://graph.facebook.com/oauth/access_token?"
-    "client_id=" ++ app_id() ++ "&"
-    "redirect_uri=" ++ mtc_util:uri_encode(login_redirect_uri()) ++ "&"
-    "client_secret=" ++ app_secret() ++ "&"
-    "code="++Code
-    ,
-  case httpc:request(Req) of
-    {ok,{{"HTTP/1.1",200,"OK"}, Headers, Body}} ->
-      ?DBG("Facebook reply:~n~p~n~p", [Headers, Body]),
-      Params = [list_to_tuple(re:split(PV, "=", [{return, list}])) || PV <- re:split(Body, "&", [{return, list}])],
-      MeReq =
-        "https://graph.facebook.com/me?"
-        "access_token=" ++ proplists:get_value("access_token", Params, "") ++ "&"
+  Action = wf:q(action),
+  if Action =:= "logoff" ->
+      SignedRequest = wf:q(signed_request),
+      ?DBG("LogOff: signed_request=~p", [SignedRequest]),
+      ok;
+     true ->
+      Code = wf:q(code),
+      Req =
+        "https://graph.facebook.com/oauth/access_token?"
         "client_id=" ++ app_id() ++ "&"
         "redirect_uri=" ++ mtc_util:uri_encode(login_redirect_uri()) ++ "&"
+        "client_secret=" ++ app_secret() ++ "&"
         "code="++Code
         ,
-      case httpc:request(MeReq) of
-        {ok,{{"HTTP/1.1",200,"OK"}, MeHeaders, MeBody}} ->
-          ?DBG("Facebook Me reply:~n~p~n~p", [MeHeaders, MeBody]),
-          ok;
-        MeError ->
-          ?ERR("Facebook Me error:~n~p", [MeError]),
+      case httpc:request(Req) of
+        {ok,{{"HTTP/1.1",200,"OK"}, Headers, Body}} ->
+          ?DBG("Facebook reply:~n~p~n~p", [Headers, Body]),
+          Params = [list_to_tuple(re:split(PV, "=", [{return, list}])) || PV <- re:split(Body, "&", [{return, list}])],
+          MeReq =
+            "https://graph.facebook.com/me?"
+            "access_token=" ++ proplists:get_value("access_token", Params, "") ++ "&"
+            "client_id=" ++ app_id() ++ "&"
+            "redirect_uri=" ++ mtc_util:uri_encode(login_redirect_uri()) ++ "&"
+            "code="++Code
+            ,
+          case httpc:request(MeReq) of
+            {ok,{{"HTTP/1.1",200,"OK"}, MeHeaders, MeBody}} ->
+              ?DBG("Facebook Me reply:~n~p~n~p", [MeHeaders, MeBody]),
+              ok;
+            MeError ->
+              ?ERR("Facebook Me error:~n~p", [MeError]),
+              error
+          end;
+        Error ->
+          ?ERR("Facebook error:~n~p", [Error]),
           error
-      end;
-    Error ->
-      ?ERR("Facebook error:~n~p", [Error]),
-      error
+      end
   end,
-
   wf:redirect(mtc:get_env(url, "http://metalkia.com")).
