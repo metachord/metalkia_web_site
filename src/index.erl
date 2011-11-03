@@ -29,22 +29,16 @@ url() ->
 
 
 body() ->
-    #container_12 { body=[
-        #grid_8 { alpha=true, prefix=2, suffix=2, omega=true, body=inner_body() }
-    ]}.
+  ?DBG("Cookies:~n~p", [wf_context:cookies()]),
+  #container_12 { body=[
+    #grid_8 { alpha=true, prefix=2, suffix=2, omega=true, body=inner_body() }
+  ]}.
 
 inner_body() ->
   #panel{body=[
-    #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}}
+    #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}},
+    #button{id=submit, text="LogOff",postback="logoff"}
   ]}.
 
-event("click-" ++ Id) ->
-  Level = wf:q("level-"++Id),
-  Text = wf:q("textarea-"++Id),
-  ?PRINT([{cid, Id}, {level, Level}, {text, Text}]),
-  {_, _, A} = now(),
-  NewId = Id ++ "-" ++ integer_to_list(A),
-  ?PRINT(NewId),
-  wf:insert_bottom("pan-"++Id, "dummy-pan"),
-  wf:replace("comment-items-" ++ Id, "dummy-item").
-
+event("logoff") ->
+  wf_context:delete_cookie("fbs_"++mt_facebook:app_id()).
