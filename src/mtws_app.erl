@@ -22,6 +22,7 @@ start() ->
   [application:start(A) ||
     A <-
       [
+       crypto,
        public_key,
        ssl,
        gproc,
