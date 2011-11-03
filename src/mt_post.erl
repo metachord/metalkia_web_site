@@ -2,10 +2,12 @@
 -module (mt_post).
 
 -export([
-    main/0,
-    title/0,
-    body/0,
-    event/1
+  main/0,
+  title/0,
+  body/0,
+  event/1,
+  author/0,
+  url/0
 ]).
 
 -export([
@@ -129,6 +131,14 @@ do_nitrogen(PageModule, Req) ->
 main() -> #template { file="./site/templates/metalkia/bare.html" }.
 
 title() -> "Add new post".
+
+author() ->
+  ?DBG("Author", []),
+  "Zert".
+
+url() ->
+  ?DBG("URL", []),
+  "http://metalkia.com".
 
 body() ->
   PathInfo = wf_context:path_info(),
