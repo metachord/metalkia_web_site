@@ -50,6 +50,7 @@ dispatch() ->
         {["mt", '*'], static_resource, [{root, "./site/static/metalkia"}]},
         {["post", post_id], mt_post, []},
         {["logoff"], mt_logoff, []},
+        {["facebook"], mt_facebook, []},
 
         %% Add routes to your modules here. The last entry makes the
         %% system use the dynamic_route_handler, which determines the
