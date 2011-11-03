@@ -47,7 +47,7 @@ dispatch() ->
         {["css", '*'], static_resource, [{root, "./site/static/metalkia/css"}]},
         {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},
         {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
-        {["metalkia", '*'], static_resource, [{root, "./site/static/metalkia"}]},
+        {["mt", '*'], static_resource, [{root, "./site/static/metalkia"}]},
         {["post", post_id], mt_post, []},
 
         %% Add routes to your modules here. The last entry makes the
