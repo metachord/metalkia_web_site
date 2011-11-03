@@ -41,4 +41,4 @@ inner_body() ->
   ]}.
 
 event("logoff") ->
-  wf_context:delete_cookie("fbs_"++mt_facebook:app_id()).
+  wf:redirect("http://metalkia.com/logoff").
