@@ -25,6 +25,7 @@ start() ->
        crypto,
        public_key,
        ssl,
+       inets,
        gproc,
        riakc,
        metalkia_core,
