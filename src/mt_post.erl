@@ -253,14 +253,7 @@ event("add-post") ->
     origin = ?MT_ORIGIN
   }),
   Id = binary_to_list(IdBin),
-  wf:replace("comment-items",
-    #panel{body = [
-      #hidden{id="post-id", text=Id},
-      #span{body = Text},
-      #br{},
-      comment_post_items(Id)
-  ]}),
-  wf:replace("pan", #panel{id = "pan-"++Id});
+  wf:redirect("/post/"++Id);
 event("add-comment-" ++ Path) ->
   LevelQ = wf:q("level-"++Path),
   Level = if LevelQ == undefined -> "0"; true -> LevelQ end,
