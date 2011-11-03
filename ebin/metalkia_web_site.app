@@ -5,8 +5,8 @@
               {applications,[kernel,stdlib,metalkia_riak]},
               {mod,{mtws_app,[]}},
               {env,[]},
-              {modules,[index,mt_identity_handler,mt_post,mt_route_handler,
-                        mt_security_handler,mt_session_handler,mtws_app,
-                        mtws_sup,nitrogen_app,nitrogen_init,nitrogen_sup,
-                        nitrogen_webmachine,static_resource,
-                        static_route_handler]}]}.
+              {modules,[index,mt_facebook,mt_identity_handler,mt_post,
+                        mt_route_handler,mt_security_handler,
+                        mt_session_handler,mtws_app,mtws_sup,nitrogen_app,
+                        nitrogen_init,nitrogen_sup,nitrogen_webmachine,
+                        static_resource,static_route_handler]}]}.

@@ -1,17 +1,32 @@
 %% -*- mode: nitrogen -*-
 -module (index).
--compile(export_all).
+
+-export([
+  main/0,
+  title/0,
+  body/0,
+  event/1,
+  author/0,
+  url/0
+]).
+
 -include_lib("nitrogen_core/include/wf.hrl").
 
--record(comment, {
-  id,
-  level = 0,
-  body = ""
-}).
+-include_lib("metalkia_core/include/mt_log.hrl").
 
 main() -> #template { file="./site/templates/metalkia/bare.html" }.
 
-title() -> "Welcome to Nitrogen".
+title() -> "Metalkia".
+
+
+author() ->
+  ?DBG("Author", []),
+  "Metachord".
+
+url() ->
+  ?DBG("URL", []),
+  "http://metalkia.com".
+
 
 body() ->
     #container_12 { body=[
@@ -19,31 +34,8 @@ body() ->
     ]}.
 
 inner_body() ->
-  inner_body(#comment{id="1234"}).
-
-inner_body(#comment{id = Id, level = Level, body = Body}) ->
-  [
-    #panel{style="margin-left: 50px;", body = [
-      #hidden{id="level-"++Id, text=Level},
-      #panel{body = [
-        #span{style="color:#ff0000;", body = Id},
-        #br{},
-        #span{body = Body}
-      ]},
-      default_items(Id),
-      #hr{},
-      #panel{id="pan-"++Id}
-    ]}
-  ].
-
-default_items(Id) ->
-  #link{id="comment-"++Id, text="Comment", postback="comment-"++Id}.
-
-comment_items(Id) ->
-  #panel{id = "comment-items-"++Id,
-    body = [
-      #textarea{id="textarea-"++Id},
-      #button{id=submit, text="Submit",postback="click-" ++ Id}
+  #panel{body=[
+    #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}}
   ]}.
 
 event("click-" ++ Id) ->
@@ -53,13 +45,6 @@ event("click-" ++ Id) ->
   {_, _, A} = now(),
   NewId = Id ++ "-" ++ integer_to_list(A),
   ?PRINT(NewId),
-  wf:insert_bottom("pan-"++Id,
-    inner_body(#comment{
-      id = NewId,
-      level = list_to_integer(Level)+1,
-      body = Text}
-  )),
-  wf:replace("comment-items-" ++ Id, default_items(Id));
-event(("comment-" ++ Id) = Target) ->
-  wf:replace(Target, comment_items(Id)).
+  wf:insert_bottom("pan-"++Id, "dummy-pan"),
+  wf:replace("comment-items-" ++ Id, "dummy-item").
 
