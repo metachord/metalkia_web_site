@@ -26,6 +26,8 @@
 -include_lib("metalkia_core/include/mt_log.hrl").
 -include_lib("metalkia_core/include/mt_util.hrl").
 
+-record(state, {page_module}).
+
 init([]) ->
   PageModule = ?MODULE,
   ?DBG("PageModule: ~p", [PageModule]),
