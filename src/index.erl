@@ -36,8 +36,8 @@ body() ->
 
 inner_body() ->
   #panel{body=[
-    #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}},
-    #button{id=submit, text="LogOff",postback="logoff"}
+    #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}}
+    %%#button{id=submit, text="LogOff",postback="logoff"}
   ]}.
 
 event("logoff") ->
