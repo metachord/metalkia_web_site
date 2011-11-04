@@ -127,19 +127,36 @@ main() ->
         {ok,{{"HTTP/1.1",200,"OK"}, Headers, Body}} ->
           ?DBG("Facebook reply:~n~p~n~p", [Headers, Body]),
           Params = [list_to_tuple(re:split(PV, "=", [{return, list}])) || PV <- re:split(Body, "&", [{return, list}])],
+          AccessToken = proplists:get_value("access_token", Params, ""),
+
           MeReq =
             "https://graph.facebook.com/me?"
-            "access_token=" ++ proplists:get_value("access_token", Params, "") ++ "&"
+            "access_token=" ++ AccessToken ++ "&"
             "client_id=" ++ app_id() ++ "&"
             "redirect_uri=" ++ mtc_util:uri_encode(login_redirect_uri()) ++ "&"
             "code="++Code
             ,
           case httpc:request(MeReq) of
             {ok,{{"HTTP/1.1",200,"OK"}, MeHeaders, MeBody}} ->
-              ?DBG("Facebook Me reply:~n~p~n~p", [MeHeaders, MeBody]),
+              ?DBG("Facebook Me reply:~n~p~n~p", [MeHeaders, mochijson2:decode(MeBody)]),
+              %% TODO: Get user info, store ID in database
               ok;
             MeError ->
               ?ERR("Facebook Me error:~n~p", [MeError]),
+              error
+          end,
+
+          FriendsReq =
+            "https://graph.facebook.com/me/friends?"
+            "access_token="++AccessToken
+            ,
+          case httpc:request(FriendsReq) of
+            {ok,{{"HTTP/1.1",200,"OK"}, FriendsHeaders, FriendsBody}} ->
+              ?DBG("Facebook Friends reply:~n~p~n~p", [FriendsHeaders, mochijson2:decode(FriendsBody)]),
+              %% TODO: Search friends IDs in database, prompt to add on metalkia
+              ok;
+            FriendsError ->
+              ?ERR("Facebook Friends error:~n~p", [FriendsError]),
               error
           end;
         Error ->
