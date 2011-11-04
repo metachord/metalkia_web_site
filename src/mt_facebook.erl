@@ -123,6 +123,7 @@ main() ->
         "client_secret=" ++ app_secret() ++ "&"
         "code="++Code
         ,
+      %% TODO: rewrite with FSM process
       case httpc:request(Req) of
         {ok,{{"HTTP/1.1",200,"OK"}, Headers, Body}} ->
           ?DBG("Facebook reply:~n~p~n~p", [Headers, Body]),
@@ -140,27 +141,59 @@ main() ->
             {ok,{{"HTTP/1.1",200,"OK"}, MeHeaders, MeBody}} ->
               ?DBG("Facebook Me reply:~n~p~n~p", [MeHeaders, mochijson2:decode(MeBody)]),
               %% TODO: Get user info, store ID in database
-              ok;
-            MeError ->
-              ?ERR("Facebook Me error:~n~p", [MeError]),
-              error
-          end,
+              case mochijson2:decode(MeBody) of
+                {struct, MeFields} ->
+                  FbProfile =
+                    lists:foldl(
+                      fun({<<"id">>, Val}, Fb) -> Fb#mt_facebook{id = Val};
+                         ({<<"name">>, Val}, Fb) -> Fb#mt_facebook{name = Val};
+                         ({<<"first_name">>, Val}, Fb) -> Fb#mt_facebook{first_name = Val};
+                         ({<<"middle_name">>, Val}, Fb) -> Fb#mt_facebook{middle_name = Val};
+                         ({<<"last_name">>, Val}, Fb) -> Fb#mt_facebook{last_name = Val};
+                         ({<<"link">>, Val}, Fb) -> Fb#mt_facebook{link = Val};
+                         ({<<"gender">>, Val}, Fb) -> Fb#mt_facebook{gender = ?a2gender(Val)};
+                         ({<<"email">>, Val}, Fb) -> Fb#mt_facebook{email = Val};
+                         ({<<"timezone">>, Val}, Fb) -> Fb#mt_facebook{timezone = ?a2i(Val)};
+                         ({<<"locale">>, Val}, Fb) -> Fb#mt_facebook{locale = Val};
+                         ({<<"updated_time">>, Val}, Fb) -> Fb#mt_facebook{updated_time = Val}
+                      end,
+                      #mt_facebook{}, MeFields),
 
-          FriendsReq =
-            "https://graph.facebook.com/me/friends?"
-            "access_token="++AccessToken
-            ,
-          case httpc:request(FriendsReq) of
-            {ok,{{"HTTP/1.1",200,"OK"}, FriendsHeaders, FriendsBody}} ->
-              ?DBG("Facebook Friends reply:~n~p~n~p", [FriendsHeaders, mochijson2:decode(FriendsBody)]),
-              %% TODO: Search friends IDs in database, prompt to add on metalkia
-              ok;
-            FriendsError ->
-              ?ERR("Facebook Friends error:~n~p", [FriendsError]),
+                  FriendsReq =
+                    "https://graph.facebook.com/me/friends?"
+                    "access_token="++AccessToken
+                    ,
+                  Friends =
+                    case httpc:request(FriendsReq) of
+                      {ok,{{"HTTP/1.1",200,"OK"}, FriendsHeaders, FriendsBody}} ->
+                        ?DBG("Facebook Friends reply:~n~p~n~p", [FriendsHeaders, mochijson2:decode(FriendsBody)]),
+                        %% TODO: Search friends IDs in database, prompt to add on metalkia
+                        case mochijson2:decode(FriendsBody) of
+                          {struct, FriendsData} ->
+                            FriendsList = proplists:get_value(<<"data">>, FriendsData, []),
+                            [#mt_fb_friend{id = proplists:get_value(<<"id">>, F),
+                                           name = proplists:get_value(<<"name">>, F)} ||
+                              {struct, F} <- FriendsList];
+                          FJsonError ->
+                            ?ERR("Cannot decode friends list:~n~p", [FJsonError]),
+                            []
+                        end;
+                      FriendsError ->
+                        ?ERR("Facebook friends request error:~n~p", [FriendsError]),
+                        []
+                    end,
+                  %% Store new Facebook profile
+                  mtc_entry:sput(FbProfile#mt_facebook{friends = Friends});
+                MJsonError ->
+                  ?ERR("Cannot decode me reply:~n~p", [MJsonError]),
+                  []
+              end;
+            MeError ->
+              ?ERR("Facebook Me request error:~n~p", [MeError]),
               error
           end;
         Error ->
-          ?ERR("Facebook error:~n~p", [Error]),
+          ?ERR("Facebook request error:~n~p", [Error]),
           error
       end
   end,
