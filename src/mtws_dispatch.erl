@@ -27,6 +27,7 @@ rules() ->
     %% {["path","to","module1",'*'], nitrogen_webmachine, module_name_1}
     %% {["path","to","module2",'*'], nitrogen_webmachine, module_name_2}
     %% {["path","to","module3",'*'], nitrogen_webmachine, module_name_3}
+    {[], nitrogen_webmachine, mt_route_handler},
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
     %%{['*'], nitrogen_webmachine, dynamic_route_handler}
   ].
