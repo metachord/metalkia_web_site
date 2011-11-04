@@ -17,15 +17,20 @@
 %% with the webmachine dispatch table to send requests through
 %% webmachine to a Nitrogen page.
 
-init(_PageModule, State) ->
+init(PageModule, State) ->
   RequestBridge = wf_context:request_bridge(),
   Path = RequestBridge:path(),
 
   {Module, PathInfo} = route(Path),
   {Module1, PathInfo1} = check_for_404(Module, PathInfo, Path),
 
-  %%wf_context:page_module(PageModule),
-  wf_context:page_module(Module1),
+  %% FIXME
+  case Module1 of
+    file_not_found_page ->
+      wf_context:page_module(PageModule);
+    _ ->
+      wf_context:page_module(Module1)
+  end,
   wf_context:path_info(PathInfo1),
 
   {ok, State}.
