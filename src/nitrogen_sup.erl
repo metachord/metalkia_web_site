@@ -3,8 +3,7 @@
 -behaviour(supervisor).
 -export([
     start_link/0,
-    init/1,
-    dispatch/0
+    init/1
 ]).
 
 %% Helper macro for declaring children of supervisor
@@ -35,37 +34,9 @@ init([]) ->
     Options = [
         {ip, BindAddress},
         {port, Port},
-        {dispatch, dispatch()}
+        {dispatch, mtws_dispatch:rules()}
     ],
     webmachine_mochiweb:start(Options),
 
     {ok, { {one_for_one, 5, 10}, []} }.
-
-dispatch() ->
-    [
-        %% Static content handlers...
-        {["css", '*'], static_resource, [{root, "./site/static/metalkia/css"}]},
-        {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},
-        {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
-        {["mt", '*'], static_resource, [{root, "./site/static/metalkia"}]},
-        {["post", post_id], mt_post, []},
-        {["logoff"], mt_logoff, []},
-        {["facebook"], mt_facebook, []},
-
-        %% Add routes to your modules here. The last entry makes the
-        %% system use the dynamic_route_handler, which determines the
-        %% module name based on the path. It's a good way to get
-        %% started, but you'll likely want to remove it after you have
-        %% added a few routes.
-        %%
-        %% p.s. - Remember that you will need to RESTART THE VM for
-        %%        dispatch changes to take effect!!!
-        %%
-        %% {["path","to","module1",'*'], nitrogen_webmachine, module_name_1}
-        %% {["path","to","module2",'*'], nitrogen_webmachine, module_name_2}
-        %% {["path","to","module3",'*'], nitrogen_webmachine, module_name_3}
-        {['*'], nitrogen_webmachine, dynamic_route_handler}
-    ].
-
-
 

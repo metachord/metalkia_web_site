@@ -8,6 +8,7 @@
               {env,[]},
               {modules,[index,mt_facebook,mt_identity_handler,mt_logoff,
                         mt_post,mt_route_handler,mt_security_handler,
-                        mt_session_handler,mtws_app,mtws_sup,nitrogen_app,
-                        nitrogen_init,nitrogen_sup,nitrogen_webmachine,
-                        static_resource,static_route_handler]}]}.
+                        mt_session_handler,mtws_app,mtws_dispatch,mtws_sup,
+                        nitrogen_app,nitrogen_init,nitrogen_sup,
+                        nitrogen_webmachine,static_resource,
+                        static_route_handler]}]}.
