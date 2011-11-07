@@ -1,5 +1,5 @@
 %% -*- mode: nitrogen -*-
--module (index).
+-module (mt_index).
 
 -export([
   main/0,

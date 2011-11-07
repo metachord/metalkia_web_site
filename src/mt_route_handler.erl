@@ -5,6 +5,7 @@
 -module (mt_route_handler).
 -behaviour (route_handler).
 -include_lib ("nitrogen_core/include/wf.hrl").
+-include_lib("metalkia_core/include/mt_log.hrl").
 -export ([
   init/2,
   finish/2
@@ -19,20 +20,26 @@
 
 init(PageModule, State) ->
   RequestBridge = wf_context:request_bridge(),
-  Path = RequestBridge:path(),
+  ?DBG("PageModule: ~p", [PageModule]),
+  if PageModule =:= [] ->
+      Path = RequestBridge:path(),
 
-  {Module, PathInfo} = route(Path),
-  {Module1, PathInfo1} = check_for_404(Module, PathInfo, Path),
+      {Module, PathInfo} = route(Path),
+      {Module1, PathInfo1} = check_for_404(Module, PathInfo, Path),
 
-  %% FIXME
-  case Module1 of
-    file_not_found_page ->
-      wf_context:page_module(PageModule);
-    _ ->
-      wf_context:page_module(Module1)
+      %% FIXME
+      case Module1 of
+        file_not_found_page ->
+          wf_context:page_module(PageModule);
+        _ ->
+          wf_context:page_module(Module1)
+      end,
+      ?DBG("Set PathInfo: ~p", [PathInfo1]),
+      wf_context:path_info(PathInfo1);
+     true ->
+      wf_context:page_module(PageModule),
+      wf_context:event_module(PageModule)
   end,
-  wf_context:path_info(PathInfo1),
-
   {ok, State}.
 
 finish(_Config, State) ->
@@ -41,7 +48,7 @@ finish(_Config, State) ->
 
 %%
 route("/") ->
-  {index, []};
+  {mt_index, []};
 
 route(Path) ->
   IsStatic = (filename:extension(Path) /= []),

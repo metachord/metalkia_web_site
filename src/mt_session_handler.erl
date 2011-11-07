@@ -23,14 +23,12 @@
 -record (state, {unique, node}).
 
 init(_Config, _State) ->
-  ?PRINT(wf:page_module()),
   % Get the session cookie and node...
   Cookie = wf:cookie(get_cookie_name()),
   State = case wf:depickle(Cookie) of
     undefined -> new_state();
     Other -> Other
   end,
-  ?DBG("State: ~p", [State]),
   {ok, State}.
 
 finish(_Config, State) ->
