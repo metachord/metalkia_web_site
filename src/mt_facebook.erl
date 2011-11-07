@@ -65,7 +65,10 @@ main() ->
                          ({<<"email">>, Val}, Fb) -> Fb#mt_facebook{email = Val};
                          ({<<"timezone">>, Val}, Fb) -> Fb#mt_facebook{timezone = ?a2i(Val)};
                          ({<<"locale">>, Val}, Fb) -> Fb#mt_facebook{locale = Val};
-                         ({<<"updated_time">>, Val}, Fb) -> Fb#mt_facebook{updated_time = Val}
+                         ({<<"updated_time">>, Val}, Fb) -> Fb#mt_facebook{updated_time = Val};
+                         (ParVal, Fb) ->
+                          ?DBG("Facebook Unhandled: ~p", [ParVal]),
+                          Fb
                       end,
                       #mt_facebook{}, MeFields),
 
