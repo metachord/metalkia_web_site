@@ -4,6 +4,13 @@
   main/0
 ]).
 
+%% For template
+-export([
+  app_id/0,
+  data_perms/0,
+  login_redirect_uri/0
+]).
+
 -include_lib("nitrogen_core/include/wf.hrl").
 -include_lib("webmachine/include/webmachine.hrl").
 
@@ -110,8 +117,8 @@ app_id() ->
 app_secret() ->
   mtc:get_env(facebook_app_secret, "dummy_app_secret").
 
-%% data_perms() ->
-%%   "email".
+data_perms() ->
+  "email".
 
 login_redirect_uri() ->
   mtc:get_env(url, "http://metalkia.com") ++ "/facebook".
