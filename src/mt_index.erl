@@ -36,9 +36,9 @@ body() ->
 
 inner_body() ->
   #panel{body=[
-    #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}},
-    #panel{body = #link{id="twitter-login-button", text="Login with Twitter", postback="twitter-login-button"}}
-    %%#button{id=submit, text="LogOff",postback="logoff"}
+    mt_facebook:login_panel(),
+    mt_twitter:login_panel(),
+    #button{id=submit, text="LogOff",postback="logoff"}
   ]}.
 
 event("logoff") ->

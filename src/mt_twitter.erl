@@ -1,7 +1,8 @@
 -module(mt_twitter).
 
 -export([
-  main/0
+  main/0,
+  login_panel/0
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -44,6 +45,16 @@ main() ->
       ok
   end,
   wf:redirect(mtc:get_env(url)).
+
+login_panel() ->
+  TwitterName = wf:session(twitter_name),
+  if
+    TwitterName =:= undefined ->
+      #panel{body = #link{id="twitter-login-button", text="Login with Twitter", postback="twitter-login-button"}};
+    true ->
+      #panel{body = "@"++TwitterName}
+  end.
+
 %%
 
 get_config() ->

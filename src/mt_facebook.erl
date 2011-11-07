@@ -1,7 +1,8 @@
 -module(mt_facebook).
 
 -export([
-  main/0
+  main/0,
+  login_panel/0
 ]).
 
 %% For template
@@ -72,6 +73,7 @@ main() ->
                       end,
                       #mt_facebook{}, MeFields),
 
+                  wf:session(facebook_name, FbProfile#mt_facebook.name),
                   FriendsReq =
                     "https://graph.facebook.com/me/friends?"
                     "access_token="++AccessToken
@@ -111,6 +113,15 @@ main() ->
       end
   end,
   wf:redirect(mtc:get_env(url, "http://metalkia.com")).
+
+login_panel() ->
+  FbName = wf:session(facebook_name),
+  if
+    FbName =:= undefined ->
+      #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}};
+    true ->
+      #panel{body = "fb:"++FbName}
+  end.
 
 %%
 
