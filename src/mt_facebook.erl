@@ -73,7 +73,7 @@ main() ->
                       end,
                       #mt_facebook{}, MeFields),
 
-                  wf:session(facebook_name, FbProfile#mt_facebook.name),
+                  wf:session(facebook_name, binary_to_list(FbProfile#mt_facebook.name)),
                   FriendsReq =
                     "https://graph.facebook.com/me/friends?"
                     "access_token="++AccessToken
