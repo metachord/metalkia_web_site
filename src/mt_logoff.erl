@@ -87,4 +87,5 @@ do_nitrogen(PageModule, Req) ->
 %%
 
 main() ->
-  "".
+  wf:logout(),
+  wf:redirect(mtc:get_env(url)).
