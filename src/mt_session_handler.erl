@@ -71,7 +71,6 @@ get_cookie_name() ->
 get_session_pid(_Config, State) ->
   Timeout = wf:config_default(session_timeout, 20),
   F = fun() -> session_loop([], Timeout) end,
-  io:format("STATE: ~p~n", [State]),
   SessionTag = {session, State#state.unique},
   {ok, _Pid} = process_registry_handler:get_pid(SessionTag, F).
 
