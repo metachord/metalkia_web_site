@@ -19,27 +19,31 @@ main() ->
     secret = secret(),
     method = hmac_sha1
    },
-  RequestTokenSecretSess = wf:session(twitter_oauth_token_secret),
-  if RequestTokenSecretSess =:= undefined ->
-      RequestTokenUrl = request_token_url(),
-      {ok, RequestTokenResponse} = oauth:get(RequestTokenUrl, [], Consumer),
-      RequestTokenParams = oauth:params_decode(RequestTokenResponse),
-      ?DBG("RequestTokenParams: ~p", [RequestTokenParams]),
-      RequestToken = oauth:token(RequestTokenParams),
-      wf:session(twitter_oauth_token, RequestToken),
-      RequestTokenSecret = oauth:token_secret(RequestTokenParams),
-      wf:session(twitter_oauth_token_secret, RequestTokenSecret),
-      wf:redirect(authorize_url() ++ "?oauth_token=" ++ RequestToken);
+  TwitterName = wf:session(twitter_name),
+  if TwitterName =:= undefined ->
+      RequestTokenSecretSess = wf:session(twitter_oauth_token_secret),
+      if RequestTokenSecretSess =:= undefined ->
+          RequestTokenUrl = request_token_url(),
+          {ok, RequestTokenResponse} = oauth:get(RequestTokenUrl, [], Consumer),
+          RequestTokenParams = oauth:params_decode(RequestTokenResponse),
+          ?DBG("RequestTokenParams: ~p", [RequestTokenParams]),
+          RequestToken = oauth:token(RequestTokenParams),
+          wf:session(twitter_oauth_token, RequestToken),
+          RequestTokenSecret = oauth:token_secret(RequestTokenParams),
+          wf:session(twitter_oauth_token_secret, RequestTokenSecret),
+          wf:redirect(authorize_url() ++ "?oauth_token=" ++ RequestToken);
+         true ->
+          AccessTokenURL = access_token_url(),
+          RequestTokenSess = wf:session(twitter_oauth_token),
+          {ok, AccessTokenResponse} = oauth:get(AccessTokenURL, [], Consumer, RequestTokenSess, RequestTokenSecretSess),
+          AccessTokenParams = oauth:params_decode(AccessTokenResponse),
+          ?DBG("AccessTokenParams: ~p", [AccessTokenParams]),
+          wf:session(twitter_name, proplists:get_value("screen_name", AccessTokenParams))
+      end;
      true ->
-      AccessTokenURL = access_token_url(),
-      RequestTokenSess = wf:session(twitter_oauth_token),
-      {ok, AccessTokenResponse} = oauth:get(AccessTokenURL, [], Consumer, RequestTokenSess, RequestTokenSecretSess),
-      AccessTokenParams = oauth:params_decode(AccessTokenResponse),
-      ?DBG("AccessTokenParams: ~p", [AccessTokenParams]),
-      wf:session(twitter_twitter_name, proplists:get_value("screen_name", AccessTokenParams)),
-      wf:redirect(mtc:get_env(url))
-  end.
-
+      ok
+  end,
+  wf:redirect(mtc:get_env(url)).
 %%
 
 get_config() ->
