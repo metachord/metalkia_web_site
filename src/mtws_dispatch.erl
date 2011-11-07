@@ -14,6 +14,7 @@ rules() ->
     {["post", post_id], mt_post, []},
     {["logoff"], mt_logoff, []},
     {["facebook"], mt_facebook, []},
+    {["twitter"], mt_twitter, []},
 
     %% Add routes to your modules here. The last entry makes the
     %% system use the dynamic_route_handler, which determines the

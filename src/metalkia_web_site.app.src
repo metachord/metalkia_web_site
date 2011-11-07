@@ -9,6 +9,7 @@
                   public_key,
                   ssl,
                   inets,
+                  oauth,
                   metalkia_core
                  ]},
   {mod, { mtws_app, []}},
