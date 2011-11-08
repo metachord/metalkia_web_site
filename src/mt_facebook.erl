@@ -67,6 +67,7 @@ main() ->
                          ({<<"timezone">>, Val}, Fb) -> Fb#mt_facebook{timezone = ?a2i(Val)};
                          ({<<"locale">>, Val}, Fb) -> Fb#mt_facebook{locale = Val};
                          ({<<"updated_time">>, Val}, Fb) -> Fb#mt_facebook{updated_time = Val};
+                         ({<<"username">>, Val}, Fb) -> Fb#mt_facebook{username = Val};
                          (ParVal, Fb) ->
                           ?DBG("Facebook Unhandled: ~p", [ParVal]),
                           Fb
