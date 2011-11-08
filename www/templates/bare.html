@@ -9,10 +9,10 @@
 
   <meta property="og:author" content="[[[page:author()]]]" />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="[[[page:url()]]]" />
+  <meta property="og:url" content="[[[mtws_common:url()]]]" />
   <meta property="og:image" content="http://metalkia.com/mt/images/valknut_mt-logo-50.png" />
 
-  <title>[[[page:title()]]]</title>
+  <title>[[[mtws_common:title()]]]</title>
   <script src='/nitrogen/jquery.js' type='text/javascript' charset='utf-8'></script>
   <script src='/nitrogen/jquery-ui.js' type='text/javascript' charset='utf-8'></script>
 <!--     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script> -->
@@ -22,14 +22,38 @@
   <script src='/nitrogen/bert.js' type='text/javascript' charset='utf-8'></script>
   <link rel="stylesheet" href="/nitrogen/jquery-ui/jquery.ui.all.css" type="text/css" media="screen" charset="utf-8" />
 <!--     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/smoothness/jquery-ui.css" type="text/css" media="screen" charset="utf-8" /> -->
+  <link rel="stylesheet" href="/mt/bootstrap/bootstrap.css" />
   <link rel="stylesheet" href="/nitrogen/nitrogen.css" />
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/social-buttons.css" />
 </head>
 <body>
-[[[page:header()]]]
-<hrule/>
-[[[page:body()]]]
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="container-fluid">
+        <a class="brand" href="#">[[[mtws_common:blog_name()]]]</a>
+        <ul class="nav">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <p class="pull-right">Logged in as <a href="#">[[[mtws_common:username()]]]</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="sidebar">
+      [[[page:header()]]]
+    </div>
+    <div class="content">
+      [[[page:body()]]]
+    </div>
+    <footer>
+      <p>© Metachord 2011</p>
+    </footer>
+  </div>
 <script>
 [[[script]]]
 </script>

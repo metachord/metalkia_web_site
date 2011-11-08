@@ -8,6 +8,11 @@ body {
     font-size: 16px;
     line-height: 32px;
     background-color: #62625D;
+    padding-top: 60px;
+}
+
+.sidebar {
+    background-color: #62625D;
 }
 
 .container_12 {
