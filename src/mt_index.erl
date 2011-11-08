@@ -4,6 +4,7 @@
 -export([
   main/0,
   title/0,
+  header/0,
   body/0,
   event/1,
   author/0,
@@ -28,22 +29,30 @@ url() ->
   "http://metalkia.com".
 
 
-body() ->
-  ?DBG("Cookies:~n~p", [wf_context:cookies()]),
-  #container_12 { body=[
-    #grid_8 { alpha=true, prefix=2, suffix=2, omega=true, body=inner_body() }
+header() ->
+  #container_16 { body=[
+    #grid_8 { alpha=true, prefix=7, suffix=0, body=inner_header() }
   ]}.
 
-inner_body() ->
+body() ->
+  #container_16 { body=[
+    #grid_8 { alpha=true, prefix=0, suffix=0, body="" }
+  ], omega = true}.
+
+inner_header() ->
+  IsTwSig = mt_twitter:is_signed_in(),
+  IsFbSig = mt_facebook:is_signed_in(),
   #panel{body=[
     mt_facebook:login_panel(),
     mt_twitter:login_panel(),
-    #button{id=submit, text="LogOff",postback="logoff"}
+    if
+      IsTwSig orelse IsFbSig ->
+        #button{id=submit, text="LogOff",postback="logoff"};
+      true ->
+        []
+    end
   ]}.
 
 event("logoff") ->
-  wf:redirect(mtc:get_env(url) ++ "/logoff");
-event("twitter-login-button") ->
-  ?DBG("Login with twitter", []),
-  wf:redirect(mtc:get_env(url) ++ "/twitter").
+  wf:redirect(mtc:get_env(url) ++ "/logoff").
 

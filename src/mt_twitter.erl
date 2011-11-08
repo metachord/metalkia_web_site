@@ -5,6 +5,13 @@
   login_panel/0
 ]).
 
+%% For template
+-export([
+  is_signed_in/0,
+  button_link/0,
+  button_text/0
+]).
+
 -include_lib("nitrogen_core/include/wf.hrl").
 -include_lib("webmachine/include/webmachine.hrl").
 
@@ -97,15 +104,36 @@ main() ->
   end.
 
 login_panel() ->
-  TwitterName = wf:session(twitter_name),
-  if
-    TwitterName =:= undefined ->
-      #panel{body = #link{id="twitter-login-button", text="Login with Twitter", postback="twitter-login-button"}};
-    true ->
-      #panel{body = "@"++TwitterName}
-  end.
+  #panel{body = #template{file = "./site/templates/metalkia/twitter_service.html"}}.
 
 %%
+
+is_signed_in() ->
+  ScreenName = wf:session(twitter_name),
+  if
+    ScreenName =:= undefined ->
+      false;
+    true ->
+      true
+  end.
+
+button_link() ->
+  ScreenName = wf:session(twitter_name),
+  if
+    ScreenName =:= undefined ->
+      mtc:get_env(url) ++ "/twitter";
+    true ->
+      "http://twitter.com/" ++ ScreenName
+  end.
+
+button_text() ->
+  ScreenName = wf:session(twitter_name),
+  if
+    ScreenName =:= undefined ->
+      "Sign in with Twitter";
+    true ->
+      "@" ++ ScreenName
+  end.
 
 get_config() ->
   mtc:get_env(twitter, []).

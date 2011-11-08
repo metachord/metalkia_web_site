@@ -7,9 +7,9 @@
 
 %% For template
 -export([
-  app_id/0,
-  data_perms/0,
-  login_redirect_uri/0
+  is_signed_in/0,
+  button_link/0,
+  button_text/0
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -75,6 +75,7 @@ main() ->
                       #mt_facebook{}, MeFields),
 
                   wf:session(facebook_name, binary_to_list(FbProfile#mt_facebook.name)),
+                  wf:session(facebook_link, binary_to_list(FbProfile#mt_facebook.link)),
                   FriendsReq =
                     "https://graph.facebook.com/me/friends?"
                     "access_token="++AccessToken
@@ -116,10 +117,23 @@ main() ->
   wf:redirect(mtc:get_env(url, "http://metalkia.com")).
 
 login_panel() ->
-  FbName = wf:session(facebook_name),
+  #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}}.
+
+%%
+
+is_signed_in() ->
+  FbLink = wf:session(facebook_link),
   if
-    FbName =:= undefined ->
-      LoginLink =
+    FbLink =:= undefined ->
+      false;
+    true ->
+      true
+  end.
+
+button_link() ->
+  FbLink = wf:session(facebook_link),
+  if
+    FbLink =:= undefined ->
       "http://www.facebook.com/connect/uiserver.php?"
       "app_id=" ++ app_id() ++ "&"
       "method=permissions.request" ++ "&"
@@ -128,14 +142,19 @@ login_panel() ->
       "display=async" ++ "&"
       "perms=" ++ data_perms() ++ "&"
       "auth_referral=1"
-      ,
-      #panel{body = #link{url = LoginLink, text = "Login with Facebook"}};
-      %%#panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}};
+        ;
     true ->
-      #panel{body = "fb:"++FbName}
+      FbLink
   end.
 
-%%
+button_text() ->
+  FbName = wf:session(facebook_name),
+  if
+    FbName =:= undefined ->
+      "Sign in with Facebook";
+    true ->
+      FbName
+  end.
 
 app_id() ->
   mtc:get_env(facebook_app_id, "dummy_app_id").

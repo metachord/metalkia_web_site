@@ -1,0 +1,120 @@
+/* CSS icons from http://sixrevisions.com/css/how-to-create-social-media-buttons-using-css3/ */
+
+/* COLORED OUTSET BUTTONS */
+
+.outset-colored {
+	font-family: Helvetica, Verdana, Arial, sans-serif;
+	font-size: 14px;
+	list-style-type: none;
+	margin: 10px 0 0 10px;
+}
+
+.outset-colored ul { list-style-type: none; display: block; }
+
+.outset-colored li {
+	float: top;
+	height: 15px;
+	margin: 0 8px 7px 0;
+}
+
+.outset-colored li a {
+	color: #424242;
+	float: left;
+	font-size: 12px;
+	font-weight: bold;
+	height: 16px;
+	padding-left: 22px;
+	padding-top: 1px;
+	position: relative;
+	text-decoration: none;
+	border: 1px solid #bfc1c6;
+	border-radius: 5px;
+	background-color: #D8D9DD;
+	-moz-border-radius: 5px;
+	-webkit-borer-radius: 5px;
+}
+
+/* EMAIL */
+.outset-colored li a.email {
+	background: -moz-linear-gradient(#ff6666, #cc0000 10%, #c40202);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #ff6666),color-stop(.10, #cc0000),color-stop(1, #c40202));
+	color: #f3f3f3;
+	border: 1px solid #c40202;
+}
+
+.outset-colored li a:hover.email {
+	background: -moz-linear-gradient(#c40202, #cc0000 1%, #e03434 10%, #e03434);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #c40202),color-stop(.01, #cc0000),color-stop(.10, #e03434),color-stop(1, #e03434));
+}
+
+/* LINKEDIN */
+.outset-colored li a.linkedin {
+	background: -moz-linear-gradient(#7cd0fb, #38a5dc 10%, #2c83ae);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #7cd0fb),color-stop(.10, #38a5dc),color-stop(1, #2c83ae));
+	color: #f3f3f3;
+	border: 1px solid #2c83ae;
+}
+
+.outset-colored li a:hover.linkedin {
+	background: -moz-linear-gradient(#2c83ae, #38a5dc 1%, #41b9f6 10%, #41b9f6);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #2c83ae),color-stop(.01, #38a5dc),color-stop(.10, #41b9f6),color-stop(1, #41b9f6));
+}
+
+/* FACEBOOK */
+.outset-colored li a.facebook {
+	background: -moz-linear-gradient(#7aa3f7, #4c72c3 10%, #3b5998);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #7aa3f7),color-stop(.10, #4c72c3),color-stop(1, #3b5998));
+	color: #f3f3f3;
+	border: 1px solid #3b5998;
+}
+
+.outset-colored li a:hover.facebook {
+	background: -moz-linear-gradient(#3b5998, #4c72c3 1%, #5c8aea 10%, #5c8aea);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #3b5998),color-stop(.01, #4c72c3),color-stop(.10, #5c8aea),color-stop(1, #5c8aea));
+}
+
+/* TWITTER */
+.outset-colored li a.twitter {
+	background: -moz-linear-gradient(#8ae0fd, #24bce6 10%, #1e9ec1);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #8ae0fd),color-stop(.10, #24bce6),color-stop(1, #1e9ec1));
+	color: #f3f3f3;
+	border: 1px solid #1e9ec1;
+}
+
+.outset-colored li a:hover.twitter {
+	background: -moz-linear-gradient(#1e9ec1, #24bce6 1%, #33ccff 10%, #33ccff);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #24bce6),color-stop(.01, #33ccff),color-stop(.10, #33ccff),color-stop(1, #33ccff));
+}
+
+/* FLICKR */
+.outset-colored li a.flickr {
+	background: -moz-linear-gradient(#fc75ba, #e10374 10%, #c10263);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #fc75ba),color-stop(.10, #e10374),color-stop(1, #c10263));
+	color: #f3f3f3;
+	border: 1px solid #c10263;
+}
+
+.outset-colored li a:hover.flickr {
+	background: -moz-linear-gradient(#c10263, #e10374 1%, #ff0283 10%, #ff0283);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #c10263),color-stop(.01, #e10374),color-stop(.10, #ff0283),color-stop(1, #ff0283));
+}
+
+.outset-colored li a img {
+	height: 16px;
+	left: 3px;
+	margin-right: 7px;
+	position: absolute;
+	top: 2px;
+	width: 16px;
+    border: none;
+}
+
+.outset-colored li a span {
+	display: block;
+	height: 16px;
+	padding-right: 4px;
+	overflow: hidden;
+	/*width: 70px; Add a width here if you want all the buttons to be the same size.*/
+}
+
+span.site { font-size: 12px; line-height: 20px; }

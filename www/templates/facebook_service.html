@@ -1,22 +1,10 @@
-<div id="fb-root"></div>
-<script>
-  window.fbAsyncInit = function() {
-    FB.init({
-       appId      : '[[[mt_facebook:app_id()]]]',
-       status     : true,
-       cookie     : true,
-       xfbml      : true
-    });
-  };
-  (function(d){
-    var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
-    js = d.createElement('script'); js.id = id; js.async = true;
-    js.src = "//connect.facebook.net/en_US/all.js";
-    d.getElementsByTagName('head')[0].appendChild(js);
-  }(document));
-</script>
-<div
-   class="fb-login-button"
-   data-perms="[[[mt_facebook:data_perms()]]]"
-   data-redirect-uri="[[[mt_facebook:login_redirect_uri()]]]"
-   >Login with Facebook</div>
+<div class="outset-colored">
+  <ul>
+	<li>
+	  <a href="[[[mt_facebook:button_link()]]]" title="[[[mt_facebook:button_text()]]]" class="facebook">
+		<img src="images/facebook_white.png" alt="Facebook icon" />
+		<span class="site">[[[mt_facebook:button_text()]]]</span>
+	  </a>
+	</li>
+  </ul>
+</div>
