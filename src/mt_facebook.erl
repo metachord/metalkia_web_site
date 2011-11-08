@@ -118,7 +118,18 @@ login_panel() ->
   FbName = wf:session(facebook_name),
   if
     FbName =:= undefined ->
-      #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}};
+      LoginLink =
+      "http://www.facebook.com/connect/uiserver.php?"
+      "app_id=" ++ app_id() ++ "&"
+      "method=permissions.request" ++ "&"
+      "redirect_uri=" ++ login_redirect_uri() ++ "&"
+      "response_type=code" ++ "&"
+      "display=async" ++ "&"
+      "perms=" ++ data_perms() ++ "&"
+      "auth_referral=1"
+      ,
+      #panel{body = #link{url = LoginLink, text = "Login with Facebook"}};
+      %%#panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}};
     true ->
       #panel{body = "fb:"++FbName}
   end.
@@ -132,7 +143,7 @@ app_secret() ->
   mtc:get_env(facebook_app_secret, "dummy_app_secret").
 
 data_perms() ->
-  "email".
+  "email,read_friendlists".
 
 login_redirect_uri() ->
   mtc:get_env(url, "http://metalkia.com") ++ "/facebook".
