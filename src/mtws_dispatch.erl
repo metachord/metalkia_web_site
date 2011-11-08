@@ -38,7 +38,9 @@ rules() ->
     {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},
     {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
     {["mt", '*'], static_resource, [{root, "./site/static/metalkia"}]},
-    {['*'], static_resource, [{root, "./site/static/metalkia"}]}
+
+    {['*'], ?MODULE, []}
+    %%{['*'], static_resource, [{root, "./site/static/metalkia"}]}
   ].
 
 init(PageModule) ->

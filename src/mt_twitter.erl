@@ -88,7 +88,17 @@ main() ->
                         ?ERR("Twitter friends request error:~n~p", [FriendsError]),
                         []
                     end,
-                  mtc_entry:sput(TwProfile#mt_twitter{friends = Friends});
+                  case mtc_entry:supdate(TwProfile#mt_twitter{friends = Friends}) of
+                    {updated, #mt_twitter{metalkia_id = MetalkiaId} = _SProfile} when MetalkiaId =/= <<>> ->
+                      %% This user already has Metalkia profile
+                      #mt_person{username = MetalkiaUser} = mtc_entry:sget(mt_person, MetalkiaId),
+                      wf:session(metalkia_id, binary_to_list(MetalkiaId)),
+                      wf:user(binary_to_list(MetalkiaUser)),
+                      wf:redirect(mtc:get_env(url));
+                    {new, _Profile} ->
+                      %% This user has not profile
+                      wf:redirect(mtc:get_env(url) ++ "/profile")
+                  end;
                 LJsonError ->
                   ?ERR("Cannot decode lookup reply:~n~p", [LJsonError]),
                   []
@@ -96,8 +106,7 @@ main() ->
             LookupError ->
               ?ERR("Twitter lookup request error:~n~p", [LookupError]),
               error
-          end,
-          wf:redirect(mtc:get_env(url))
+          end
       end;
     true ->
       wf:redirect(mtc:get_env(url))

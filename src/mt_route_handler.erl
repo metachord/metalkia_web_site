@@ -51,13 +51,12 @@ route("/") ->
   {mt_index, []};
 
 route(Path) ->
-  IsStatic = (filename:extension(Path) /= []),
-  case IsStatic of
-    true ->
-      % Serve this up as a static file.
-      {static_file, Path};
-    false ->
-      {web_404, Path}
+  ["/" | Resource] = filename:split(Path),
+  case Resource of
+    [UserName, "profile"] ->
+      {mt_profile, [{username, UserName}]};
+    _ ->
+      {mt_index, []}
   end.
 
 check_for_404(static_file, _PathInfo, Path) ->

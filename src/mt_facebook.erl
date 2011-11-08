@@ -100,7 +100,17 @@ main() ->
                         []
                     end,
                   %% Store new Facebook profile
-                  mtc_entry:sput(FbProfile#mt_facebook{friends = Friends});
+                  case mtc_entry:supdate(FbProfile#mt_facebook{friends = Friends}) of
+                    {updated, #mt_facebook{metalkia_id = MetalkiaId} = _SProfile} when MetalkiaId =/= <<>> ->
+                      %% This user already has Metalkia profile
+                      #mt_person{username = MetalkiaUser} = mtc_entry:sget(mt_person, MetalkiaId),
+                      wf:session(metalkia_id, binary_to_list(MetalkiaId)),
+                      wf:user(binary_to_list(MetalkiaUser)),
+                      wf:redirect(mtc:get_env(url));
+                    {new, _Profile} ->
+                      %% This user has not profile
+                      wf:redirect(mtc:get_env(url) ++ "/profile")
+                  end;
                 MJsonError ->
                   ?ERR("Cannot decode me reply:~n~p", [MJsonError]),
                   []

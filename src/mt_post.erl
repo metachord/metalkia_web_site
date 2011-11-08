@@ -145,7 +145,7 @@ event("add-post") ->
   ?PRINT(Text),
   Author = #mt_person{
     id = 1,
-    name = <<"Zert">>
+    username = wf:user()
   },
   IdBin = mtc_entry:sput(#mt_post{
     author = Author,
@@ -164,7 +164,7 @@ event("add-comment-" ++ Path) ->
 
   Author = #mt_person{
     id = 1,
-    name = <<"Zert">>
+    username = wf:user()
   },
   Comment = #mt_comment{
     post_id = ?a2b(PostId),
