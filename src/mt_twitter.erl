@@ -41,7 +41,55 @@ main() ->
           {ok, AccessTokenResponse} = oauth:get(AccessTokenURL, [], Consumer, RequestTokenSess, RequestTokenSecretSess),
           AccessTokenParams = oauth:params_decode(AccessTokenResponse),
           ?DBG("AccessTokenParams: ~p", [AccessTokenParams]),
-          wf:session(twitter_name, proplists:get_value("screen_name", AccessTokenParams)),
+          ScreenName = proplists:get_value("screen_name", AccessTokenParams),
+          wf:session(twitter_name, ScreenName),
+
+          %% TODO: move following code to async process
+          LookupUrl = "https://api.twitter.com/1/users/lookup.json?include_entities=true&screen_name=" ++ ScreenName,
+          case httpc:request(LookupUrl) of
+            {ok,{{"HTTP/1.1",200,"OK"}, LookupHeaders, LookupBody}} ->
+              ?DBG("Twitter lookup reply:~n~p~n~p", [LookupHeaders, LookupBody]),
+              case mochijson2:decode(LookupBody) of
+                {struct, LookupFields} ->
+                  TwProfile =
+                    lists:foldl(
+                      fun({<<"id_str">>, Val}, Tw) -> Tw#mt_twitter{id = Val};
+                         ({<<"screen_name">>, Val}, Tw) -> Tw#mt_twitter{screen_name = Val};
+                         ({<<"url">>, Val}, Tw) -> Tw#mt_twitter{url = Val};
+                         ({<<"name">>, Val}, Tw) -> Tw#mt_twitter{name = Val};
+                         ({<<"time_zone">>, Val}, Tw) -> Tw#mt_twitter{timezone = Val};
+                         ({<<"utc_offset">>, Val}, Tw) -> Tw#mt_twitter{utc_offset = ?a2i(Val)};
+                         ({<<"description">>, Val}, Tw) -> Tw#mt_twitter{description = Val};
+                         ({<<"lang">>, Val}, Tw) -> Tw#mt_twitter{locale = Val};
+                         (_ParVal, Tw) -> Tw
+                      end,
+                      #mt_twitter{}, LookupFields),
+                  FriendsUrl = "https://api.twitter.com/1/friends/ids.json?cursor=-1&stringify_ids=true&screen_name=" ++ ScreenName,
+                  Friends =
+                    case httpc:request(FriendsUrl) of
+                      {ok,{{"HTTP/1.1",200,"OK"}, FriendsHeaders, FriendsBody}} ->
+                        ?DBG("Twitter friends ids reply:~n~p~n~p", [FriendsHeaders, FriendsBody]),
+                        case mochijson2:decode(FriendsBody) of
+                          {struct, FriendsData} ->
+                            FriendsIds = proplists:get_value(<<"ids">>, FriendsData),
+                            [#mt_tw_friend{id = Id} || Id <- FriendsIds];
+                          FJsonError ->
+                            ?ERR("Cannot decode friends list:~n~p", [FJsonError]),
+                            []
+                        end;
+                      FriendsError ->
+                        ?ERR("Twitter friends request error:~n~p", [FriendsError]),
+                        []
+                    end,
+                  mtc_entry:sput(TwProfile#mt_twitter{friends = Friends});
+                LJsonError ->
+                  ?ERR("Cannot decode lookup reply:~n~p", [LJsonError]),
+                  []
+              end;
+            LookupError ->
+              ?ERR("Twitter lookup request error:~n~p", [LookupError]),
+              error
+          end,
           wf:redirect(mtc:get_env(url))
       end;
     true ->
