@@ -26,10 +26,41 @@ url() ->
   "http://metalkia.com".
 
 username() ->
-  wf:user().
+  User = wf:user(),
+  if User =/= undefined ->
+    User;
+    true ->
+      FbName = wf:session(facebook_name),
+      if FbName =/= undefined ->
+        mt_facebook:username_text();
+        true ->
+          TwName = wf:session(twitter_name),
+          if TwName =/= undefined ->
+              mt_twitter:username_text();
+            true ->
+              "undefined"
+          end
+      end
+  end.
+
 
 profile_link() ->
-  "#".
+  User = wf:user(),
+  if User =/= undefined ->
+      "#";
+    true ->
+      FbLink = wf:session(facebook_link),
+      if FbLink =/= undefined ->
+        mt_facebook:profile_link();
+        true ->
+          TwName = wf:session(twitter_name),
+          if TwName =/= undefined ->
+              mt_twitter:profile_link();
+            true ->
+              "#"
+          end
+      end
+  end.
 
 set_user(User) ->
   wf:user(User).

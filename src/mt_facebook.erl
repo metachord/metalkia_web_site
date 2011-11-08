@@ -8,8 +8,8 @@
 %% For template
 -export([
   is_signed_in/0,
-  button_link/0,
-  button_text/0
+  profile_link/0,
+  username_text/0
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -139,7 +139,7 @@ is_signed_in() ->
       true
   end.
 
-button_link() ->
+profile_link() ->
   FbLink = wf:session(facebook_link),
   if
     FbLink =:= undefined ->
@@ -156,7 +156,7 @@ button_link() ->
       FbLink
   end.
 
-button_text() ->
+username_text() ->
   FbName = wf:session(facebook_name),
   if
     FbName =:= undefined ->
