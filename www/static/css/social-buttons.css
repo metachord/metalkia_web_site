@@ -99,6 +99,19 @@
 	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #c10263),color-stop(.01, #e10374),color-stop(.10, #ff0283),color-stop(1, #ff0283));
 }
 
+/* FLICKR */
+.outset-colored li a.logoff {
+	background: -moz-linear-gradient(#806270, #7e7e78 10%, #7e7e78);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #62625d),color-stop(.10, #696964),color-stop(1, #7e7e78));
+	color: #f3f3f3;
+	border: 1px solid #62625d;
+}
+
+.outset-colored li a:hover.logoff {
+	background: -moz-linear-gradient(#62625d, #7e7e78 1%, #7e7e78 10%, #7e7e78);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0, #62625d),color-stop(.01, #696964),color-stop(.10, #7e7e78),color-stop(1, #7e7e78));
+}
+
 .outset-colored li a img {
 	height: 16px;
 	left: 3px;
@@ -114,7 +127,8 @@
 	height: 16px;
 	padding-right: 4px;
 	overflow: hidden;
+    width: 110px;
 	/*width: 70px; Add a width here if you want all the buttons to be the same size.*/
 }
 
-span.site { font-size: 12px; line-height: 20px; }
+span.site { font-size: 12px; line-height: 17px; }

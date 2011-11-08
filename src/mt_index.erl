@@ -47,7 +47,7 @@ inner_header() ->
     mt_twitter:login_panel(),
     if
       IsTwSig orelse IsFbSig ->
-        #button{id=submit, text="LogOff",postback="logoff"};
+        mt_logoff:logoff_panel();
       true ->
         []
     end
