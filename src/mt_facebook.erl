@@ -24,7 +24,7 @@ main() ->
   if Action =:= "logoff" ->
       SignedRequest = wf:q(signed_request),
       ?DBG("LogOff: signed_request=~p", [SignedRequest]),
-      ok;
+      wf:redirect(mtc:get_env(url));
      true ->
       Code = wf:q(code),
       Req =
@@ -123,8 +123,7 @@ main() ->
           ?ERR("Facebook request error:~n~p", [Error]),
           error
       end
-  end,
-  wf:redirect(mtc:get_env(url, "http://metalkia.com")).
+  end.
 
 login_panel() ->
   #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}}.
