@@ -74,23 +74,73 @@ a:hover, a:active {
 
 label {
   padding-top: 6px;
-  font-size: 13px;
-  line-height: 18px;
+  font-size: inherit;
+  line-height: inherit;
   float: left;
   width: 130px;
   text-align: right;
-  color: #404040;
+  color: inherit;
 }
 
 .label {
   padding: 1px 3px 2px;
-  font-size: 9.75px;
-  font-weight: bold;
-  color: #000000;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: inherit;
+  color: inherit;
+  text-transform: none;
   white-space: nowrap;
-  background-color: #62625D;
+  background-color: inherit;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
+}
+
+.mt-label {
+  padding: 1px 3px 2px;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: right;
+  text-transform: none;
+  white-space: nowrap;
+  background-color: inherit;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+.mt-entry {
+  padding: 1px 3px 2px;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: #000000;
+  text-align: left;
+  text-transform: none;
+  white-space: nowrap;
+  background-color: inherit;
+  border-color: #55aa55;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+div.inplace_textbox .instructions {
+    padding-left: 12px;
+    color: #aa8844;
+    font-size: 0.8em;
+}
+
+.mt-textbox {
+    border: none;
+    outline: none;
+}
+
+.warning {
+    outline: solid 3px #f66;
+}
+
+.warning {
+    outline: solid 3px #6f6;
 }
