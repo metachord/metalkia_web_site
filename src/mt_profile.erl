@@ -52,6 +52,7 @@ body() ->
         #p{},
         row(username),
         row(email),
+        row(password),
         row(name),
         #button{text = "Save profile", postback = "save-profile"}
       ]
@@ -109,7 +110,7 @@ event("save-profile") ->
       Person = #mt_person{
         id = ?a2b(UserName),
         username = ?a2b(UserName),
-        password_sha1 = crypto:sha(Password),
+        password_sha1 = if Password =/= undefined -> crypto:sha(Password); true -> undefined end,
         email = ?a2b(Email)
       },
       %% TODO: send verification mail
