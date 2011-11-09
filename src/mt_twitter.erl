@@ -57,7 +57,7 @@ main() ->
             {ok,{{"HTTP/1.1",200,"OK"}, LookupHeaders, LookupBody}} ->
               ?DBG("Twitter lookup reply:~n~p~n~p", [LookupHeaders, LookupBody]),
               case mochijson2:decode(LookupBody) of
-                {struct, LookupFields} ->
+                [{struct, LookupFields}] ->
                   TwProfile =
                     lists:foldl(
                       fun({<<"id_str">>, Val}, Tw) -> Tw#mt_twitter{id = Val};
