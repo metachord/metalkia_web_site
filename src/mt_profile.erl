@@ -86,7 +86,7 @@ form_entry(Tag) ->
       Name = mtws_common:username(),
       #textbox{id = "input-name", text = Name};
     password ->
-      #textbox{id = "input-password"};
+      #password{id = "input-password"};
     _ -> ""
   end.
 
