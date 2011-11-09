@@ -74,6 +74,7 @@ main() ->
                       end,
                       #mt_facebook{}, MeFields),
 
+                  mtws_common:set_email(binary_to_list(FbProfile#mt_facebook.email)),
                   wf:session(facebook_name, binary_to_list(FbProfile#mt_facebook.name)),
                   wf:session(facebook_link, binary_to_list(FbProfile#mt_facebook.link)),
                   FriendsReq =

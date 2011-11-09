@@ -1,11 +1,15 @@
 -module(mtws_common).
 
 -export([
-  set_user/1
+  set_user/1,
+  get_user/0,
+  set_email/1,
+  get_email/0
 ]).
 
 -export([
   blog_name/0,
+  blog_link/0,
   title/0,
   url/0,
   username/0,
@@ -19,11 +23,14 @@
 blog_name() ->
   "Metalkia blog".
 
+blog_link() ->
+  wf:session_default(blog_link, mtc:get_env(url)).
+
 title() -> "Metalkia".
 
 url() ->
   ?DBG("URL", []),
-  "http://metalkia.com".
+  mtc:get_env(url).
 
 username() ->
   User = wf:user(),
@@ -38,7 +45,7 @@ username() ->
           if TwName =/= undefined ->
               mt_twitter:username_text();
             true ->
-              "undefined"
+              ""
           end
       end
   end.
@@ -64,3 +71,12 @@ profile_link() ->
 
 set_user(User) ->
   wf:user(User).
+
+get_user() ->
+  wf:user().
+
+set_email(Email) ->
+  wf:session(user_email, Email).
+
+get_email() ->
+  wf:session(user_email).

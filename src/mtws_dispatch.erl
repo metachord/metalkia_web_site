@@ -33,6 +33,7 @@ rules() ->
     {["logoff"],             ?MODULE, mt_logoff},
     {["facebook"],           ?MODULE, mt_facebook},
     {["twitter"],            ?MODULE, mt_twitter},
+    {["profile"],            ?MODULE, mt_profile},
     %% Static content handlers
     {["css", '*'], static_resource, [{root, "./site/static/metalkia/css"}]},
     {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},

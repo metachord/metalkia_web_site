@@ -35,4 +35,16 @@ body() ->
   PathInfo = wf_context:path_info(),
   ?DBG("PathInfo: ~p", [PathInfo]),
   ?DBG("User: ~p", [wf:user()]),
-  "Profile".
+  Email = mtws_common:get_email(),
+  ?DBG("Email: ~p", [Email]),
+  if
+    Email =:= undefined ->
+      wf:redirect(mtws_common:blog_link());
+    true ->
+      [
+        #gravatar{email = mtws_common:get_email(), rating = "g"},
+        #p{},
+        #label{text = "Name"},
+        #inplace_textbox{text = mtws_common:username()}
+      ]
+  end.
