@@ -52,7 +52,8 @@ body() ->
         #p{},
         row(username),
         row(email),
-        row(name)
+        row(name),
+        #button{text = "Save profile", postback = "save-profile"}
       ]
   end.
 
@@ -68,6 +69,7 @@ form_label(Tag) ->
     username -> "Metalkia Username";
     email -> "Email";
     name -> "Name";
+    password -> "Password";
     _ -> "-undefined-"
   end,
   #label{text = Text}.
@@ -78,21 +80,42 @@ form_entry(Tag) ->
       username_entry("", "");
     email ->
       Email = mtws_common:get_email(),
-      #textbox{text = Email};
+      #textbox{id = "input-email", text = Email};
     name ->
       Name = mtws_common:username(),
-      #textbox{text = Name};
+      #textbox{id = "input-name", text = Name};
+    password ->
+      #textbox{id = "input-password"};
     _ -> ""
   end.
 
 event("check-username") ->
   UserName = wf:q("input-username"),
   ?DBG("Check UserName: ~p", [UserName]),
-  case mtc_entry:sget(mt_person, list_to_binary(UserName)) of
+  case mtc_entry:sget(mt_person, ?a2b(UserName)) of
     #mt_person{} ->
       wf:replace("entry-username", username_entry(UserName, "warning"));
     _ ->
       wf:replace("entry-username", username_entry(UserName, "approved"))
+  end;
+event("save-profile") ->
+  UserName = wf:q("input-username"),
+  case mtc_entry:sget(mt_person, ?a2b(UserName)) of
+    #mt_person{} ->
+      wf:replace("entry-username", username_entry(UserName, "warning"));
+    _ ->
+      Email = wf:q("input-email"),
+      Password = wf:q("input-password"),
+      Person = #mt_person{
+        id = ?a2b(UserName),
+        username = ?a2b(UserName),
+        password_sha1 = crypto:sha(Password),
+        email = ?a2b(Email)
+      },
+      %% TODO: send verification mail
+      mtc_entry:sput(Person),
+      mtws_common:set_user(UserName),
+      mtws_common:set_email(UserName)
   end.
 
 
