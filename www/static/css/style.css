@@ -71,3 +71,26 @@ a:hover, a:active {
 .link {
     color: #394A22;
 }
+
+label {
+  padding-top: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  float: left;
+  width: 130px;
+  text-align: right;
+  color: #404040;
+}
+
+.label {
+  padding: 1px 3px 2px;
+  font-size: 9.75px;
+  font-weight: bold;
+  color: #000000;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background-color: #62625D;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
