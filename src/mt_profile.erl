@@ -141,7 +141,8 @@ event("save-profile") ->
         email = ?a2b(Email)
       },
       ?DBG("Update profile:~n~p", [Person]),
-      mtc_entry:supdate(Person);
+      mtc_entry:supdate(Person),
+      mtws_common:update_external_profile(UserNameValidBin);
     #mt_person{id = _Other} ->
       ?DBG("Bad username: ~p", [UserName]),
       wf:replace("entry-username", username_entry(UserName, "warning"));
