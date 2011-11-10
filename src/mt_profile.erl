@@ -73,7 +73,6 @@ body() ->
             #p{},
             row(view, Profile, username),
             row(view, Profile, email),
-            row(view, Profile, password),
             row(view, Profile, name)
           ];
         error ->
