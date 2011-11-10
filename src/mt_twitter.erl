@@ -88,6 +88,7 @@ main() ->
                         ?ERR("Twitter friends request error:~n~p", [FriendsError]),
                         []
                     end,
+                  wf:session(twitter_id, ?a2b(TwProfile#mt_twitter.id)),
                   case mtc_entry:supdate(TwProfile#mt_twitter{friends = Friends}) of
                     {updated, #mt_twitter{metalkia_id = MetalkiaId} = _SProfile} when MetalkiaId =/= undefined ->
                       %% This user already has Metalkia profile

@@ -101,6 +101,7 @@ main() ->
                         []
                     end,
                   %% Store new Facebook profile
+                  wf:session(facebook_id, ?a2b(FbProfile#mt_facebook.id)),
                   case mtc_entry:supdate(FbProfile#mt_facebook{friends = Friends}) of
                     {updated, #mt_facebook{metalkia_id = MetalkiaId} = _SProfile} when MetalkiaId =/= undefined ->
                       %% This user already has Metalkia profile
