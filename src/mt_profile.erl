@@ -156,7 +156,7 @@ event("save-profile") ->
       ?DBG("Save profile:~n~p", [Person]),
       MetalkiaId = mtc_entry:sput(Person),
       wf:user(UserName),
-      mtws_common:set_email(UserName),
+      mtws_common:set_email(Email),
       mtws_common:update_external_profile(MetalkiaId)
   end.
 
