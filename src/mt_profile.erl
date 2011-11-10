@@ -43,11 +43,15 @@ body() ->
   ?DBG("PathInfo: ~p", [PathInfo]),
   User = wf:user(),
   ?DBG("User: ~p", [User]),
-  RequestedUser = dict:find(username, PathInfo),
+  RequestedUser =
+  case dict:find(username, PathInfo) of
+    {ok, RU} -> RU;
+    error -> undefined
+  end,
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
   if
-    ((RequestedUser =:= error) andalso (Email =/= undefined)) orelse
+    ((RequestedUser =:= undefined) andalso (Email =/= undefined)) orelse
     RequestedUser =:= User ->
       %% Edit mode
       Profile = undefined,                      % FIXME
@@ -62,15 +66,19 @@ body() ->
       ];
     true ->
       %% Readonly mode
-      Profile = dict:find(profile, PathInfo),
-      [
-        #gravatar{email = Profile#mt_person.email, rating = "g"},
-        #p{},
-        row(view, Profile, username),
-        row(view, Profile, email),
-        row(view, Profile, password),
-        row(view, Profile, name)
-      ]
+      case dict:find(profile, PathInfo) of
+        {ok, Profile} ->
+          [
+            #gravatar{email = Profile#mt_person.email, rating = "g"},
+            #p{},
+            row(view, Profile, username),
+            row(view, Profile, email),
+            row(view, Profile, password),
+            row(view, Profile, name)
+          ];
+        error ->
+          []
+      end
   end.
 
 row(Mode, Profile, Tag) ->
