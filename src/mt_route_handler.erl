@@ -62,7 +62,7 @@ route(Path) ->
           ?DBG("Profile not found: ~p", [UserName]),
           {mt_404, Path};
         Profile ->
-          {mt_profile, [{username, UserName}, {profile, Profile}]}
+          {mt_profile, dict:from_list([{username, UserName}, {profile, Profile}])}
       end;
     _ ->
       {mt_index, []}
