@@ -97,6 +97,7 @@ main() ->
                       wf:redirect(mtc:get_env(url));
                     _ ->
                       %% This user has not profile
+                      wf:session(twitter_id, ?a2b(TwProfile#mt_twitter.id)),
                       wf:redirect(mtc:get_env(url) ++ "/profile")
                   end;
                 LJsonError ->

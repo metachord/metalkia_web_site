@@ -110,6 +110,7 @@ main() ->
                       wf:redirect(mtc:get_env(url));
                     _ ->
                       %% This user has not profile
+                      wf:session(facebook_id, ?a2b(FbProfile#mt_facebook.id)),
                       wf:redirect(mtc:get_env(url) ++ "/profile")
                   end;
                 MJsonError ->
