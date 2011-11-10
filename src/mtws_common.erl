@@ -73,7 +73,7 @@ get_email() ->
 
 update_external_profile(MetalkiaId) ->
   FbId = wf:session(facebook_id),
-  TwId = wf:session(facebook_id),
+  TwId = wf:session(twitter_id),
 
   case mtc_entry:sget(mt_facebook, ?a2b(FbId)) of
     #mt_facebook{} = FbProfile ->
