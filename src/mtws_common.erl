@@ -58,7 +58,7 @@ user_or_name() ->
 profile_link() ->
   User = wf:user(),
   if User =/= undefined ->
-      "#";
+      "/profile";
     true ->
       FbLink = wf:session(facebook_link),
       if FbLink =/= undefined ->
