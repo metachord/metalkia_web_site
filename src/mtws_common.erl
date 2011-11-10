@@ -11,6 +11,7 @@
   blog_link/0,
   title/0,
   url/0,
+  user_or_name/0,
   name/0,
   profile_link/0
 ]).
@@ -46,6 +47,13 @@ name() ->
       end
   end.
 
+user_or_name() ->
+  User = wf:user(),
+  if User =/= undefined ->
+      User;
+     true ->
+      name()
+  end.
 
 profile_link() ->
   User = wf:user(),
