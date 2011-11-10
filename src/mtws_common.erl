@@ -98,10 +98,19 @@ update_external_profile(MetalkiaId) ->
 
   case mtc_entry:sget(mt_person, ?a2b(MetalkiaId)) of
     #mt_person{} = Profile ->
-      NewProfile = Profile#mt_person{
-        facebook_id = if FbId =/= undefined -> ?a2b(FbId); true -> undefined end,
-        twitter_id = if TwId =/= undefined -> ?a2b(TwId); true -> undefined end
-      },
+      NewProfile =
+        lists:foldl(
+          fun({facebook_id, Id}, Prof) ->
+              if Id =:= undefined -> Prof;
+                 true -> Prof#mt_person{facebook_id = ?a2b(Id)}
+              end;
+             ({twitter_id, Id}, Prof) ->
+              if Id =:= undefined -> Prof;
+                 true -> Prof#mt_person{twitter_id = ?a2b(Id)}
+              end
+          end,
+          Profile,
+          [{facebook_id, FbId}, {twitter_id, TwId}]),
       mtc_entry:sput(NewProfile);
     _ ->
       ?DBG("Facebook profile not found: ~p", [FbId])
