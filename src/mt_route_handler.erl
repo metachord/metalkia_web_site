@@ -6,6 +6,7 @@
 -behaviour (route_handler).
 -include_lib ("nitrogen_core/include/wf.hrl").
 -include_lib("metalkia_core/include/mt_log.hrl").
+-include_lib("metalkia_core/include/mt_util.hrl").
 -export ([
   init/2,
   finish/2
@@ -28,12 +29,14 @@ init(PageModule, State) ->
       {Module1, PathInfo1} = check_for_404(Module, PathInfo, Path),
 
       %% FIXME
-      case Module1 of
-        file_not_found_page ->
-          wf_context:page_module(PageModule);
-        _ ->
-          wf_context:page_module(Module1)
-      end,
+      %% case Module1 of
+      %%   file_not_found_page ->
+      %%     wf_context:page_module(PageModule);
+      %%   _ ->
+      %%     wf_context:page_module(Module1)
+      %% end,
+      wf_context:page_module(Module1),
+
       ?DBG("Set PathInfo: ~p", [PathInfo1]),
       wf_context:path_info(PathInfo1);
      true ->
@@ -54,7 +57,13 @@ route(Path) ->
   ["/" | Resource] = filename:split(Path),
   case Resource of
     [UserName, "profile"] ->
-      {mt_profile, [{username, UserName}]};
+      case mtc_entry:sget(mt_person, ?a2b(UserName)) of
+        undefined ->
+          ?DBG("Profile not found: ~p", [UserName]),
+          {mt_404, Path};
+        _ ->
+          {mt_profile, [{username, UserName}]}
+      end;
     _ ->
       {mt_index, []}
   end.
