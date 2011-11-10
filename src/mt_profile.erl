@@ -41,54 +41,78 @@ url() ->
 body() ->
   PathInfo = wf_context:path_info(),
   ?DBG("PathInfo: ~p", [PathInfo]),
-  ?DBG("User: ~p", [wf:user()]),
+  User = wf:user(),
+  ?DBG("User: ~p", [User]),
+  RequestedUser = dict:find(username, PathInfo),
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
   if
-    Email =:= undefined ->
-      wf:redirect(mtws_common:blog_link());
-    true ->
+    ((RequestedUser =:= error) andalso (Email =/= undefined)) orelse
+    RequestedUser =:= User ->
+      %% Edit mode
+      Profile = undefined,                      % FIXME
       [
         #gravatar{email = Email, rating = "g"},
         #p{},
-        row(username),
-        row(email),
-        row(password),
-        row(name),
+        row(edit, Profile, username),
+        row(edit, Profile, email),
+        row(edit, Profile, password),
+        row(edit, Profile, name),
         #button{text = "Save profile", postback = "save-profile"}
+      ];
+    true ->
+      %% Readonly mode
+      Profile = dict:find(profile, PathInfo),
+      [
+        #gravatar{email = Profile#mt_person.email, rating = "g"},
+        #p{},
+        row(view, Profile, username),
+        row(view, Profile, email),
+        row(view, Profile, password),
+        row(view, Profile, name)
       ]
   end.
 
-row(Tag) ->
+row(Mode, Profile, Tag) ->
   #panel{class = "clearfix", body = [
-    #template{file = "./site/templates/metalkia/form_row.tpl", bindings = [{'Tag', Tag}]}
+    #template{file = "./site/templates/metalkia/form_row.tpl", bindings = [{'Val', {Mode, Profile, Tag}}]}
   ]}.
 
 
-form_label(Tag) ->
+form_label({Mode, _, Tag}) ->
+  App = if Mode =:= edit -> " *"; true -> "" end,
   Text =
   case Tag of
-    username -> "Metalkia Username";
-    email -> "Email";
-    name -> "Name";
+    username -> "Metalkia Username" ++ App;
+    email -> "Email" ++ App;
+    name -> "Name" ++ App;
     password -> "Password";
     _ -> "-undefined-"
   end,
   #label{text = Text}.
 
-form_entry(Tag) ->
-  case Tag of
-    username ->
-      username_entry("", "");
-    email ->
-      Email = wf:session(email_trusted),
-      email_entry(Email, "", false);
-    name ->
-      Name = mtws_common:name(),
-      #textbox{id = "input-name", text = Name};
-    password ->
-      #password{id = "input-password"};
-    _ -> ""
+form_entry({Mode, Profile, Tag}) ->
+  case Mode of
+    edit ->
+      case Tag of
+        username ->
+          username_entry("", "");
+        email ->
+          Email = wf:session(email_trusted),
+          email_entry(Email, "", false);
+        name ->
+          Name = mtws_common:name(),
+          #textbox{id = "input-name", text = Name};
+        password ->
+          #password{id = "input-password"};
+        _ -> ""
+      end;
+    view ->
+      case Tag of
+        username -> Profile#mt_person.username;
+        email -> Profile#mt_person.email;
+        name -> Profile#mt_person.name
+      end
   end.
 
 event("check-username") ->
@@ -131,6 +155,7 @@ event("save-profile") ->
   UserName = normalize_input(wf:q("input-username")),
   UserNameValid = wf:user(),
   UserNameValidBin = ?a2b(UserNameValid),
+  Name = normalize_input(wf:q("input-name")),
 
   Email = wf:session(email_trusted),
   Password = wf:q("input-password"),
@@ -138,7 +163,8 @@ event("save-profile") ->
     #mt_person{id = UserNameValidBin} = StoredPerson ->
       Person = StoredPerson#mt_person{
         password_sha1 = if Password =/= undefined -> crypto:sha(Password); true -> undefined end,
-        email = ?a2b(Email)
+        email = ?a2b(Email),
+        name = ?a2b(Name)
       },
       ?DBG("Update profile:~n~p", [Person]),
       mtc_entry:supdate(Person),
@@ -151,7 +177,8 @@ event("save-profile") ->
         id = ?a2b(UserName),
         username = ?a2b(UserName),
         password_sha1 = if Password =/= undefined -> crypto:sha(Password); true -> undefined end,
-        email = ?a2b(Email)
+        email = ?a2b(Email),
+        name = ?a2b(Name)
       },
       ?DBG("Save profile:~n~p", [Person]),
       MetalkiaId = mtc_entry:sput(Person),

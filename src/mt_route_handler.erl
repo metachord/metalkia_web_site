@@ -61,8 +61,8 @@ route(Path) ->
         undefined ->
           ?DBG("Profile not found: ~p", [UserName]),
           {mt_404, Path};
-        _ ->
-          {mt_profile, [{username, UserName}]}
+        Profile ->
+          {mt_profile, [{username, UserName}, {profile, Profile}]}
       end;
     _ ->
       {mt_index, []}
