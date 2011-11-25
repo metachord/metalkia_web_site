@@ -125,6 +125,7 @@ form_entry({Mode, Profile, Tag}) ->
 event("check-username") ->
   UserName = normalize_input(wf:q("input-username")),
   ?DBG("Check UserName: ~p", [UserName]),
+  %% TODO: Check username stop-list
   case mtc_entry:sget(mt_person, ?a2b(UserName)) of
     #mt_person{} ->
       wf:replace("entry-username", username_entry(UserName, "warning"));
@@ -166,6 +167,7 @@ event("save-profile") ->
 
   Email = wf:session(email_trusted),
   Password = wf:q("input-password"),
+  %% TODO: Check username stop-list
   case mtc_entry:sget(mt_person, ?a2b(UserName)) of
     #mt_person{id = UserNameValidBin} = StoredPerson ->
       Person = StoredPerson#mt_person{

@@ -16,7 +16,12 @@ finish(_Config, State) ->
   {ok, State}.
 
 get_user(_Config, _State) ->
-  wf:session(?KEY).
+  case wf:session(?KEY) of
+    undefined ->
+      mtc:get_env(test_username);
+    Real ->
+      Real
+  end.
 
 set_user(User, _Config, State) ->
   wf:session(?KEY, User),

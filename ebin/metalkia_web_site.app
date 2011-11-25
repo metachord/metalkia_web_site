@@ -6,10 +6,10 @@
                              metalkia_core]},
               {mod,{mtws_app,[]}},
               {env,[]},
-              {modules,[mt_404,mt_facebook,mt_identity_handler,mt_index,
-                        mt_logoff,mt_post,mt_profile,mt_route_handler,
-                        mt_security_handler,mt_session_handler,mt_twitter,
-                        mtws_app,mtws_common,mtws_dispatch,mtws_sup,
-                        nitrogen_app,nitrogen_init,nitrogen_sup,
-                        nitrogen_webmachine,static_resource,
-                        static_route_handler]}]}.
+              {modules,[element_tagsinput,mt,mt_404,mt_facebook,
+                        mt_identity_handler,mt_index,mt_logoff,mt_post,
+                        mt_profile,mt_route_handler,mt_security_handler,
+                        mt_session_handler,mt_twitter,mtws_app,mtws_common,
+                        mtws_dispatch,mtws_sanitizer,mtws_sup,nitrogen_app,
+                        nitrogen_init,nitrogen_sup,nitrogen_webmachine,
+                        static_resource,static_route_handler]}]}.

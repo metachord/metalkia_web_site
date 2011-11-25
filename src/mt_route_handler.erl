@@ -7,6 +7,7 @@
 -include_lib ("nitrogen_core/include/wf.hrl").
 -include_lib("metalkia_core/include/mt_log.hrl").
 -include_lib("metalkia_core/include/mt_util.hrl").
+-include_lib("metalkia_core/include/mt_records.hrl").
 -export ([
   init/2,
   finish/2
@@ -22,11 +23,14 @@
 init(PageModule, State) ->
   RequestBridge = wf_context:request_bridge(),
   ?DBG("PageModule: ~p", [PageModule]),
+  ?DBG("Headers:~n~p", [wf:headers()]),
   if PageModule =:= [] ->
       Path = RequestBridge:path(),
 
-      {Module, PathInfo} = route(Path),
-      {Module1, PathInfo1} = check_for_404(Module, PathInfo, Path),
+      PathInfo = wf_context:path_info(),
+
+      {Module, PathInfo1} = route(Path, PathInfo),
+      {Module1, PathInfo2} = check_for_404(Module, PathInfo1, Path),
 
       %% FIXME
       %% case Module1 of
@@ -36,9 +40,7 @@ init(PageModule, State) ->
       %%     wf_context:page_module(Module1)
       %% end,
       wf_context:page_module(Module1),
-
-      ?DBG("Set PathInfo: ~p", [PathInfo1]),
-      wf_context:path_info(PathInfo1);
+      wf_context:path_info(PathInfo2);
      true ->
       wf_context:page_module(PageModule),
       wf_context:event_module(PageModule)
@@ -48,25 +50,78 @@ init(PageModule, State) ->
 finish(_Config, State) ->
   {ok, State}.
 
-
 %%
-route("/") ->
-  {mt_index, []};
+%% route("/", PathInfo) ->
+%%   {mt_index, PathInfo};
 
-route(Path) ->
-  ["/" | Resource] = filename:split(Path),
-  case Resource of
-    [UserName, "profile"] ->
-      case mtc_entry:sget(mt_person, ?a2b(UserName)) of
-        undefined ->
-          ?DBG("Profile not found: ~p", [UserName]),
-          {mt_404, Path};
-        Profile ->
-          {mt_profile, dict:from_list([{username, UserName}, {profile, Profile}])}
+route(Path, PathInfo) ->
+  IsStatic = (filename:extension(Path) /= []),
+  if
+    IsStatic ->
+      {static_file, Path};
+    true ->
+      case user_blog(PathInfo) of
+        {UserName, BlogName, Streams} ->
+          route_blog(UserName, BlogName, Streams, Path, PathInfo);
+        _ ->
+          {mt_index, PathInfo}
+      end
+  end.
+
+route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
+  Profile = mtc_entry:sget(mt_person, UserName),
+  PathInfo1 =
+    lists:foldl(
+      fun({Key, Value}, PI) ->
+          dict:store(Key, Value, PI)
+      end, PathInfo, [
+                      {username, UserName},
+                      {profile, Profile},
+                      {streams, Streams}
+                     ]),
+  case Path of
+    "/profile" ->
+      {mt_profile, PathInfo1};
+    "/post/" ++ PostArgs ->
+      case filename:split(PostArgs) of
+        [PostId | _] ->
+          PathInfo2 = dict:store(post_id, PostId, PathInfo1),
+          {mt_post, PathInfo2};
+        _ ->
+          {mt_post, PathInfo1}
+      end;
+    "/" ->
+      case Streams of
+        [] ->
+          {mt_index, PathInfo1};
+        _ ->
+          {mt_post, PathInfo1}
       end;
     _ ->
-      {mt_index, []}
+      ?DBG("Other Path: ~p", [Path]),
+      {mt_index, PathInfo1}
   end.
+
+-spec user_blog(dict()) -> {binary() | undefined, binary()}.
+user_blog(PathInfo) ->
+  HostTokensRev = dict:fetch(host_tokens, PathInfo),
+  {match, [SiteUrl]} = re:run(mtc:get_env(url), "^(https?://)?(?<HOST>[^/:]+)(:.*)?$", [{capture, ['HOST'], list}]),
+  [Tld, SiteName] = lists:reverse(string:tokens(SiteUrl, ".")),
+  case HostTokensRev of
+    [Tld, SiteName, UserName] ->
+      %% Request to Metalkia
+      ?DBG("Request to Metalkia", []),
+      {UserName, default};
+    _ ->
+      %% Search blog for this CNAME
+      case mtc_entry:sget(mt_cname, list_to_binary(string:join(lists:reverse(HostTokensRev), "."))) of
+        #mt_cname{cname = CName, owner = Owner, streams = Streams} ->
+          {Owner, binary_to_list(CName), Streams};
+        _ ->
+          {undefined, string:join(lists:reverse(HostTokensRev), "."), []}
+      end
+  end.
+
 
 check_for_404(static_file, _PathInfo, Path) ->
   {static_file, Path};

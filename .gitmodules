@@ -1,3 +1,6 @@
 [submodule "www/static/bootstrap"]
 	path = www/static/bootstrap
 	url = git://github.com/twitter/bootstrap.git
+[submodule "www/static/jquery-tags-input"]
+	path = www/static/jquery-tags-input
+	url = https://github.com/xoxco/jQuery-Tags-Input.git

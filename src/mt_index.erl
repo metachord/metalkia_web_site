@@ -12,6 +12,7 @@
 -include_lib("nitrogen_core/include/wf.hrl").
 
 -include_lib("metalkia_core/include/mt_log.hrl").
+-include_lib("metalkia_core/include/mt_records.hrl").
 
 main() -> #template { file="./site/templates/metalkia/bare.html" }.
 
@@ -34,6 +35,17 @@ header() ->
   ]}.
 
 body() ->
+  PathInfo = wf:path_info(),
+  ?DBG("PathInfo: ~p", [PathInfo]),
+  Streams = dict:fetch(streams, PathInfo),
+  Posts =
+  [mtc_entry:sget(mt_post, Key) ||
+    Key <- lists:umerge(
+             [lists:umerge(
+                [mtc_entry:sget(tags, UserName, Tag) ||
+                  Tag <- Tags]) ||
+               #mt_stream{username = UserName, tags = Tags} <- Streams])],
+  ?DBG("Result:~n~p", [Posts]),
   "".
 
 event("logoff") ->

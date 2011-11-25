@@ -28,12 +28,9 @@
 rules() ->
   [
     %% Dynamic content handlers
-    {[],                     ?MODULE, mt_index},
-    {["post", post_id],      ?MODULE, mt_post},
     {["logoff"],             ?MODULE, mt_logoff},
     {["facebook"],           ?MODULE, mt_facebook},
     {["twitter"],            ?MODULE, mt_twitter},
-    {["profile"],            ?MODULE, mt_profile},
     %% Static content handlers
     {["css", '*'], static_resource, [{root, "./site/static/metalkia/css"}]},
     {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},
@@ -86,14 +83,15 @@ process_post(ReqData, State) ->
   {true, ReqData2, State}.
 
 do_nitrogen(PageModule, Req) ->
-  ?DBG("do_nitrogen(~p)", [PageModule]),
+  %% ?DBG("do_nitrogen(~p)", [PageModule]),
   RequestBridge = simple_bridge:make_request(webmachine_request_bridge, Req),
   ResponseBridge = simple_bridge:make_response(webmachine_response_bridge, Req),
   nitrogen:init_request(RequestBridge, ResponseBridge),
 
   PathInfo = wrq:path_info(Req),
-  ?DBG("PathInfo: ~p", [PathInfo]),
-  wf_context:path_info(PathInfo),
+  PathInfo1 = dict:store(host_tokens, wrq:host_tokens(Req), PathInfo),
+  %% ?DBG("PathInfo: ~p", [PathInfo1]),
+  wf_context:path_info(PathInfo1),
 
   [nitrogen:handler(Handler, PageModule) ||
   Handler <- [

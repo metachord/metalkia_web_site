@@ -144,3 +144,8 @@ div.inplace_textbox .instructions {
 .approved {
     outline: solid 3px #6f6;
 }
+
+textarea.post-input {
+    width: 500px;
+    height: 400px;
+}
