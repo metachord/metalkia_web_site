@@ -175,8 +175,8 @@ event("add-post") ->
   Tags = wf:q("tags-input"),
   StripList = "[^[:word:] ,_-]",
   Sanit = fun(T) ->
-    mtws_sanitize:sanitize(T),
-    re:replace(mtws_sanitize:sanitize(T), StripList, "", [global, {return, list}])
+    mtws_sanitizer:sanitize(T),
+    re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}])
   end,
 
   ?DBG("Tags: ~p", [Tags]),
@@ -187,7 +187,7 @@ event("add-post") ->
   },
   IdBin = mtc_entry:sput(#mt_post{
     author = Author,
-    body = case Text of undefined -> Text; _ -> mtws_sanitize:sanitize(Text) end,
+    body = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
     origin = ?MT_ORIGIN,
     tags = [list_to_binary(Sanit(T)) || T <- string:tokens(Tags, ",")]
   }),
@@ -201,7 +201,7 @@ event("add-comment-" ++ Path) ->
   ?PRINT([{path, Path}, {post_id, PostId}, {level, Level}, {text, Text}]),
   Parents = path_to_parents(Path),
 
-  SanText = case Text of undefined -> Text; _ -> mtws_sanitize:sanitize(Text) end,
+  SanText = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
   UserName = ?a2b(wf:user()),                   % FIXME
   Author = #mt_author{
     id = UserName,
