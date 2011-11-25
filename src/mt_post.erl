@@ -173,10 +173,9 @@ comment_post_items(Id) ->
 event("add-post") ->
   Text = wf:q("textarea"),
   Tags = wf:q("tags-input"),
-  StripList = "[^[:word:] ,_-]",
   Sanit = fun(T) ->
-    mtws_sanitizer:sanitize(T),
-    re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}])
+    StripList = "[<>=&$#@!*%];\"\'",
+    re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}, unicode])
   end,
 
   ?DBG("Tags: ~p", [Tags]),
@@ -189,7 +188,7 @@ event("add-post") ->
     author = Author,
     body = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
     origin = ?MT_ORIGIN,
-    tags = [list_to_binary(Sanit(T)) || T <- string:tokens(Tags, ",")]
+    tags = [unicode:characters_to_binary(Sanit(T)) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
   }),
   Id = binary_to_list(IdBin),
   wf:redirect("/post/"++Id);
