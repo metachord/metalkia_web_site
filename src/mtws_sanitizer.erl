@@ -48,12 +48,12 @@ init([]) ->
 
 handle_call({sanitize, Text}, _From,
             #state{port_path = HS} = State) ->
-  Port = open_port({spawn, HS}, [{packet, 4}, use_stdio]),
+  Port = open_port({spawn, HS}, [{packet, 4}, binary, use_stdio]),
   port_command(Port, unicode:characters_to_binary(Text)),
   receive
     {Port, {data, Reply}} ->
       port_close(Port),
-      {reply, Reply, State};
+      {reply, unicode:characters_to_list(Reply), State};
     {'EXIT', Port, Reason} ->
       {stop, Reason, State}
   after 2000 ->
