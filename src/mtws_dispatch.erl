@@ -44,7 +44,6 @@ rules() ->
   ].
 
 init(PageModule) ->
-  ?DBG("PageModule: ~p", [PageModule]),
   State = #state { page_module=PageModule },
   {ok, State}.
 
@@ -56,18 +55,15 @@ content_types_provided(Request, Context) ->
     Request, Context}.
 
 is_protected(_Module) ->
-  ?DBG("Module: ~p", [_Module]),
   true.
 
 realm() ->
   "Metalkia".
 
 is_authenticated(_Module, _User) ->
-  ?DBG("Module: ~p, ~p", [_Module, _User]),
   false.
 
 authenticate(_Module, _User, _Password) ->
-  ?DBG("Module: ~p, ~p:~p", [_Module, _User, _Password]),
   false.
 
 to_html(ReqData, State) ->
@@ -85,14 +81,12 @@ process_post(ReqData, State) ->
   {true, ReqData2, State}.
 
 do_nitrogen(PageModule, Req) ->
-  %% ?DBG("do_nitrogen(~p)", [PageModule]),
   RequestBridge = simple_bridge:make_request(webmachine_request_bridge, Req),
   ResponseBridge = simple_bridge:make_response(webmachine_response_bridge, Req),
   nitrogen:init_request(RequestBridge, ResponseBridge),
 
   PathInfo = wrq:path_info(Req),
   PathInfo1 = dict:store(host_tokens, wrq:host_tokens(Req), PathInfo),
-  %% ?DBG("PathInfo: ~p", [PathInfo1]),
   wf_context:path_info(PathInfo1),
 
   [nitrogen:handler(Handler, PageModule) ||
@@ -102,14 +96,4 @@ do_nitrogen(PageModule, Req) ->
       mt_security_handler,
       mt_identity_handler
   ]],
-
-  PostParams = RequestBridge:post_params(),
-  ?DBG("POST Params:~n~p", [PostParams]),
-
-  GetParams = RequestBridge:query_params(),
-  ?DBG("GET Params:~n~p", [GetParams]),
-
-  EventModule = wf_context:event_module(),
-  ?DBG("EventModule: ~p", [EventModule]),
-
   nitrogen:run().
