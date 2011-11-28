@@ -69,7 +69,7 @@ inner_body(Path) ->
           #hr{}
         ]},
         #panel{id="pan-"++Id} |
-        comment_tree(lists:keysort(#mt_comment.parents, Post#mt_post.comments))
+        comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments))
       ];
     _ ->
       [
@@ -111,16 +111,22 @@ comment_tree(Comments) ->
 
 comment_tree([], Tree) ->
   Tree;
-comment_tree([#mt_comment{post_id = PostId, id = CID, parents = Parents, body = Body}|Comments], Tree) ->
-  Path = parents_to_path(PostId, Parents),
-  %%[CID|_] = lists:reverse(Path),
-  E = comment_body(#comment{
-    post_id = PostId,
-    id = CID,
-    parents = Parents,
-    path = Path,
-    level = length(Parents),
-    body = Body}),
+comment_tree([#mt_comment_ref{parents = _Parents, comment_key = CKey}|Comments], Tree) ->
+  E =
+  case mtc_entry:sget(mt_comment, CKey) of
+    #mt_comment{post_id = PostId, id = CID, parents = Parents, body = Body} ->
+      Path = parents_to_path(PostId, Parents),
+      comment_body(#comment{
+        post_id = PostId,
+        id = CID,
+        parents = Parents,
+        path = Path,
+        level = length(Parents),
+        body = Body});
+    _Other ->
+      ?ERR("Bad comment record for key ~p: ~p", [CKey, _Other]),
+      []
+  end,
   comment_tree(Comments, Tree ++ [E]).
 
 
