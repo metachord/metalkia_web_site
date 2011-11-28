@@ -37,6 +37,7 @@ rules() ->
     {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
     {["mt", '*'], static_resource, [{root, "./site/static/metalkia"}]},
 
+    {[],                   ?MODULE, []},
     {["profile"],          ?MODULE, []},
     {["post", '*'],        ?MODULE, []},
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
