@@ -111,7 +111,7 @@ user_blog(PathInfo) ->
     [Tld, SiteName, UserName] ->
       %% Request to Metalkia
       ?DBG("Request to Metalkia", []),
-      {UserName, default};
+      {UserName, default, []};
     _ ->
       %% Search blog for this CNAME
       case mtc_entry:sget(mt_cname, list_to_binary(string:join(lists:reverse(HostTokensRev), "."))) of
