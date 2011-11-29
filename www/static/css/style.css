@@ -4,15 +4,17 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 /***** STYLE *****/
 
 body {
-    font-family: "Lucida Grande", "Segoe UI", Tahoma, Helvetica, Arial, sans-serif;
+    /* font-family: "Lucida Grande", "Segoe UI", Tahoma, Helvetica, Arial, sans-serif; */
+    /* font-family: 'PT Sans Caption', sans-serif; */
+    font-family: 'PT Serif', serif;
     font-size: 16px;
     line-height: 32px;
-    background-color: #62625D;
+    background-color: #ffffff;
     padding-top: 60px;
 }
 
 .sidebar {
-    background-color: #62625D;
+    background-color: #ffffff;
 }
 
 .container_12 {
@@ -20,7 +22,7 @@ body {
 }
 
 h1 {
-    font-family: Arial, sans-serif;
+    /* font-family: Arial, sans-serif; */
     font-weight: bold;
     padding-bottom: 7px;
     border-bottom: dashed 1px #DDD;
@@ -32,7 +34,7 @@ h1 {
 }
 
 h2 {
-    font-family: Arial, sans-serif;
+    /* font-family: Arial, sans-serif; */
     font-size: 1.5em;
     line-height: 1.333333em;
     margin-top: 1.6em;
@@ -40,7 +42,7 @@ h2 {
 }
 
 h3 {
-    font-family: Arial, sans-serif;
+    /* font-family: Arial, sans-serif; */
     font-size: 1.25em;
     line-height: 1.6em;
     margin-top: 1.333333em;
@@ -148,4 +150,8 @@ div.inplace_textbox .instructions {
 textarea.post-input {
     width: 500px;
     height: 400px;
+}
+
+.post-handlers {
+    font-size: 9px;
 }
