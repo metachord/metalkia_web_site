@@ -129,7 +129,7 @@ main() ->
   end.
 
 login_panel() ->
-  #panel{body = #template{file = "./site/templates/metalkia/facebook_service.html"}}.
+  #template{file = "./site/templates/metalkia/facebook_service.html"}.
 
 %%
 
@@ -163,7 +163,7 @@ username_text() ->
   FbName = wf:session(facebook_name),
   if
     FbName =:= undefined ->
-      "Sign in with Facebook";
+      "Facebook";
     true ->
       FbName
   end.

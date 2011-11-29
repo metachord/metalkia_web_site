@@ -22,8 +22,6 @@
 
 init(PageModule, State) ->
   RequestBridge = wf_context:request_bridge(),
-  ?DBG("PageModule: ~p", [PageModule]),
-  ?DBG("Headers:~n~p", [wf:headers()]),
   if PageModule =:= [] ->
       Path = RequestBridge:path(),
 
@@ -61,8 +59,11 @@ route(Path, PathInfo) ->
       {static_file, Path};
     true ->
       case user_blog(PathInfo) of
-        {UserName, BlogName, Streams} ->
-          route_blog(UserName, BlogName, Streams, Path, PathInfo);
+        {undefined, Blog} ->
+          ?ERR("Blog ~p not registered", [Blog]),
+          {mt_index, PathInfo};
+        {UserName, BlogName, Streams, NewPathInfo} ->
+          route_blog(UserName, BlogName, Streams, Path, NewPathInfo);
         _ ->
           {mt_index, PathInfo}
       end
@@ -98,7 +99,6 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
           {mt_post, PathInfo1}
       end;
     _ ->
-      ?DBG("Other Path: ~p", [Path]),
       {mt_index, PathInfo1}
   end.
 
@@ -108,17 +108,41 @@ user_blog(PathInfo) ->
   {match, [SiteUrl]} = re:run(mtc:get_env(url), "^(https?://)?(?<HOST>[^/:]+)(:.*)?$", [{capture, ['HOST'], list}]),
   [Tld, SiteName] = lists:reverse(string:tokens(SiteUrl, ".")),
   case HostTokensRev of
-    [Tld, SiteName, UserName] ->
+    [Tld, SiteName | Rest] ->
       %% Request to Metalkia
-      ?DBG("Request to Metalkia", []),
-      {UserName, default, []};
+      BlogName = default,
+      BlogTitle = "Metalkia",
+      NewPathInfo =
+        lists:foldl(
+          fun({Key, Value}, PI) ->
+              dict:store(Key, Value, PI)
+          end, PathInfo, [
+                          {blog, BlogName},
+                          {blog_title, BlogTitle}
+                         ]),
+      UserName =
+        case Rest of
+          [UN] -> UN;
+          [] -> none;
+          _ -> undefined
+        end,
+      {UserName, BlogName, [], NewPathInfo};
     _ ->
       %% Search blog for this CNAME
       case mtc_entry:sget(mt_cname, list_to_binary(string:join(lists:reverse(HostTokensRev), "."))) of
-        #mt_cname{cname = CName, owner = Owner, streams = Streams} ->
-          {Owner, binary_to_list(CName), Streams};
+        #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams} ->
+          BlogName = ?a2l(CName),
+          NewPathInfo =
+            lists:foldl(
+              fun({Key, Value}, PI) ->
+                  dict:store(Key, Value, PI)
+              end, PathInfo, [
+                              {blog, BlogName},
+                              {blog_title, ?a2l(BlogTitle)}
+                             ]),
+          {Owner, BlogName, Streams, NewPathInfo};
         _ ->
-          {undefined, string:join(lists:reverse(HostTokensRev), "."), []}
+          {undefined, string:join(lists:reverse(HostTokensRev), ".")}
       end
   end.
 

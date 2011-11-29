@@ -115,7 +115,7 @@ main() ->
   end.
 
 login_panel() ->
-  #panel{body = #template{file = "./site/templates/metalkia/twitter_service.html"}}.
+  #template{file = "./site/templates/metalkia/twitter_service.html"}.
 
 %%
 
@@ -141,7 +141,7 @@ username_text() ->
   ScreenName = wf:session(twitter_name),
   if
     ScreenName =:= undefined ->
-      "Sign in with Twitter";
+      "Twitter";
     true ->
       "@" ++ ScreenName
   end.

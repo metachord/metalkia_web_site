@@ -155,3 +155,21 @@ textarea.post-input {
 .post-handlers {
     font-size: 9px;
 }
+
+pre {
+    font-size: 12px;
+    padding: 0;
+    margin: 0;
+    background: #f0f0f0;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    line-height: 20px; /*--Height of each line of code--*/
+    background: url(pre_code_bg.gif) repeat-y left top; /*--Background of lined paper--*/
+    overflow: auto; /*--If the Code exceeds the width, a scrolling is available--*/
+    overflow-y: hidden;  /*--Hides vertical scroll created by IE--*/
+}
+pre code {
+    margin: 0 0 0 40px;  /*--Left Margin--*/
+    padding: 18px 0;
+    display: block;
+}

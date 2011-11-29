@@ -5,6 +5,7 @@
   main/0,
   title/0,
   body/0,
+  header/0,
   event/1,
   author/0,
   url/0
@@ -35,20 +36,54 @@ main() -> #template { file="./site/templates/metalkia/bare.html" }.
 title() -> "Add new post".
 
 author() ->
-  ?DBG("Author", []),
-  "Zert".
+  %% FIXME: possible store author name in context?
+  PathInfo = wf_context:path_info(),
+  case dict:find(post_id, PathInfo) of
+    {ok, Id} ->
+      %% Get Author of post
+      case mtc_entry:sget(mt_post, ?a2b(Id)) of
+        #mt_post{author = #mt_author{id = PersonId}} ->
+          case mtc_entry:sget(mt_person, ?a2b(PersonId)) of
+            #mt_person{username = UserName, name = Name} ->
+              if
+                Name =:= undefined -> ?a2l(UserName);
+                true -> unicode:characters_to_list(Name)
+              end;
+            _ ->
+              ""
+          end;
+        _ -> ""
+      end;
+    _ -> ""
+  end.
 
 url() ->
-  ?DBG("URL", []),
-  "http://metalkia.com".
+  PathInfo = wf_context:path_info(),
+  Prefix =
+  case dict:find(blog, PathInfo) of
+    {ok, default} ->
+      mtc:get_env(url);
+    {ok, BlogName} ->
+      BlogName;
+    _ ->
+      mtc:get_env(url)
+  end,
+  case dict:find(post_id, PathInfo) of
+    {ok, PostId} ->
+      Prefix ++ "/post/" ++ PostId;
+    _ ->
+      Prefix
+  end.
+
+
+header() ->
+  "".
 
 body() ->
   PathInfo = wf_context:path_info(),
   case dict:find(post_id, PathInfo) of
     {ok, PostId} ->
-      #container_12 { body=[
-        #grid_8 { alpha=true, prefix=2, suffix=2, omega=true, body=inner_body(PostId) }
-      ]};
+      inner_body(PostId);
     _ ->
       posts_list()
   end.
@@ -56,16 +91,19 @@ body() ->
 inner_body(Path) ->
   Id = Path, % FIXME
   ?DBG("PostId: ~p", [Id]),
+  Email = mtc:get_env(test_email, mtws_common:get_email()),
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
     #mt_post{} = Post ->
       ?DBG("Post:~n~p", [Post]),
       [
         #panel{style="margin-left: 50px;", body = [
+          #gravatar{email = Email, rating = "g"},
           #panel{body = [
             #hidden{id="post-id", text=Id},
             #span{body = Post#mt_post.body}
           ]},
           default_items(Id),
+          share_handlers(),
           #hr{}
         ]},
         #panel{id="pan-"++Id} |
@@ -159,7 +197,15 @@ comment_body(#comment{post_id = PostId, id = Id, parents = Parents, path = _Path
   ].
 
 default_items(Path) ->
-  #link{id="comment-"++Path, text="Comment", postback="comment-"++Path}.
+  #panel{class = "post-handlers", body = [
+    #link{id="comment-"++Path, text="Comment", postback="comment-"++Path}
+  ]}.
+
+share_handlers() ->
+  #panel{class = "post-handlers", body = [
+    #template{file="./site/templates/metalkia/share-buttons.tpl"}
+  ]}.
+
 
 post_items() ->
   #panel{id = "comment-items",
@@ -180,7 +226,7 @@ event("add-post") ->
   Text = wf:q("textarea"),
   Tags = wf:q("tags-input"),
   Sanit = fun(T) ->
-    StripList = "[<>=&$#@!*%];\"\'",
+    StripList = "[<>=&$#@!*%];\"\'`",
     re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}, unicode])
   end,
 

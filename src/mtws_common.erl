@@ -13,7 +13,9 @@
   url/0,
   user_or_name/0,
   name/0,
-  profile_link/0
+  profile_link/0,
+  copyright/0,
+  sign/0
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -31,7 +33,6 @@ blog_link() ->
 title() -> "Metalkia".
 
 url() ->
-  ?DBG("URL", []),
   mtc:get_env(url).
 
 name() ->
@@ -71,6 +72,28 @@ profile_link() ->
               "#"
           end
       end
+  end.
+
+sign() ->
+  IsTwSig = mt_twitter:is_signed_in(),
+  IsFbSig = mt_facebook:is_signed_in(),
+  case user_or_name() of
+    "" ->
+      #list{class = "topnav", body = [
+        #listitem{body = #link{url = "#", text = "Login"}},
+        #listitem{body = #list{class = "subnav", body = [
+          #listitem{body = mt_facebook:login_panel()},
+          #listitem{body = mt_twitter:login_panel()},
+          if
+            IsTwSig orelse IsFbSig ->
+              #listitem{body = mt_logoff:logoff_panel()};
+            true ->
+              []
+          end
+        ]}}
+      ]};
+    UN ->
+      #link{text = UN, url = profile_link()}
   end.
 
 set_email(Email) ->
@@ -116,4 +139,12 @@ update_external_profile(MetalkiaId) ->
       ?DBG("Facebook profile not found: ~p", [FbId])
   end.
 
-
+copyright() ->
+  PathInfo = wf:path_info(),
+  case dict:find(blog, PathInfo) of
+    {ok, _BlogName} ->
+      %% Fetch Copyright of blog
+      "";
+    error ->
+      "© Metalkia, 2011"
+  end.
