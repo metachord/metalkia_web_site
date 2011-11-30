@@ -197,7 +197,10 @@ comment_body(#comment{post_id = PostId, id = Id, parents = Parents, path = _Path
   ].
 
 default_items(Path) ->
+  [PostId|Parents] = path_to_parents(Path),
   #panel{class = "post-handlers", body = [
+    #link{text="Link", url="/post/"++?a2l(PostId) ++
+      if length(Parents) > 0 -> [CommentId|_] = lists:reverse(Parents), "#"++?a2l(CommentId); true -> "" end},
     #link{id="comment-"++Path, text="Comment", postback="comment-"++Path}
   ]}.
 
@@ -250,7 +253,7 @@ event("add-comment-" ++ Path) ->
   Text = wf:q("textarea-"++Path),
   [PostId|_] = string:tokens(Path, "-"),
   ?PRINT([{path, Path}, {post_id, PostId}, {level, Level}, {text, Text}]),
-  Parents = path_to_parents(Path),
+  [_PostId|Parents] = path_to_parents(Path),
 
   SanText = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
   UserName = ?a2b(wf:user()),                   % FIXME
@@ -282,7 +285,7 @@ event(("comment-" ++ Id) = Target) ->
   wf:replace(Target, comment_post_items(Id)).
 
 path_to_parents(Path) ->
-  [_PostId|Result] = string:tokens(Path, "-"),
+  Result = string:tokens(Path, "-"),
   [list_to_integer(L) || L <- Result].
 
 parents_to_path(PostId, Parents) ->
