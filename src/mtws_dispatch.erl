@@ -29,6 +29,7 @@ rules() ->
   [
     %% Dynamic content handlers
     {["logoff"],             ?MODULE, mt_logoff},
+    {["sso"],                ?MODULE, mt_sso},
     {["facebook"],           ?MODULE, mt_facebook},
     {["twitter"],            ?MODULE, mt_twitter},
     %% Static content handlers
@@ -87,7 +88,11 @@ do_nitrogen(PageModule, Req) ->
 
   PathInfo = wrq:path_info(Req),
   PathInfo1 = dict:store(host_tokens, wrq:host_tokens(Req), PathInfo),
-  wf_context:path_info(PathInfo1),
+  CurrentDomain = string:join(lists:reverse(wrq:host_tokens(Req)), "."),
+  CurrentUrl = atom_to_list(wrq:scheme(Req)) ++ "://" ++ CurrentDomain ++ wrq:raw_path(Req),
+  PathInfo2 = dict:store(current_domain, CurrentDomain, PathInfo1),
+  PathInfo3 = dict:store(current_url, CurrentUrl, PathInfo2),
+  wf_context:path_info(PathInfo3),
 
   [nitrogen:handler(Handler, PageModule) ||
   Handler <- [

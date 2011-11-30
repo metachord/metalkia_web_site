@@ -3,6 +3,8 @@
 -export([
   set_email/1,
   get_email/0,
+  set_state/1,
+  get_state/0,
   update_external_profile/1
 ]).
 
@@ -80,24 +82,40 @@ profile_link() ->
 sign() ->
   IsTwSig = mt_twitter:is_signed_in(),
   IsFbSig = mt_facebook:is_signed_in(),
+  UserName = user_or_name(),
   SignString =
-  case user_or_name() of
+  case UserName of
     "" -> "Login";
     UN -> UN
   end,
-  #list{class = "topnav", body = [
-    #listitem{body = #link{url = "#", text = SignString}},
-    #listitem{body = #list{class = "subnav", body = [
-      #listitem{body = mt_facebook:login_panel()},
-      #listitem{body = mt_twitter:login_panel()},
-      if
-        IsTwSig orelse IsFbSig ->
-          #listitem{body = mt_logoff:logoff_panel()};
-        true ->
-          []
-      end
-    ]}}
-  ]}.
+  [
+    case UserName of
+      "" ->
+        CurrentUrl = dict:fetch(current_url, wf:path_info()),
+        CurrentDomain = dict:fetch(current_domain, wf:path_info()),
+        ?DBG("CurrentUrl: ~p", [CurrentUrl]),
+        ["<iframe width=\"0\" height=\"0\" src=\"" ++
+          mtc:get_env(url) ++ "/sso" ++
+          "?action=auth" ++
+          "&return_url=" ++ mtc_util:uri_encode(CurrentUrl) ++
+          "&auth_domain=" ++ mtc_util:uri_encode(CurrentDomain) ++
+          "\"></iframe>"];
+      _ -> []
+    end,
+    #list{class = "topnav", body = [
+      #listitem{body = #link{url = "#", text = SignString}},
+      #listitem{body = #list{class = "subnav", body = [
+        #listitem{body = mt_facebook:login_panel()},
+        #listitem{body = mt_twitter:login_panel()},
+        if
+          IsTwSig orelse IsFbSig ->
+            #listitem{body = mt_logoff:logoff_panel()};
+          true ->
+            []
+        end
+      ]}}
+    ]}
+  ].
 
 set_email(Email) ->
   wf:session(user_email, Email).
@@ -151,3 +169,39 @@ copyright() ->
     error ->
       "© Metalkia, 2011"
   end.
+
+-record(session_state, {
+  user,
+  email,
+  facebook_id,
+  facebook_name,
+  twitter_id,
+  twitter_name
+}).
+
+get_state() ->
+  #session_state{
+    user = wf:user(),
+    email = wf:session(user_email),
+    facebook_id = wf:session(facebook_id),
+    facebook_name = wf:session(facebook_name),
+    twitter_id = wf:session(twitter_id),
+    twitter_name = wf:session(twitter_name)
+  }.
+
+set_state(undefined) ->
+  ok;
+set_state(#session_state{
+             user = User,
+             email = Email,
+             facebook_id = FacebookId,
+             facebook_name = FacebookName,
+             twitter_id = TwitterId,
+             twitter_name = TwitterName
+            }) ->
+  wf:user(User),
+  wf:session(user_email, Email),
+  wf:session(facebook_id, FacebookId),
+  wf:session(facebook_name, FacebookName),
+  wf:session(twitter_id, TwitterId),
+  wf:session(twitter_name, TwitterName).

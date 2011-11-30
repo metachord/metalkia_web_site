@@ -23,7 +23,9 @@ init([]) ->
   Children =
     [
      {mtws_sanitizer, {mtws_sanitizer, start_link, []},
-      Restart, Shutdown, Type, [mtws_sanitizer]}
+      Restart, Shutdown, Type, [mtws_sanitizer]},
+     {mtws_session, {mtws_session, start_link, []},
+      Restart, Shutdown, Type, [mtws_session]}
     ],
 
   {ok, {SupFlags, Children}}.
