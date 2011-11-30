@@ -74,7 +74,11 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
   PathInfo1 =
     lists:foldl(
       fun({Key, Value}, PI) ->
-          dict:store(Key, Value, PI)
+          if Value =/= undefined ->
+              dict:store(Key, Value, PI);
+             true ->
+              PI
+          end
       end, PathInfo, [
                       {username, UserName},
                       {profile, Profile},
