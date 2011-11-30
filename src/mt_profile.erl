@@ -28,15 +28,13 @@
 
 main() -> #template { file="./site/templates/metalkia/bare.html" }.
 
-title() -> "Add new post".
+title() -> "Profile".
 
 author() ->
-  ?DBG("Author", []),
-  "Zert".
+  mtws_common:user_or_name().
 
 url() ->
-  ?DBG("URL", []),
-  "http://metalkia.com".
+  mtc:get_env(url).
 
 body() ->
   PathInfo = wf_context:path_info(),
