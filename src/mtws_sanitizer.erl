@@ -37,7 +37,6 @@ start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 sanitize(Text) ->
-  ?DBG("Sanitize: ~p", [Text]),
   gen_server:call(?SERVER, {sanitize, Text}).
 
 %%% gen_server callbacks
@@ -49,7 +48,6 @@ init([]) ->
 
 handle_call({sanitize, Text}, _From,
             #state{port_path = HS} = State) ->
-  ?DBG("HS: ~p", [HS]),
   Port = open_port({spawn, HS}, [{packet, 4}, binary, use_stdio]),
   port_command(Port, unicode:characters_to_binary(Text)),
   receive
