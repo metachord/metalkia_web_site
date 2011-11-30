@@ -156,6 +156,10 @@ textarea.post-input {
     font-size: 9px;
 }
 
+div.post-handlers a {
+    padding: 1px 3px 2px;
+}
+
 pre {
     font-size: 12px;
     padding: 0;
