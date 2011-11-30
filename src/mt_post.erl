@@ -33,7 +33,7 @@
 
 main() -> #template { file="./site/templates/metalkia/bare.html" }.
 
-title() -> "Add new post".
+title() -> mtws_common:blog_name().
 
 author() ->
   %% FIXME: possible store author name in context?

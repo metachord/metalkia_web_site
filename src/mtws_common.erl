@@ -9,7 +9,6 @@
 -export([
   blog_name/0,
   blog_link/0,
-  title/0,
   url/0,
   user_or_name/0,
   name/0,
@@ -25,12 +24,16 @@
 -include_lib("metalkia_core/include/mt_records.hrl").
 
 blog_name() ->
-  "Metalkia blog".
+  PathInfo = wf_context:path_info(),
+  case dict:find(blog_title, PathInfo) of
+    {ok, BlogTitle} ->
+      BlogTitle;
+    error ->
+      "Metalkia"
+  end.
 
 blog_link() ->
   wf:session_default(blog_link, mtc:get_env(url)).
-
-title() -> "Metalkia".
 
 url() ->
   mtc:get_env(url).
