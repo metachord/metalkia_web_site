@@ -56,7 +56,7 @@ handle_call({sanitize, Text}, _From,
       {reply, unicode:characters_to_list(Reply), State};
     {'EXIT', Port, Reason} ->
       {stop, Reason, State}
-  after 5000 ->
+  after 10000 ->
       {stop, port_timeout, State}
   end;
 handle_call(Request, _From, State) ->
