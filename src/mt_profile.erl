@@ -46,12 +46,12 @@ body() ->
   RequestedUser =
   case dict:find(username, PathInfo) of
     {ok, RU} -> RU;
-    error -> undefined
+    error -> none
   end,
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
   if
-    ((RequestedUser =:= undefined) andalso (Email =/= undefined)) orelse
+    ((RequestedUser =:= none) andalso (Email =/= undefined)) orelse
     RequestedUser =:= User ->
       %% Edit mode
       Profile = undefined,                      % FIXME
