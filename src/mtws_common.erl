@@ -77,24 +77,24 @@ profile_link() ->
 sign() ->
   IsTwSig = mt_twitter:is_signed_in(),
   IsFbSig = mt_facebook:is_signed_in(),
+  SignString =
   case user_or_name() of
-    "" ->
-      #list{class = "topnav", body = [
-        #listitem{body = #link{url = "#", text = "Login"}},
-        #listitem{body = #list{class = "subnav", body = [
-          #listitem{body = mt_facebook:login_panel()},
-          #listitem{body = mt_twitter:login_panel()},
-          if
-            IsTwSig orelse IsFbSig ->
-              #listitem{body = mt_logoff:logoff_panel()};
-            true ->
-              []
-          end
-        ]}}
-      ]};
-    UN ->
-      #link{text = UN, url = profile_link()}
-  end.
+    "" -> "Login";
+    UN -> UN
+  end,
+  #list{class = "topnav", body = [
+    #listitem{body = #link{url = "#", text = SignString}},
+    #listitem{body = #list{class = "subnav", body = [
+      #listitem{body = mt_facebook:login_panel()},
+      #listitem{body = mt_twitter:login_panel()},
+      if
+        IsTwSig orelse IsFbSig ->
+          #listitem{body = mt_logoff:logoff_panel()};
+        true ->
+          []
+      end
+    ]}}
+  ]}.
 
 set_email(Email) ->
   wf:session(user_email, Email).
