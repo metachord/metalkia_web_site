@@ -14,6 +14,7 @@
 
 -export([
          put_state/2,
+         put_state/3,
          get_state/1
         ]).
 
@@ -39,7 +40,10 @@ start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 put_state(Code, Value) ->
-  gen_server:call(?SERVER, {put, Code, Value}).
+  put_state(Code, Value, ?SSO_TO).
+
+put_state(Code, Value, TimeOut) ->
+  gen_server:call(?SERVER, {put, Code, Value, TimeOut}).
 
 get_state(Code) ->
   gen_server:call(?SERVER, {get, Code}).
@@ -52,10 +56,10 @@ init([]) ->
      tid = Tid
     }}.
 
-handle_call({put, Code, Value}, _From,
+handle_call({put, Code, Value, TimeOut}, _From,
             #state{tid = Tid} = State) ->
   ets:insert(Tid, {Code, Value}),
-  timer:send_after(?SSO_TO, {drop, Code}),
+  timer:send_after(TimeOut, {drop, Code}),
   {reply, ok, State};
 handle_call({get, Code}, _From,
             #state{tid = Tid} = State) ->
