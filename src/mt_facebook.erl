@@ -25,6 +25,8 @@ main() ->
       SignedRequest = wf:q(signed_request),
       ?DBG("LogOff: signed_request=~p", [SignedRequest]),
       wf:redirect(mtc:get_env(url));
+     Action =:= "login" ->
+      wf:redirect(auth_link());
      true ->
       Code = wf:q(code),
       Req =
@@ -146,15 +148,7 @@ profile_link() ->
   FbLink = wf:session(facebook_link),
   if
     FbLink =:= undefined ->
-      "http://www.facebook.com/connect/uiserver.php?"
-      "app_id=" ++ app_id() ++ "&"
-      "method=permissions.request" ++ "&"
-      "redirect_uri=" ++ login_redirect_uri() ++ "&"
-      "response_type=code" ++ "&"
-      "display=async" ++ "&"
-      "perms=" ++ data_perms() ++ "&"
-      "auth_referral=1"
-        ;
+        mtc:get_env(url) ++ "/facebook?action=login";
     true ->
       FbLink
   end.
@@ -167,6 +161,16 @@ username_text() ->
     true ->
       FbName
   end.
+
+auth_link() ->
+  "http://www.facebook.com/connect/uiserver.php?"
+    "app_id=" ++ app_id() ++ "&"
+    "method=permissions.request" ++ "&"
+    "redirect_uri=" ++ login_redirect_uri() ++ "&"
+    "response_type=code" ++ "&"
+    "display=async" ++ "&"
+    "perms=" ++ data_perms() ++ "&"
+    "auth_referral=1".
 
 app_id() ->
   mtc:get_env(facebook_app_id, "dummy_app_id").
