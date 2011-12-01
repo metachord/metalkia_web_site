@@ -19,8 +19,8 @@ main() ->
   case Action of
     "auth" ->
       ReturnUrl = wf:q(return_url),
-      AuthDomain = wf:q(auth_domain),
-      case check_domain(AuthDomain) of
+      AuthBaseUri = wf:q(auth_domain),
+      case check_domain(AuthBaseUri) of
         true ->
           case wf:user() of
             undefined ->
@@ -30,7 +30,7 @@ main() ->
               VerificationCode = mtc_util:rand_str(10),
               mtws_session:put_state(VerificationCode, mtws_common:get_state()),
               "<script>"
-              "window.top.location = 'http://" ++ mtc_util:uri_encode(AuthDomain) ++ "/sso" ++
+              "window.top.location = '" ++ mtc_util:uri_encode(AuthBaseUri) ++ "/sso" ++
               "?action=verify" ++
               "&code=" ++ mtc_util:uri_encode(VerificationCode) ++
               "&return_url=" ++ mtc_util:uri_encode(ReturnUrl) ++

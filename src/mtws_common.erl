@@ -48,7 +48,7 @@ url() ->
 
 %% TODO: use same one from webmachine when seth/base_uri will be merged in upstream
 base_uri() ->
-  case dict:find(current_domain, wf:path_info()) of
+  case dict:find(current_base_uri, wf:path_info()) of
     {ok, CurrentDomain} ->
       CurrentDomain;
     error ->
@@ -106,13 +106,13 @@ sign() ->
     case UserName of
       "" ->
         CurrentUrl = dict:fetch(current_url, wf:path_info()),
-        CurrentDomain = dict:fetch(current_domain, wf:path_info()),
+        CurrentBaseUri = dict:fetch(current_base_uri, wf:path_info()),
         ?DBG("CurrentUrl: ~p", [CurrentUrl]),
         ["<iframe width=\"0\" height=\"0\" src=\"" ++
           mtc:get_env(url) ++ "/sso" ++
           "?action=auth" ++
           "&return_url=" ++ mtc_util:uri_encode(CurrentUrl) ++
-          "&auth_domain=" ++ mtc_util:uri_encode(CurrentDomain) ++
+          "&auth_domain=" ++ mtc_util:uri_encode(CurrentBaseUri) ++
           "\"></iframe>"];
       _ -> []
     end,

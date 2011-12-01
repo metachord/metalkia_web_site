@@ -88,9 +88,9 @@ do_nitrogen(PageModule, Req) ->
 
   PathInfo = wrq:path_info(Req),
   PathInfo1 = dict:store(host_tokens, wrq:host_tokens(Req), PathInfo),
-  CurrentDomain = string:join(lists:reverse(wrq:host_tokens(Req)), "."),
-  CurrentUrl = atom_to_list(wrq:scheme(Req)) ++ "://" ++ CurrentDomain ++ wrq:raw_path(Req),
-  PathInfo2 = dict:store(current_domain, CurrentDomain, PathInfo1),
+  CurrentBaseUri = atom_to_list(wrq:scheme(Req)) ++ "://" ++ string:join(lists:reverse(wrq:host_tokens(Req)), "."),
+  CurrentUrl = CurrentBaseUri ++ wrq:raw_path(Req),
+  PathInfo2 = dict:store(current_base_uri, CurrentBaseUri, PathInfo1),
   PathInfo3 = dict:store(current_url, CurrentUrl, PathInfo2),
   wf_context:path_info(PathInfo3),
 
