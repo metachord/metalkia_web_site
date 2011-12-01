@@ -210,10 +210,16 @@ comment_body(#comment{post_id = PostId, id = Id, parents = Parents, path = _Path
 
 default_items(Path) ->
   [PostId|Parents] = path_to_parents(Path),
+  User = wf:user(),
   #panel{class = "post-handlers", body = [
     #link{text="Link", url="/post/"++?a2l(PostId) ++
       if length(Parents) > 0 -> [CommentId|_] = lists:reverse(Parents), "#"++?a2l(CommentId); true -> "" end},
-    #link{id="comment-"++Path, text="Comment", postback="comment-"++Path}
+    if
+      User =/= undefined ->
+        #link{id="comment-"++Path, text="Comment", postback="comment-"++Path};
+      true ->
+        []
+    end
   ]}.
 
 share_handlers() ->
@@ -307,7 +313,13 @@ event("add-comment-" ++ Path) ->
   end;
 
 event(("comment-" ++ Id) = Target) ->
-  wf:replace(Target, comment_post_items(Id)).
+  User = wf:user(),
+  if
+    User =/= undefined ->
+      wf:replace(Target, comment_post_items(Id));
+    true ->
+      pass
+  end.
 
 path_to_parents(Path) ->
   Result = string:tokens(Path, "-"),
