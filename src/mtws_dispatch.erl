@@ -28,10 +28,7 @@
 rules() ->
   [
     %% Dynamic content handlers
-    {["logoff"],             ?MODULE, mt_logoff},
     {["sso"],                ?MODULE, mt_sso},
-    {["facebook"],           ?MODULE, mt_facebook},
-    {["twitter"],            ?MODULE, mt_twitter},
     %% Static content handlers
     {["css", '*'], static_resource, [{root, "./site/static/metalkia/css"}]},
     {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},

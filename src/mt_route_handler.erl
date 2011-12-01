@@ -87,6 +87,12 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
   case Path of
     "/profile" ->
       {mt_profile, PathInfo1};
+    "/logoff" ->
+      {mt_logoff, PathInfo1};
+    "/facebook" ->
+      {mt_facebook, PathInfo1};
+    "/twitter" ->
+      {mt_twitter, PathInfo1};
     "/post/" ++ PostArgs ->
       case filename:split(PostArgs) of
         [PostId | _] ->
