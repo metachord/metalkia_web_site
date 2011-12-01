@@ -191,7 +191,8 @@ copyright() ->
   facebook_name,
   facebook_link,
   twitter_id,
-  twitter_name
+  twitter_name,
+  redirect_url
 }).
 
 get_state() ->
@@ -202,7 +203,8 @@ get_state() ->
     facebook_name = wf:session(facebook_name),
     facebook_link = wf:session(facebook_link),
     twitter_id = wf:session(twitter_id),
-    twitter_name = wf:session(twitter_name)
+    twitter_name = wf:session(twitter_name),
+    redirect_url = wf:session(redirect_url)
   }.
 
 set_state(undefined) ->
@@ -214,7 +216,8 @@ set_state(#session_state{
              facebook_name = FacebookName,
              facebook_link = FacebookLink,
              twitter_id = TwitterId,
-             twitter_name = TwitterName
+             twitter_name = TwitterName,
+             redirect_url = RedirectUrl
             }) ->
   wf:user(User),
   wf:session(user_email, Email),
@@ -222,4 +225,5 @@ set_state(#session_state{
   wf:session(facebook_name, FacebookName),
   wf:session(facebook_link, FacebookLink),
   wf:session(twitter_id, TwitterId),
-  wf:session(twitter_name, TwitterName).
+  wf:session(twitter_name, TwitterName),
+  wf:session(redirect_url, RedirectUrl).
