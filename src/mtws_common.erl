@@ -17,7 +17,7 @@
   name/0,
   profile_link/0,
   copyright/0,
-  sign/0
+  menu/0
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -94,7 +94,7 @@ profile_link() ->
       end
   end.
 
-sign() ->
+menu() ->
   User = wf:user(),
   UserName = user_or_name(),
   SignString =
@@ -117,17 +117,29 @@ sign() ->
       _ -> []
     end,
     #list{class = "topnav", body = [
-      #listitem{body = #link{url = "#", text = SignString}},
-      #listitem{body = #list{class = "subnav", body = [
-        #listitem{body = mt_facebook:login_panel()},
-        #listitem{body = mt_twitter:login_panel()},
-        if
-          User =/= undefined ->
-            #listitem{body = mt_logoff:logoff_panel()};
-          true ->
-            []
-        end
-      ]}}
+      #listitem{body = [
+        #link{url = "#", text = SignString},
+        #list{class = "subnav", body = [
+          #listitem{body = mt_facebook:login_panel()},
+          #listitem{body = mt_twitter:login_panel()},
+          if
+            User =/= undefined ->
+              #listitem{body = mt_logoff:logoff_panel()};
+            true ->
+              []
+          end
+      ]}]},
+      if
+        User =/= undefined ->
+          #listitem{body = [
+            #link{url = "#", text = "Post"},
+            #list{class = "subnav", body = [
+              #listitem{body = #link{url = "/add-post", text = "Add post"}}
+            ]}
+          ]};
+        true ->
+          []
+      end
     ]}
   ].
 

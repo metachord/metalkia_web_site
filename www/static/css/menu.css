@@ -12,6 +12,7 @@ ul.topnav li {
     float: left;
     margin: 0;
     padding: 0 15px 0 0;
+    position: relative; /*--Declare X and Y axis base for sub navigation--*/
 }
 ul.topnav li a{
     padding: 10px 5px;
@@ -31,7 +32,7 @@ ul.topnav li ul.subnav {
     background: #333;
     margin: 0; padding: 0;
     display: none;
-    float: bottom;
+    float: left;
     width: 170px;
     border: 1px solid #111;
 }
