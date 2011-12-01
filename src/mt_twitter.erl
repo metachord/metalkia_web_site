@@ -139,7 +139,7 @@ profile_link() ->
   ScreenName = wf:session(twitter_name),
   if
     ScreenName =:= undefined ->
-      mtws_common:base_uri() ++ "/twitter" ++
+      mtc:get_env(url) ++ "/twitter" ++
       "?action=login" ++
       "&redirect_url=" ++ mtc_util:uri_encode(mtws_common:url());
     true ->

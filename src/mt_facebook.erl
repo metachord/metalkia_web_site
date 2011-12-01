@@ -155,7 +155,7 @@ profile_link() ->
   FbLink = wf:session(facebook_link),
   if
     FbLink =:= undefined ->
-      mtws_common:base_uri() ++ "/facebook" ++
+      mtc:get_env(url) ++ "/facebook" ++
         "?action=login" ++
         "&redirect_url=" ++ mtc_util:uri_encode(mtws_common:url());
     true ->
