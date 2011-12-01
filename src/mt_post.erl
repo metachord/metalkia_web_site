@@ -91,10 +91,15 @@ body() ->
 inner_body(Path) ->
   Id = Path, % FIXME
   ?DBG("PostId: ~p", [Id]),
-  Email = mtc:get_env(test_email, mtws_common:get_email()),
   User = wf:user(),
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
-    #mt_post{} = Post ->
+    #mt_post{author = #mt_author{id = PersonId}} = Post ->
+      Email =
+      case mtc_entry:sget(mt_person, PersonId) of
+        #mt_person{email = EmailBin} -> ?a2l(EmailBin);
+        _ -> undefined
+      end,
+
       ?DBG("Post:~n~p", [Post]),
       [
         #panel{style="margin-left: 50px;", body = [
