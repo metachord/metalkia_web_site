@@ -30,7 +30,7 @@ main() ->
               VerificationCode = mtc_util:rand_str(10),
               mtws_session:put_state(VerificationCode, mtws_common:get_state()),
               "<script>"
-              "window.top.location = '" ++ mtc_util:uri_encode(AuthBaseUri) ++ "/sso" ++
+              "window.top.location = '" ++ AuthBaseUri ++ "/sso" ++
               "?action=verify" ++
               "&code=" ++ mtc_util:uri_encode(VerificationCode) ++
               "&return_url=" ++ mtc_util:uri_encode(ReturnUrl) ++
