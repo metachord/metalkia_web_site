@@ -12,6 +12,7 @@
   blog_name/0,
   blog_link/0,
   url/0,
+  base_uri/0,
   user_or_name/0,
   name/0,
   profile_link/0,
@@ -41,6 +42,15 @@ url() ->
   case dict:find(current_url, wf:path_info()) of
     {ok, CurrentUrl} ->
       CurrentUrl;
+    error ->
+      mtc:get_env(url)
+  end.
+
+%% TODO: use same one from webmachine when seth/base_uri will be merged in upstream
+base_uri() ->
+  case dict:find(current_domain, wf:path_info()) of
+    {ok, CurrentDomain} ->
+      CurrentDomain;
     error ->
       mtc:get_env(url)
   end.
