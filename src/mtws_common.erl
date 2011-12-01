@@ -36,7 +36,10 @@ blog_name() ->
   end.
 
 blog_link() ->
-  wf:session_default(blog_link, mtc:get_env(url)).
+  case dict:find(current_base_uri, wf:path_info()) of
+    {ok, Uri} -> Uri;
+    error -> mtc:get_env(url)
+  end.
 
 url() ->
   case dict:find(current_url, wf:path_info()) of
