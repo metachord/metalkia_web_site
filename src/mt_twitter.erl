@@ -132,7 +132,7 @@ profile_link() ->
   ScreenName = wf:session(twitter_name),
   if
     ScreenName =:= undefined ->
-      mtc:get_env(url) ++ "/twitter";
+      mtws_common:base_uri() ++ "/twitter";
     true ->
       "http://twitter.com/" ++ ScreenName
   end.
