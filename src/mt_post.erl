@@ -92,6 +92,7 @@ inner_body(Path) ->
   Id = Path, % FIXME
   ?DBG("PostId: ~p", [Id]),
   Email = mtc:get_env(test_email, mtws_common:get_email()),
+  User = wf:user(),
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
     #mt_post{} = Post ->
       ?DBG("Post:~n~p", [Post]),
@@ -107,16 +108,27 @@ inner_body(Path) ->
           #hr{}
         ]},
         #panel{id="pan-"++Id} |
-        comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments))
+        if
+          User =/= undefined ->
+            comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments));
+          true ->
+            []
+        end
       ];
     _ ->
-      [
-        #panel{style="margin-left: 50px;", body = [
-          post_items(),
-          #hr{}
-        ]},
-        #panel{id="pan"}
-      ]
+      if
+        User =/= undefined ->
+          [
+            #panel{style="margin-left: 50px;", body = [
+              post_items(),
+              #hr{}
+            ]},
+            #panel{id="pan"}
+          ];
+        true ->
+          %% Redirect?
+          []
+      end
   end.
 
 posts_list() ->
@@ -226,61 +238,74 @@ comment_post_items(Id) ->
   ]}.
 
 event("add-post") ->
-  Text = wf:q("textarea"),
-  Tags = wf:q("tags-input"),
-  Sanit = fun(T) ->
-    StripList = "[<>=&$#@!*%];\"\'`",
-    re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}, unicode])
-  end,
+  User = wf:user(),
+  if
+    User =/= undefined ->
+      Text = wf:q("textarea"),
+      Tags = wf:q("tags-input"),
+      Sanit = fun(T) ->
+        StripList = "[<>=&$#@!*%];\"\'`",
+        re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}, unicode])
+      end,
 
-  ?DBG("Tags: ~p", [Tags]),
-  UserName = ?a2b(wf:user()),                   % FIXME
-  Author = #mt_author{
-    id = UserName,
-    name = UserName
-  },
-  IdBin = mtc_entry:sput(#mt_post{
-    author = Author,
-    body = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
-    origin = ?MT_ORIGIN,
-    tags = [unicode:characters_to_binary(Sanit(T)) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
-  }),
-  Id = binary_to_list(IdBin),
-  wf:redirect("/post/"++Id);
+      ?DBG("Tags: ~p", [Tags]),
+      UserName = ?a2b(User),                        % FIXME
+      Author = #mt_author{
+        id = UserName,
+        name = UserName
+      },
+      IdBin = mtc_entry:sput(#mt_post{
+        author = Author,
+        body = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
+        origin = ?MT_ORIGIN,
+        tags = [unicode:characters_to_binary(Sanit(T)) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
+      }),
+      Id = binary_to_list(IdBin),
+      wf:redirect("/post/"++Id);
+    true ->
+      pass
+  end;
 event("add-comment-" ++ Path) ->
-  LevelQ = wf:q("level-"++Path),
-  Level = if LevelQ == undefined -> "0"; true -> LevelQ end,
-  Text = wf:q("textarea-"++Path),
-  [PostId|_] = string:tokens(Path, "-"),
-  ?PRINT([{path, Path}, {post_id, PostId}, {level, Level}, {text, Text}]),
-  [_PostId|Parents] = path_to_parents(Path),
+  User = wf:user(),
+  if
+    User =/= undefined ->
+      LevelQ = wf:q("level-"++Path),
+      Level = if LevelQ == undefined -> "0"; true -> LevelQ end,
+      Text = wf:q("textarea-"++Path),
+      [PostId|_] = string:tokens(Path, "-"),
+      ?PRINT([{path, Path}, {post_id, PostId}, {level, Level}, {text, Text}]),
+      [_PostId|Parents] = path_to_parents(Path),
 
-  SanText = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
-  UserName = ?a2b(wf:user()),                   % FIXME
-  Author = #mt_author{
-    id = UserName,
-    name = UserName
-  },
-  Comment = #mt_comment{
-    post_id = ?a2b(PostId),
-    author = Author,
-    body = SanText,
-    parents = Parents
-  },
-  NewCID = mtc_entry:sput(Comment),
-  CID = list_to_integer(binary_to_list(NewCID)),
-  NewId = Path++"-"++CID,
-  ?PRINT(NewId),
-  wf:insert_bottom("pan-"++Path,
-    comment_body(#comment{
-      post_id = ?a2b(PostId),
-      id = CID,
-      parents = Parents ++ [CID],
-      path = NewId,
-      level = list_to_integer(Level)+1,
-      body = SanText}
-  )),
-  wf:replace("comment-items-" ++ Path, default_items(Path));
+      SanText = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
+      UserName = ?a2b(wf:user()),                   % FIXME
+      Author = #mt_author{
+        id = UserName,
+        name = UserName
+      },
+      Comment = #mt_comment{
+        post_id = ?a2b(PostId),
+        author = Author,
+        body = SanText,
+        parents = Parents
+      },
+      NewCID = mtc_entry:sput(Comment),
+      CID = list_to_integer(binary_to_list(NewCID)),
+      NewId = Path++"-"++CID,
+      ?PRINT(NewId),
+      wf:insert_bottom("pan-"++Path,
+        comment_body(#comment{
+          post_id = ?a2b(PostId),
+          id = CID,
+          parents = Parents ++ [CID],
+          path = NewId,
+          level = list_to_integer(Level)+1,
+          body = SanText}
+      )),
+      wf:replace("comment-items-" ++ Path, default_items(Path));
+    true ->
+      pass
+  end;
+
 event(("comment-" ++ Id) = Target) ->
   wf:replace(Target, comment_post_items(Id)).
 
