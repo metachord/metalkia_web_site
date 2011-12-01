@@ -50,6 +50,20 @@ class HTMLSanitize
        lambda do |env|
          node      = env[:node]
          node_name = env[:node_name]
+         return if node_name == 'pre'
+         return if node_name == 'code'
+         if !node.text?
+           text = node.text
+           text.gsub!(/\n\n/, "<p>")
+           text.gsub!(/[\n]+/, "<br />")
+           node.replace(text)
+         end
+         {:node_whitelist => [node]}
+       end,
+
+       lambda do |env|
+         node      = env[:node]
+         node_name = env[:node_name]
          return if env[:is_whitelisted] || !node.element?
          return unless node_name == 'iframe'
          return unless node['src'] =~ /\Ahttps?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\//
@@ -86,7 +100,7 @@ errlog("Start")
 inlen = STDIN.read(4).unpack('N')
 intext = STDIN.read(inlen[0])
 
-outtext = Sanitize.clean(intext, HTMLSanitize::Config::RELAXED)
+outtext = "<p>" + Sanitize.clean("<p>" + intext + "</p>", HTMLSanitize::Config::RELAXED) + "</p>"
 outlen = outtext.size()
 
 STDOUT.write([outlen].pack('N'))
