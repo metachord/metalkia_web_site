@@ -37,6 +37,9 @@ rules() ->
 
     {[],                   ?MODULE, []},
     {["profile"],          ?MODULE, []},
+    {["logoff"],           ?MODULE, []},
+    {["facebook"],         ?MODULE, []},
+    {["twitter"],          ?MODULE, []},
     {["post", '*'],        ?MODULE, []},
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
   ].
