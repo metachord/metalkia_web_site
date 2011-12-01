@@ -16,7 +16,7 @@
 
 main() ->
   wf:logout(),
-  wf:redirect(mtc:get_env(url)).
+  wf:redirect(mtws_common:url()).
 
 logoff_panel() ->
   #panel{body = #template{file = "./site/templates/metalkia/logoff_service.html"}}.
