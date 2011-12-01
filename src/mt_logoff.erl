@@ -23,7 +23,7 @@ logoff_panel() ->
 
 
 button_link() ->
-  mtc:get_env(url) ++ "/logoff".
+  mtws_common:base_uri() ++ "/logoff".
 
 button_text() ->
   "Sign out".
