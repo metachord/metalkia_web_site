@@ -174,6 +174,7 @@ copyright() ->
   email,
   facebook_id,
   facebook_name,
+  facebook_link,
   twitter_id,
   twitter_name
 }).
@@ -184,6 +185,7 @@ get_state() ->
     email = wf:session(user_email),
     facebook_id = wf:session(facebook_id),
     facebook_name = wf:session(facebook_name),
+    facebook_link = wf:session(facebook_link),
     twitter_id = wf:session(twitter_id),
     twitter_name = wf:session(twitter_name)
   }.
@@ -195,6 +197,7 @@ set_state(#session_state{
              email = Email,
              facebook_id = FacebookId,
              facebook_name = FacebookName,
+             facebook_link = FacebookLink,
              twitter_id = TwitterId,
              twitter_name = TwitterName
             }) ->
@@ -202,5 +205,6 @@ set_state(#session_state{
   wf:session(user_email, Email),
   wf:session(facebook_id, FacebookId),
   wf:session(facebook_name, FacebookName),
+  wf:session(facebook_link, FacebookLink),
   wf:session(twitter_id, TwitterId),
   wf:session(twitter_name, TwitterName).
