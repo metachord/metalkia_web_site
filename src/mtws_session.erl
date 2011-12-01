@@ -64,6 +64,7 @@ handle_call({get, Code}, _From,
       [{Code, V}] -> V;
       _ -> undefined
     end,
+  ets:delete(Tid, Code),
   {reply, Value, State};
 handle_call(Request, _From, State) ->
   Error = {unknown_call, Request},
