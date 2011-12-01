@@ -251,7 +251,7 @@ post_items() ->
   #panel{id = "comment-items",
     body = [
       #textarea{id="textarea", class="post-input"},
-      #tagsinput{id="tags-input", text = unicode:characters_to_list(string:join(TagList, ","))},
+      #tagsinput{id="tags-input", text = string:join([unicode:characters_to_list(T) || T <- TagList], ",")},
       #button{id=submit, text="Submit",postback="add-post"}
   ]}.
 
