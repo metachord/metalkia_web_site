@@ -16,14 +16,20 @@
 
 main() ->
   wf:logout(),
-  wf:redirect(mtws_common:url()).
+  RedirectUrl =
+  case wf:q(redirect_url) of
+    undefined ->
+      mtc:get_env(url);
+    Url -> Url
+  end,
+  wf:redirect(RedirectUrl).
 
 logoff_panel() ->
   #panel{body = #template{file = "./site/templates/metalkia/logoff_service.html"}}.
 
 
 button_link() ->
-  mtws_common:base_uri() ++ "/logoff".
+  mtws_common:base_uri() ++ "/logoff?redirect_url=" ++ mtc_util:uri_encode(mtws_common:url()).
 
 button_text() ->
   "Sign out".
