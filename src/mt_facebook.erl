@@ -111,11 +111,11 @@ main() ->
                       %% #mt_person{username = MetalkiaUser} = mtc_entry:sget(mt_person, MetalkiaId),
                       wf:session(metalkia_id, binary_to_list(MetalkiaId)),
                       wf:user(binary_to_list(MetalkiaId)),
-                      case wf:session(redirect_after_login) of
+                      case wf:session(redirect_url) of
                         undefined ->
                           wf:redirect(mtc:get_env(url));
                         Url ->
-                          wf:session(redirect_after_login, undefined),
+                          wf:session(redirect_url, undefined),
                           wf:redirect(Url)
                       end;
                     _ ->
