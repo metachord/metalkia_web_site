@@ -26,8 +26,8 @@ main() ->
             undefined ->
               %% Need signin
               "";
-            _UserName ->
-              VerificationCode = mtc_util:rand_str(10),
+            UserName ->
+              VerificationCode = UserName ++ "__" ++ mtc_util:rand_str(10),
               mtws_session:put_state(VerificationCode, mtws_common:get_state()),
               "<script>"
               "window.top.location = '" ++ AuthBaseUri ++ "/sso" ++
