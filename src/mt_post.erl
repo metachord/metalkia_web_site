@@ -135,7 +135,8 @@ inner_body(Id) ->
         end
       ];
     _ ->
-      wf:status_code(404)
+      wf:status_code(404),
+      "Post not found"
   end.
 
 posts_list() ->
