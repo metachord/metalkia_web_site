@@ -25,9 +25,9 @@
 init(ConfigProps) ->
     {root, Root} = proplists:lookup(root, ConfigProps),
     {ok, #context{root=Root}}.
-    
+
 allowed_methods(ReqData, Context) ->
-    {['HEAD', 'GET', 'PUT', 'DELETE', 'POST'], ReqData, Context}.
+    {['HEAD', 'GET'], ReqData, Context}.
 
 file_path(Context, Name) ->
     RelName = case hd(Name) of
@@ -38,7 +38,7 @@ file_path(Context, Name) ->
 
 file_exists(Context, Name) ->
     NamePath = file_path(Context, Name),
-    case filelib:is_regular(NamePath) of 
+    case filelib:is_regular(NamePath) of
         true ->
             {true, NamePath};
         false ->
@@ -47,11 +47,19 @@ file_exists(Context, Name) ->
 
 resource_exists(ReqData, Context) ->
     Path = wrq:disp_path(ReqData),
-    case file_exists(Context, Path) of 
+
+    FullPath =
+        case mochiweb_util:safe_relative_path(Path) of
+          undefined ->
+            [];
+          SafeName ->
+            SafeName
+        end,
+    case file_exists(Context, FullPath) of
         {true, _} ->
             {true, ReqData, Context};
         _ ->
-            case Path of
+            case FullPath of
                 "p" -> {true, ReqData, Context};
                 _ -> {false, ReqData, Context}
             end
@@ -61,7 +69,7 @@ maybe_fetch_object(Context, Path) ->
     % if returns {true, NewContext} then NewContext has response_body
     case Context#context.response_body of
         undefined ->
-            case file_exists(Context, Path) of 
+            case file_exists(Context, Path) of
                 {true, FullPath} ->
                     {ok, Value} = file:read_file(FullPath),
                     {true, Context#context{response_body=Value}};
@@ -90,7 +98,7 @@ accept_content(ReqData, Context) ->
     Path = wrq:disp_path(ReqData),
     FP = file_path(Context, Path),
     ok = filelib:ensure_dir(filename:dirname(FP)),
-    ReqData1 = case file_exists(Context, Path) of 
+    ReqData1 = case file_exists(Context, Path) of
         {true, _} ->
             ReqData;
         _ ->
@@ -105,7 +113,7 @@ accept_content(ReqData, Context) ->
             {true, wrq:set_resp_body(Value, ReqData1), Context};
         Err ->
             {{error, Err}, ReqData1, Context}
-    end.    
+    end.
 
 post_is_create(ReqData, Context) ->
     {true, ReqData, Context}.
@@ -128,7 +136,7 @@ delete_resource(ReqData, Context) ->
     end.
 
 provide_content(ReqData, Context) ->
-    case maybe_fetch_object(Context, wrq:disp_path(ReqData)) of 
+    case maybe_fetch_object(Context, wrq:disp_path(ReqData)) of
         {true, NewContext} ->
             Body = NewContext#context.response_body,
             {Body, ReqData, Context};
