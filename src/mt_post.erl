@@ -88,9 +88,23 @@ body() ->
       posts_list()
   end.
 
-inner_body(Path) ->
-  Id = Path, % FIXME
-  ?DBG("PostId: ~p", [Id]),
+inner_body(post_add) ->
+  User = wf:user(),
+  if
+    User =/= undefined ->
+      [
+        #panel{style="margin-left: 50px;", body = [
+          post_items(),
+          #hr{}
+        ]},
+        #panel{id="pan"}
+      ];
+    true ->
+      %% Redirect?
+      []
+  end;
+
+inner_body(Id) ->
   User = wf:user(),
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
     #mt_post{author = #mt_author{id = PersonId}} = Post ->
@@ -121,19 +135,7 @@ inner_body(Path) ->
         end
       ];
     _ ->
-      if
-        User =/= undefined ->
-          [
-            #panel{style="margin-left: 50px;", body = [
-              post_items(),
-              #hr{}
-            ]},
-            #panel{id="pan"}
-          ];
-        true ->
-          %% Redirect?
-          []
-      end
+      wf:status_code(404)
   end.
 
 posts_list() ->

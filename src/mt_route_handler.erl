@@ -93,6 +93,9 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
       {mt_facebook, PathInfo1};
     "/twitter" ->
       {mt_twitter, PathInfo1};
+    "/post-add" ->
+      PathInfo2 = dict:store(post_id, post_add, PathInfo1),
+      {mt_post, PathInfo2};
     "/post/" ++ PostArgs ->
       case filename:split(PostArgs) of
         [PostId | _] ->

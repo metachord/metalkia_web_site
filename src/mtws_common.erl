@@ -134,7 +134,7 @@ menu() ->
           #listitem{body = [
             #link{url = "#", text = "Post"},
             #list{class = "subnav", body = [
-              #listitem{body = #link{url = "/add-post", text = "Add post"}}
+              #listitem{body = #link{url = "/post-add", text = "Add post"}}
             ]}
           ]};
         true ->

@@ -41,6 +41,7 @@ rules() ->
     {["facebook"],         ?MODULE, []},
     {["twitter"],          ?MODULE, []},
     {["post", '*'],        ?MODULE, []},
+    {["post-add"],         ?MODULE, []},
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
   ].
 
