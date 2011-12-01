@@ -27,6 +27,7 @@ main() ->
     secret = secret(),
     method = hmac_sha1
    },
+  wf:session(redirect_url, wf:q(redirect_url)),
   TwitterName = wf:session(twitter_name),
   RequestTokenSecretSess = wf:session(twitter_oauth_token_secret),
   if
@@ -95,7 +96,13 @@ main() ->
                       %% #mt_person{username = MetalkiaUser} = mtc_entry:sget(mt_person, MetalkiaId),
                       wf:session(metalkia_id, binary_to_list(MetalkiaId)),
                       wf:user(binary_to_list(MetalkiaId)),
-                      wf:redirect(mtc:get_env(url));
+                      case wf:session(redirect_after_login) of
+                        undefined ->
+                          wf:redirect(mtc:get_env(url));
+                        Url ->
+                          wf:session(redirect_after_login, undefined),
+                          wf:redirect(Url)
+                      end;
                     _ ->
                       %% This user has not profile
                       wf:session(twitter_id, ?a2b(TwProfile#mt_twitter.id)),
@@ -132,7 +139,9 @@ profile_link() ->
   ScreenName = wf:session(twitter_name),
   if
     ScreenName =:= undefined ->
-      mtws_common:base_uri() ++ "/twitter";
+      mtws_common:base_uri() ++ "/twitter" ++
+      "?action=login" ++
+      "&redirect_url=" ++ mtc_util:uri_encode(mtws_common:url());
     true ->
       "http://twitter.com/" ++ ScreenName
   end.

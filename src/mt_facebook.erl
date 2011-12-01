@@ -26,6 +26,7 @@ main() ->
       ?DBG("LogOff: signed_request=~p", [SignedRequest]),
       wf:redirect(mtc:get_env(url));
      Action =:= "login" ->
+      wf:session(redirect_url, wf:q(redirect_url)),
       wf:redirect(auth_link());
      true ->
       Code = wf:q(code),
@@ -110,7 +111,13 @@ main() ->
                       %% #mt_person{username = MetalkiaUser} = mtc_entry:sget(mt_person, MetalkiaId),
                       wf:session(metalkia_id, binary_to_list(MetalkiaId)),
                       wf:user(binary_to_list(MetalkiaId)),
-                      wf:redirect(mtc:get_env(url));
+                      case wf:session(redirect_after_login) of
+                        undefined ->
+                          wf:redirect(mtc:get_env(url));
+                        Url ->
+                          wf:session(redirect_after_login, undefined),
+                          wf:redirect(Url)
+                      end;
                     _ ->
                       %% This user has not profile
                       wf:session(facebook_id, ?a2b(FbProfile#mt_facebook.id)),
@@ -148,7 +155,9 @@ profile_link() ->
   FbLink = wf:session(facebook_link),
   if
     FbLink =:= undefined ->
-      mtws_common:base_uri() ++ "/facebook?action=login";
+      mtws_common:base_uri() ++ "/facebook" ++
+        "?action=login" ++
+        "&redirect_url=" ++ mtc_util:uri_encode(mtws_common:url());
     true ->
       FbLink
   end.
