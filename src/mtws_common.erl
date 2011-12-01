@@ -38,7 +38,12 @@ blog_link() ->
   wf:session_default(blog_link, mtc:get_env(url)).
 
 url() ->
-  mtc:get_env(url).
+  case dict:find(current_url, wf:path_info()) of
+    {ok, CurrentUrl} ->
+      CurrentUrl;
+    error ->
+      mtc:get_env(url)
+  end.
 
 name() ->
   FbName = wf:session(facebook_name),
