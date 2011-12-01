@@ -237,10 +237,21 @@ share_handlers() ->
 
 
 post_items() ->
+  TagList =
+  case dict:find(streams, wf:path_info()) of
+    {ok, Streams} ->
+      case [Tags || #mt_stream{username = UserName, tags = Tags} <- Streams, UserName =:= ?a2b(wf:user())] of
+        [] -> [];
+        [T|_] -> T
+      end;
+    error ->
+      []
+  end,
+
   #panel{id = "comment-items",
     body = [
       #textarea{id="textarea", class="post-input"},
-      #tagsinput{id="tags-input"},
+      #tagsinput{id="tags-input", text = unicode:characters_to_list(string:join(TagList, ","))},
       #button{id=submit, text="Submit",postback="add-post"}
   ]}.
 
