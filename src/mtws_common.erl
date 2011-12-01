@@ -80,8 +80,7 @@ profile_link() ->
   end.
 
 sign() ->
-  IsTwSig = mt_twitter:is_signed_in(),
-  IsFbSig = mt_facebook:is_signed_in(),
+  User = wf:user(),
   UserName = user_or_name(),
   SignString =
   case UserName of
@@ -108,7 +107,7 @@ sign() ->
         #listitem{body = mt_facebook:login_panel()},
         #listitem{body = mt_twitter:login_panel()},
         if
-          IsTwSig orelse IsFbSig ->
+          User =/= undefined ->
             #listitem{body = mt_logoff:logoff_panel()};
           true ->
             []
