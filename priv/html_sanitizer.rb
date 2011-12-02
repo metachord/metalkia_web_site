@@ -100,7 +100,7 @@ errlog("Start")
 inlen = STDIN.read(4).unpack('N')
 intext = STDIN.read(inlen[0])
 
-outtext = "<p>" + Sanitize.clean("<p>" + intext + "</p>", HTMLSanitize::Config::RELAXED) + "</p>"
+outtext = Sanitize.clean(intext, HTMLSanitize::Config::RELAXED)
 outlen = outtext.size()
 
 STDOUT.write([outlen].pack('N'))
