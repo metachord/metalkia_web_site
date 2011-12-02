@@ -281,9 +281,9 @@ event("add-post") ->
       },
       IdBin = mtc_entry:sput(#mt_post{
         author = Author,
-        body = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(Text) end,
+        body = case Text of undefined -> Text; _ -> mtws_sanitizer:sanitize(iolist_to_binary(["<p>", Text, "</p>"])) end,
         origin = ?MT_ORIGIN,
-        tags = [unicode:characters_to_binary(Sanit(T)) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
+        tags = [unicode:characters_to_binary(Sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
       }),
       Id = binary_to_list(IdBin),
       wf:redirect("/post/"++Id);
