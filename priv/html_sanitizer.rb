@@ -52,7 +52,7 @@ class HTMLSanitize
          node_name = env[:node_name]
          return if node_name == 'pre'
          return if node_name == 'code'
-         if !node.text?
+         if node.text?
            text = node.text
            text.gsub!(/\n\n/, "<p>")
            text.gsub!(/[\n]+/, "<br />")
