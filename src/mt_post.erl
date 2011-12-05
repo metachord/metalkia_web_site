@@ -27,8 +27,7 @@
   id,
   path = "",
   parents = [],
-  level = 0,
-  body = ""
+  level = 0
 }).
 
 main() -> #template { file="./site/templates/metalkia/bare.html" }.
@@ -172,15 +171,15 @@ comment_tree([], Tree) ->
 comment_tree([#mt_comment_ref{parents = _Parents, comment_key = CKey}|Comments], Tree) ->
   E =
   case mtc_entry:sget(mt_comment, CKey) of
-    #mt_comment{post_id = PostId, id = CID, parents = Parents, body = Body} ->
+    #mt_comment{post_id = PostId, id = CID, parents = Parents} = Comment->
       Path = parents_to_path(PostId, Parents),
-      comment_body(#comment{
+      comment_body(Comment, #comment{
         post_id = PostId,
         id = CID,
         parents = Parents,
         path = Path,
-        level = length(Parents),
-        body = Body});
+        level = length(Parents)
+      });
     _Other ->
       ?ERR("Bad comment record for key ~p: ~p", [CKey, _Other]),
       []
@@ -188,7 +187,7 @@ comment_tree([#mt_comment_ref{parents = _Parents, comment_key = CKey}|Comments],
   comment_tree(Comments, Tree ++ [E]).
 
 
-comment_body(#comment{post_id = PostId, id = Id, parents = Parents, path = _Path, level = Level, body = Body}) ->
+comment_body(#mt_comment{body = Body}, #comment{post_id = PostId, id = Id, parents = Parents, path = _Path, level = Level}) ->
   Margin = Level*50+50,
   Anchor = integer_to_list(Id),
   [
@@ -318,13 +317,13 @@ event("add-comment-" ++ Path) ->
       NewId = Path++"-"++CID,
       ?PRINT(NewId),
       wf:insert_bottom("pan-"++Path,
-        comment_body(#comment{
-          post_id = ?a2b(PostId),
-          id = CID,
-          parents = Parents ++ [CID],
-          path = NewId,
-          level = list_to_integer(Level)+1,
-          body = SanText}
+        comment_body(Comment,
+          #comment{
+            post_id = ?a2b(PostId),
+            id = CID,
+            parents = Parents ++ [CID],
+            path = NewId,
+            level = list_to_integer(Level)+1}
       )),
       wf:replace("comment-items-" ++ Path, default_items(Path));
     true ->
