@@ -61,7 +61,7 @@ def clean_html( fragment ):
                             text = str(current)
                             pass
                         else:
-                            text = str(current)
+                            text = current
                             text = re.sub(re.compile('\n\n', re.UNICODE), '<p>', text)
                             text = re.sub(re.compile('[\n]+', re.UNICODE), '<br />', text)
                             current.replaceWith(text)
@@ -85,7 +85,7 @@ def clean_html( fragment ):
 inlen = struct.unpack('>I', sys.stdin.read(4))
 intext = sys.stdin.read(inlen[0])
 
-outtext = clean_html(intext)
+outtext = clean_html(intext).encode('utf-8')
 outlen = len(outtext)
 
 sys.stdout.write(struct.pack('>I', outlen))
