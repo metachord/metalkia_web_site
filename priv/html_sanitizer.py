@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import sys
 import struct
-from BeautifulSoup import BeautifulSoup
+import re
+from BeautifulSoup import BeautifulSoup, NavigableString
 
 acceptable_elements = ['a', 'abbr', 'acronym', 'address', 'area', 'b', 'big',
                        'blockquote', 'br', 'button', 'caption', 'center', 'cite', 'code', 'col',
@@ -23,15 +25,48 @@ acceptable_attributes = ['abbr', 'accept', 'accept-charset', 'accesskey',
                          'span', 'src', 'start', 'summary', 'tabindex', 'target', 'title', 'type',
                          'usemap', 'valign', 'value', 'vspace', 'width']
 
+BeautifulSoup.QUOTE_TAGS = ['pre', 'code']
+
 def clean_html( fragment ):
     while True:
         soup = BeautifulSoup( fragment )
         removed = False
         for tag in soup.findAll(True): # find all tags
-            if tag.name not in acceptable_elements:
+            if tag.name == 'script':
+                if re.match("https?:\/\/(?:www\.)?gist\.github\.com\/\d+\.js", dict(tag.attrs)[u'src']):
+                    removed = False
+                else:
+                    tag.extract()
+                    removed = True
+            elif tag.name == 'iframe':
+                if re.match("https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/", dict(tag.attrs)[u'src']):
+                    removed = False
+                else:
+                    tag.extract()
+                    removed = True
+            elif tag.name == 'pre':
+                pass
+            elif tag.name not in acceptable_elements:
                 tag.extract() # remove the bad ones
                 removed = True
             else: # it might have bad attributes
+                if not len(tag.contents):
+                    pass
+                else:
+                    stopNode = tag.contents[-1]
+                    strings = []
+                    current = tag.contents[0]
+                    while current:
+                        if not isinstance(current, NavigableString):
+                            text = str(current)
+                            pass
+                        else:
+                            text = str(current)
+                            text = re.sub(re.compile('\n\n', re.UNICODE), '<p>', text)
+                            text = re.sub(re.compile('[\n]+', re.UNICODE), '<br />', text)
+                            current.replaceWith(text)
+                        current = current.next
+
                 # a better way to get all attributes?
                 for attr in tag._getAttrMap().keys():
                     if attr not in acceptable_attributes:
