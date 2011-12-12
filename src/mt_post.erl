@@ -215,43 +215,44 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
   Margin = Level*50+50,
   Anchor = integer_to_list(Id),
 
-  {UserName, Email} =
+  {UserName, RealName, Email} =
   case mtc_entry:sget(mt_person, ?a2b(PersonId)) of
     #mt_person{username = UN, name = Name, email = EM} ->
       if
-        Name =:= undefined -> {?a2l(UN), ?a2l(EM)};
-        true -> {unicode:characters_to_list(Name), ?a2l(EM)}
+        Name =:= undefined -> {?a2l(UN), ?a2l(UN), ?a2l(EM)};
+        true -> {?a2l(UN), unicode:characters_to_list(Name), ?a2l(EM)}
       end;
     _Other ->
       ?ERR("Unknown person: ~p", [PersonId]),
-      {"", ""}
+      {"", "", ""}
   end,
 
+  %% {"http","metalkia.com","/test/ttt","a=55","asd"}
+  {UScheme, UHost, _UPath, _UArgs, _UPart} = mochiweb_util:urlsplit(mtc:get_env(url)),
+  UserProfileUrl = mochiweb_util:urlunsplit({UScheme, UserName ++ "." ++ UHost, ["/profile"], "", ""}),
 
   [
-    #panel{class = "comment-body", style="position:relative; margin-left: "++integer_to_list(Margin)++"px;", body = [
-      #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
-      #panel{style = "float:left", body = [
-        #gravatar{class = "user-avatar", email = Email, rating = "g"},
-        #br{},
-        #span{class = "user-name", body = UserName}
+    #panel{class = "comment-box", style="position:relative; margin-left: "++integer_to_list(Margin)++"px;", body = [
+      #panel{class = "user-identify-box", body = [
+        #span{class = "user-name", body = [#link{text = RealName, url = UserProfileUrl}]},
+        #panel{class = "user-avatar", body = [#gravatar{email = Email, rating = "g"}]}
       ]},
-      #panel{style = "float:left", body = [
-        #span{
-          style="color:#ff0000;",
+      #panel{style = "float:top", body = [
+        #panel{
+          class = "comment-anchor",
           body =
-            %% [#link{
-            %% text = "#"++integer_to_list(PostId)++"/"++Anchor,
-            %% url = "#c"++Anchor, id="c"++Anchor,
-            %% class = "comment-anchor-link"}]
+          %% [#link{
+          %% text = "#"++integer_to_list(PostId)++"/"++Anchor,
+          %% url = "#c"++Anchor, id="c"++Anchor,
+          %% class = "comment-anchor-link"}]
           "<a href=\"#" ++ Anchor ++ "\" "
           "id=\"" ++ Anchor ++ "\" "
           "class=\"comment-anchor-link link\" "
           "target=\"_self\">" ++ "#"++binary_to_list(PostId)++"/"++Anchor ++ "</a>"
         },
-        #br{},
-        #span{body = Body}
+        #panel{class = "comment-body", body = Body}
       ]},
+      #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
       default_items(parents_to_path(PostId, Parents))
     ]},
     #panel{id="pan-"++parents_to_path(PostId, Parents)}
@@ -260,7 +261,7 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
 default_items(Path) ->
   [PostId|Parents] = path_to_parents(Path),
   User = wf:user(),
-  #panel{style = "float:top", class = "post-handlers", body = [
+  #panel{class = "post-handlers", body = [
     #link{text="Link", url="/post/"++?a2l(PostId) ++
       if length(Parents) > 0 -> [CommentId|_] = lists:reverse(Parents), "#"++?a2l(CommentId); true -> "" end},
     if

@@ -70,9 +70,9 @@ a:hover, a:active {
     color: #44634A;
 }
 
-.link {
-    color: #394A22;
-}
+/* .link { */
+/*     color: #0000FF; */
+/* } */
 
 label {
   padding-top: 6px;
@@ -152,14 +152,42 @@ textarea.post-input {
     height: 400px;
 }
 
-.comment-body {
-    border: dashed 1px #DDD;
+.comment-box {
+    /* border: dashed 1px #F0F; */
+    min-height: 120px;
+    line-height: inherit;
+    min-height: 120px;
 }
 
+.comment-body {
+    /* border: dashed 1px #F55; */
+    /* line-height: 0px; */
+}
+
+.comment-anchor {
+    /* border: dashed 1px #DDD; */
+    /* line-height: 0px; */
+}
 
 .post-handlers {
     float: top;
     font-size: 9px;
+    margin-bottom: 0px;
+    color: #88F;
+}
+
+div.post-handlers a {
+    padding: 1px 3px 2px;
+    color: #555599;
+    text-decoration: none;
+}
+
+.user-identify-box {
+    /* border: dashed 1px #5F5; */
+    left:0;
+    float: left;
+    margin-left: 0px;
+    padding-left: 0px;
 }
 
 .user-avatar {
@@ -169,11 +197,8 @@ textarea.post-input {
 .user-name {
     float: top;
     color: #000000;
+    padding: 0px, 0px, 0px;
     font-size: 10px;
-}
-
-div.post-handlers a {
-    padding: 1px 3px 2px;
 }
 
 pre {
