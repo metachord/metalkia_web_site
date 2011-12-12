@@ -70,7 +70,7 @@ route(Path, PathInfo) ->
   end.
 
 route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
-  Profile = mtc_entry:sget(mt_person, UserName),
+  Profile = mtc_entry:sget(mt_person, ?a2b(UserName)),
   PathInfo1 =
     lists:foldl(
       fun({Key, Value}, PI) ->

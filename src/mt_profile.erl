@@ -38,9 +38,7 @@ url() ->
 
 body() ->
   PathInfo = wf_context:path_info(),
-  ?DBG("PathInfo: ~p", [PathInfo]),
   User = wf:user(),
-  ?DBG("User: ~p", [User]),
   RequestedUser =
   case dict:find(username, PathInfo) of
     {ok, RU} -> RU;
