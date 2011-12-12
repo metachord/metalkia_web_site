@@ -92,11 +92,10 @@ inner_body(post_add) ->
   if
     User =/= undefined ->
       [
-        #panel{style="margin-left: 50px;", body = [
+        #panel{id="pan", style="margin-left: 50px;", body = [
           post_items(),
           #hr{}
-        ]},
-        #panel{id="pan"}
+        ]}
       ];
     true ->
       %% Redirect?
@@ -114,7 +113,7 @@ inner_body(Id) ->
 
       ?DBG("Post:~n~p", [Post]),
       [
-        #panel{style="margin-left: 50px;", body = [
+        #panel{id="pan-"++Id, style="margin-left: 50px;", body = [
           #gravatar{email = Email, rating = "g"},
           #panel{body = [
             #hidden{id="post-id", text=Id},
@@ -124,7 +123,6 @@ inner_body(Id) ->
           share_handlers(),
           #hr{}
         ]},
-        #panel{id="pan-"++Id} |
         comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments))
       ];
     _ ->
@@ -156,15 +154,13 @@ posts_list() ->
           #mt_stream{username = UserName, tags = Tags} <- Streams])),
 
       [[
-        #panel{style="margin-left: 50px;", body = [
+        #panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
           #panel{body = [
             #span{body = Post#mt_post.body}
           ]},
           default_items(?a2l(Id)),
           #hr{}
-        ]},
-        #panel{id="pan-"++?a2l(Id)} |
-        [] %%comment_tree(lists:keysort(#mt_comment.parents, Post#mt_post.comments))
+        ]}
       ] ||
         #mt_post{id = Id} = Post <-
         [mtc_entry:sget(mt_post, Key) ||
@@ -226,28 +222,29 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
   UserProfileUrl = mochiweb_util:urlunsplit({UScheme, UserName ++ "." ++ UHost, ["/profile"], "", ""}),
 
   [
-    #panel{class = "comment-box", style="position:relative; margin-left: "++integer_to_list(Margin)++"px;", body = [
+    #panel{id="pan-"++parents_to_path(PostId, Parents), class = "comment-box", style="margin-left: "++integer_to_list(Margin)++"px;", body = [
       #panel{class = "user-identify-box", body = [
         #span{class = "user-name", body = [#link{text = RealName, url = UserProfileUrl}]},
         #panel{class = "user-avatar", body = [#gravatar{email = Email, rating = "g"}]}
       ]},
-      #panel{
-        class = "comment-anchor",
-        body =
-        %% [#link{
-        %% text = "#"++integer_to_list(PostId)++"/"++Anchor,
-        %% url = "#c"++Anchor, id="c"++Anchor,
-        %% class = "comment-anchor-link"}]
-        "<a href=\"#" ++ Anchor ++ "\" "
-        "id=\"" ++ Anchor ++ "\" "
-        "class=\"comment-anchor-link link\" "
-        "target=\"_self\">" ++ "#"++binary_to_list(PostId)++"/"++Anchor ++ "</a>"
-      },
-      #panel{class = "comment-body", body = Body},
+      #panel{body = [
+        #panel{
+          class = "comment-anchor",
+          body =
+          %% [#link{
+          %% text = "#"++integer_to_list(PostId)++"/"++Anchor,
+          %% url = "#c"++Anchor, id="c"++Anchor,
+          %% class = "comment-anchor-link"}]
+          "<a href=\"#" ++ Anchor ++ "\" "
+          "id=\"" ++ Anchor ++ "\" "
+          "class=\"comment-anchor-link link\" "
+          "target=\"_self\">" ++ "#"++binary_to_list(PostId)++"/"++Anchor ++ "</a>"
+        },
+        #panel{class = "comment-body", body = Body}
+      ]},
       #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
       default_items(parents_to_path(PostId, Parents))
-    ]},
-    #panel{id="pan-"++parents_to_path(PostId, Parents)}
+    ]}
   ].
 
 default_items(Path) ->

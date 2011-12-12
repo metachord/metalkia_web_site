@@ -66,10 +66,6 @@ a:hover, a:active {
     text-decoration: underline;
 }
 
-.comment-anchor-link {
-    color: #44634A;
-}
-
 /* .link { */
 /*     color: #0000FF; */
 /* } */
@@ -156,17 +152,27 @@ textarea.post-input {
     /* border: dashed 1px #F0F; */
     min-height: 120px;
     line-height: inherit;
-    min-height: 120px;
 }
 
 .comment-body {
     /* border: dashed 1px #F55; */
     /* line-height: 0px; */
+    width: inherit;
+    padding: 0px 0px 0px 0px;
+    right: 0;
+    min-height: 80px;
 }
 
 .comment-anchor {
     /* border: dashed 1px #DDD; */
     /* line-height: 0px; */
+    width: inherit;
+    padding: 0px 0px 0px 0px;
+    right: 0;
+}
+
+.comment-anchor-link {
+    color: #44634A;
 }
 
 .post-handlers {
