@@ -152,7 +152,7 @@ posts_list() ->
             [] ->
               UserPostsBucket = iolist_to_binary([UserName, "-", "posts"]),
               {ok, ListKeys} = mtriak:list_keys(UserPostsBucket),
-              ListKeys;
+              lists:reverse(ListKeys);
             _ ->
               Res = lists:umerge([lists:sort(mtc_entry:sget(tags, UserName, Tag)) || Tag <- Tags]),
               ?DBG("Res: ~p", [Res]),
