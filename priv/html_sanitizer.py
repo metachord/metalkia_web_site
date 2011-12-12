@@ -62,8 +62,8 @@ def clean_html( fragment ):
                             pass
                         else:
                             text = current
-                            text = re.sub(re.compile('\n\n', re.UNICODE), '<p>', text)
-                            text = re.sub(re.compile('[\n]+', re.UNICODE), '<br />', text)
+                            text = re.sub(re.compile('\n[\n]+', re.UNICODE), '</p><p>', text)
+                            text = re.sub(re.compile('\n', re.UNICODE), '<br />', text)
                             current.replaceWith(text)
                         current = current.next
 
