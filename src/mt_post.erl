@@ -231,21 +231,19 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
         #span{class = "user-name", body = [#link{text = RealName, url = UserProfileUrl}]},
         #panel{class = "user-avatar", body = [#gravatar{email = Email, rating = "g"}]}
       ]},
-      #panel{style = "float:top", body = [
-        #panel{
-          class = "comment-anchor",
-          body =
-          %% [#link{
-          %% text = "#"++integer_to_list(PostId)++"/"++Anchor,
-          %% url = "#c"++Anchor, id="c"++Anchor,
-          %% class = "comment-anchor-link"}]
-          "<a href=\"#" ++ Anchor ++ "\" "
-          "id=\"" ++ Anchor ++ "\" "
-          "class=\"comment-anchor-link link\" "
-          "target=\"_self\">" ++ "#"++binary_to_list(PostId)++"/"++Anchor ++ "</a>"
-        },
-        #panel{class = "comment-body", body = Body}
-      ]},
+      #panel{
+        class = "comment-anchor",
+        body =
+        %% [#link{
+        %% text = "#"++integer_to_list(PostId)++"/"++Anchor,
+        %% url = "#c"++Anchor, id="c"++Anchor,
+        %% class = "comment-anchor-link"}]
+        "<a href=\"#" ++ Anchor ++ "\" "
+        "id=\"" ++ Anchor ++ "\" "
+        "class=\"comment-anchor-link link\" "
+        "target=\"_self\">" ++ "#"++binary_to_list(PostId)++"/"++Anchor ++ "</a>"
+      },
+      #panel{class = "comment-body", body = Body},
       #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
       default_items(parents_to_path(PostId, Parents))
     ]},
