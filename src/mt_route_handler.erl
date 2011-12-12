@@ -124,7 +124,7 @@ user_blog(PathInfo) ->
     [Tld, SiteName | Rest] ->
       %% Request to Metalkia
       BlogName = default,
-      BlogTitle = "Metalkia",
+      BlogTitle = "Metalkia (beta)",
       NewPathInfo =
         lists:foldl(
           fun({Key, Value}, PI) ->
