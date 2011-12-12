@@ -104,7 +104,6 @@ inner_body(post_add) ->
   end;
 
 inner_body(Id) ->
-  User = wf:user(),
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
     #mt_post{author = #mt_author{id = PersonId}} = Post ->
       Email =
@@ -126,12 +125,7 @@ inner_body(Id) ->
           #hr{}
         ]},
         #panel{id="pan-"++Id} |
-        if
-          User =/= undefined ->
-            comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments));
-          true ->
-            []
-        end
+        comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments))
       ];
     _ ->
       wf:status_code(404),
