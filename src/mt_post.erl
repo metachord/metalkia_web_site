@@ -142,6 +142,25 @@ posts_list() ->
   PathInfo = wf_context:path_info(),
   case dict:find(streams, PathInfo) of
     {ok, Streams} ->
+      ?DBG("Streams: ~p", [Streams]),
+
+      Keys =
+      lists:reverse(lists:umerge(
+        [begin
+          ?DBG("Tags: ~p", [Tags]),
+          case Tags of
+            [] ->
+              UserPostsBucket = iolist_to_binary([UserName, "-", "posts"]),
+              {ok, ListKeys} = mtriak:list_keys(UserPostsBucket),
+              ListKeys;
+            _ ->
+              Res = lists:umerge([lists:sort(mtc_entry:sget(tags, UserName, Tag)) || Tag <- Tags]),
+              ?DBG("Res: ~p", [Res]),
+              Res
+          end
+        end ||
+          #mt_stream{username = UserName, tags = Tags} <- Streams])),
+
       [[
         #panel{style="margin-left: 50px;", body = [
           #panel{body = [
@@ -153,12 +172,10 @@ posts_list() ->
         #panel{id="pan-"++?a2l(Id)} |
         [] %%comment_tree(lists:keysort(#mt_comment.parents, Post#mt_post.comments))
       ] ||
-        #mt_post{id = Id} = Post <- [mtc_entry:sget(mt_post, Key) ||
-          Key <- lists:reverse(lists:umerge(
-              [lists:umerge(
-                [lists:sort(mtc_entry:sget(tags, UserName, Tag)) ||
-                Tag <- Tags]) ||
-                #mt_stream{username = UserName, tags = Tags} <- Streams]))]];
+        #mt_post{id = Id} = Post <-
+        [mtc_entry:sget(mt_post, Key) ||
+          Key <- Keys]
+      ];
     _ ->
       []
   end.

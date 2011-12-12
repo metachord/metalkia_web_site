@@ -121,7 +121,7 @@ user_blog(PathInfo) ->
   {match, [SiteUrl]} = re:run(mtc:get_env(url), "^(https?://)?(?<HOST>[^/:]+)(:.*)?$", [{capture, ['HOST'], list}]),
   [Tld, SiteName] = lists:reverse(string:tokens(SiteUrl, ".")),
   case HostTokensRev of
-    [Tld, SiteName | Rest] ->
+    [Tld, SiteName] ->
       %% Request to Metalkia
       BlogName = default,
       BlogTitle = "Metalkia",
@@ -133,12 +133,13 @@ user_blog(PathInfo) ->
                           {blog, BlogName},
                           {blog_title, BlogTitle}
                          ]),
-      UserName =
-        case Rest of
-          [UN] -> UN;
-          [] -> none;
-          _ -> undefined
-        end,
+      %% UserName =
+      %%   case Rest of
+      %%     [UN] -> UN;
+      %%     [] -> none;
+      %%     _ -> undefined
+      %%   end,
+      UserName = undefined,
       {UserName, BlogName, [], NewPathInfo};
     _ ->
       %% Search blog for this CNAME
