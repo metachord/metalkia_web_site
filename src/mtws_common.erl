@@ -32,7 +32,7 @@ blog_name() ->
     {ok, BlogTitle} ->
       BlogTitle;
     error ->
-      "Metalkia"
+      "Metalkia (beta)"
   end.
 
 blog_link() ->
