@@ -186,14 +186,40 @@ comment_tree([#mt_comment_ref{parents = _Parents, comment_key = CKey}|Comments],
   end,
   comment_tree(Comments, Tree ++ [E]).
 
-
-comment_body(#mt_comment{body = Body}, #comment{post_id = PostId, id = Id, parents = Parents, path = _Path, level = Level}) ->
+comment_body(#mt_comment{author = #mt_author{id = PersonId},
+                         body = Body
+                        },
+             #comment{post_id = PostId,
+                      id = Id,
+                      parents = Parents,
+                      path = _Path,
+                      level = Level
+                     }) ->
   Margin = Level*50+50,
   Anchor = integer_to_list(Id),
+
+  {UserName, Email} =
+  case mtc_entry:sget(mt_person, ?a2b(PersonId)) of
+    #mt_person{username = UN, name = Name, email = EM} ->
+      if
+        Name =:= undefined -> {?a2l(UN), ?a2l(EM)};
+        true -> {unicode:characters_to_list(Name), ?a2l(EM)}
+      end;
+    _Other ->
+      ?ERR("Unknown person: ~p", [PersonId]),
+      {"", ""}
+  end,
+
+
   [
-    #panel{style="position:relative; margin-left: "++integer_to_list(Margin)++"px;", body = [
+    #panel{class = "comment-body", style="position:relative; margin-left: "++integer_to_list(Margin)++"px;", body = [
       #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
-      #panel{body = [
+      #panel{style = "float:left", body = [
+        #gravatar{class = "user-avatar", email = Email, rating = "g"},
+        #br{},
+        #span{class = "user-name", body = UserName}
+      ]},
+      #panel{style = "float:left", body = [
         #span{
           style="color:#ff0000;",
           body =
@@ -209,8 +235,7 @@ comment_body(#mt_comment{body = Body}, #comment{post_id = PostId, id = Id, paren
         #br{},
         #span{body = Body}
       ]},
-      default_items(parents_to_path(PostId, Parents)),
-      #hr{}
+      default_items(parents_to_path(PostId, Parents))
     ]},
     #panel{id="pan-"++parents_to_path(PostId, Parents)}
   ].
@@ -218,7 +243,7 @@ comment_body(#mt_comment{body = Body}, #comment{post_id = PostId, id = Id, paren
 default_items(Path) ->
   [PostId|Parents] = path_to_parents(Path),
   User = wf:user(),
-  #panel{class = "post-handlers", body = [
+  #panel{style = "float:top", class = "post-handlers", body = [
     #link{text="Link", url="/post/"++?a2l(PostId) ++
       if length(Parents) > 0 -> [CommentId|_] = lists:reverse(Parents), "#"++?a2l(CommentId); true -> "" end},
     if
