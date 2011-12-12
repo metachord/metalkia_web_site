@@ -53,6 +53,7 @@ body() ->
       Profile = undefined,                      % FIXME
       [
         #gravatar{email = Email, rating = "g"},
+        #flash{},
         #p{},
         row(edit, Profile, username),
         row(edit, Profile, email),
@@ -173,7 +174,8 @@ event("save-profile") ->
       },
       ?DBG("Update profile:~n~p", [Person]),
       mtc_entry:supdate(Person),
-      mtws_common:update_external_profile(UserNameValidBin);
+      mtws_common:update_external_profile(UserNameValidBin),
+      wf:flash("Profile updated");
     #mt_person{id = _Other} ->
       ?DBG("Bad username: ~p", [UserName]),
       wf:replace("entry-username", username_entry(UserName, "warning"));
@@ -189,7 +191,8 @@ event("save-profile") ->
       MetalkiaId = mtc_entry:sput(Person),
       wf:user(UserName),
       mtws_common:set_email(Email),
-      mtws_common:update_external_profile(MetalkiaId)
+      mtws_common:update_external_profile(MetalkiaId),
+      wf:flash("New profile saved")
   end.
 
 
