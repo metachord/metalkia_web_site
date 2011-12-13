@@ -32,7 +32,7 @@ blog_name() ->
     {ok, BlogTitle} ->
       BlogTitle;
     error ->
-      "Metalkia (beta)"
+      mtc:get_env(default_blog_name)
   end.
 
 blog_link() ->

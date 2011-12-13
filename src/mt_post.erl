@@ -134,24 +134,30 @@ posts_list() ->
   PathInfo = wf_context:path_info(),
   case dict:find(streams, PathInfo) of
     {ok, Streams} ->
-      ?DBG("Streams: ~p", [Streams]),
+      ReqStreams =
+      case Streams of
+        [] ->
+          case dict:find(username, PathInfo) of
+            {ok, UN} ->
+              [#mt_stream{username = ?a2b(UN), tags = []}];
+            _ -> []
+          end;
+        _ -> Streams
+      end,
 
       Keys =
       lists:reverse(lists:umerge(
         [begin
-          ?DBG("Tags: ~p", [Tags]),
           case Tags of
             [] ->
               UserPostsBucket = iolist_to_binary([UserName, "-", "posts"]),
               {ok, ListKeys} = mtriak:list_keys(UserPostsBucket),
               lists:reverse(ListKeys);
             _ ->
-              Res = lists:umerge([lists:sort(mtc_entry:sget(tags, UserName, Tag)) || Tag <- Tags]),
-              ?DBG("Res: ~p", [Res]),
-              Res
+              lists:umerge([lists:sort(mtc_entry:sget(tags, UserName, Tag)) || Tag <- Tags])
           end
         end ||
-          #mt_stream{username = UserName, tags = Tags} <- Streams])),
+          #mt_stream{username = UserName, tags = Tags} <- ReqStreams])),
 
       [[
         #panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [

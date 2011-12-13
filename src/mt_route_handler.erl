@@ -62,16 +62,16 @@ route(Path, PathInfo) ->
         {undefined, Blog} ->
           ?ERR("Blog ~p not registered", [Blog]),
           {mt_index, PathInfo};
-        {UserName, BlogName, Streams, NewPathInfo} ->
-          route_blog(UserName, BlogName, Streams, Path, NewPathInfo);
+        {UserName, BlogName, Streams, NewPathInfo, Profile} ->
+          route_blog(UserName, BlogName, Streams, Path, NewPathInfo, Profile);
         _ ->
           {mt_index, PathInfo}
       end
   end.
 
-route_blog(_UserName, undefined, _Streams, _Path, PathInfo) ->
+route_blog(_UserName, undefined, _Streams, _Path, PathInfo, _Profile) ->
   {mt_404, PathInfo};
-route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
+route_blog(UserName, _BlogName, Streams, Path, PathInfo, Profile) ->
   Profile = mtc_entry:sget(mt_person, ?a2b(UserName)),
   PathInfo1 =
     lists:foldl(
@@ -113,7 +113,12 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
     "/" ->
       case Streams of
         [] ->
-          {mt_index, PathInfo1};
+          if
+            is_list(UserName) ->
+              {mt_post, PathInfo1};
+            true ->
+              {mt_index, PathInfo1}
+          end;
         _ ->
           {mt_post, PathInfo1}
       end;
@@ -126,28 +131,30 @@ user_blog(PathInfo) ->
   HostTokensRev = dict:fetch(host_tokens, PathInfo),
   {match, [SiteUrl]} = re:run(mtc:get_env(url), "^(https?://)?(?<HOST>[^/:]+)(:.*)?$", [{capture, ['HOST'], list}]),
   [Tld, SiteName] = lists:reverse(string:tokens(SiteUrl, ".")),
+  BlogId =
+  case dict:find(blog_id, PathInfo) of
+    {ok, BN} ->
+      BN;
+    error ->
+      undefined
+  end,
   case HostTokensRev of
-    [Tld, SiteName | Rest] ->
+    [Tld, SiteName | Rest] when BlogId =:= undefined ->
       %% Request to Metalkia
-      UserName =
+      {UserName, Profile} =
       case Rest of
-        [UN] -> UN;
-        [] -> none;
-        _ -> undefined
-      end,
-      UserNameBin = if is_list(UserName) -> ?a2b(UserName); true -> undefined end,
-      {BlogName, BlogTitle, Streams} =
-      case dict:find(blog_id, PathInfo) of
-        {ok, BN} ->
-          case mtc_entry:sget(mt_cname, ?a2b(BN)) of
-            #mt_cname{cname = _CName, title = BT, owner = UserNameBin, streams = BSs} ->
-              {BN, ?a2l(BT), BSs};
+        [UN] ->
+          case mtc_entry:sget(mt_person, ?a2b(UN)) of
+            #mt_person{} = UP ->
+              {UN, UP};
             _ ->
-              {undefined, undefined, []}
+              {undefined, undefined}
           end;
-        _ ->
-          {"", "Metalkia (beta)", []}
+        [] -> {none, undefined};
+        _ -> {undefined, undefined}
       end,
+      BlogName = default,
+      BlogTitle = mtc:get_env(default_blog_name),
       NewPathInfo =
       lists:foldl(
         fun({Key, Value}, PI) ->
@@ -156,10 +163,17 @@ user_blog(PathInfo) ->
           {blog, BlogName},
           {blog_title, BlogTitle}
       ]),
-      {UserName, BlogName, Streams, NewPathInfo};
+      {UserName, BlogName, [], NewPathInfo, Profile};
     _ ->
       %% Search blog for this CNAME
-      case mtc_entry:sget(mt_cname, list_to_binary(string:join(lists:reverse(HostTokensRev), "."))) of
+      BlogNamePretend =
+      if
+        BlogId =:= undefined ->
+          string:join(lists:reverse(HostTokensRev), ".");
+        true ->
+          BlogId
+      end,
+      case mtc_entry:sget(mt_cname, list_to_binary(BlogNamePretend)) of
         #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams} ->
           BlogName = ?a2l(CName),
           NewPathInfo =
@@ -170,9 +184,10 @@ user_blog(PathInfo) ->
                               {blog, BlogName},
                               {blog_title, ?a2l(BlogTitle)}
                              ]),
-          {Owner, BlogName, Streams, dict:erase(blog_id, NewPathInfo)};
+          Profile = mtc_entry:sget(mt_person, Owner),
+          {Owner, BlogName, Streams, dict:erase(blog_id, NewPathInfo), Profile};
         _ ->
-          {undefined, string:join(lists:reverse(HostTokensRev), ".")}
+          {undefined, string:join(lists:reverse(HostTokensRev), "."), undefined}
       end
   end.
 
