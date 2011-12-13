@@ -40,7 +40,8 @@ rules() ->
     {["logoff"],           ?MODULE, []},
     {["facebook"],         ?MODULE, []},
     {["twitter"],          ?MODULE, []},
-    {["post", '*'],        ?MODULE, []},
+    {["post"],             ?MODULE, []},
+    {["post", post_id],    ?MODULE, []},
     {["post-add"],         ?MODULE, []},
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
   ].
