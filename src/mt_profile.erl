@@ -245,18 +245,12 @@ email_verify_entry(Code, Class) ->
   ]}.
 
 email_verification(Email) ->
-  F =
-  "to:~p\n"
-  "from:noreply@metalkia.com\n"
-  "subject:Email verification\n"
-  "\n"
-  "Verification code: ~p\n"
-  "Please entry this code in verification input form in profile",
-
   Code = mtc_util:rand_str(10),
-  Port = open_port({spawn, mtc:get_env(sendmail, "/usr/sbin/sendmail -t")}, [use_stdio, exit_status, binary]),
-  port_command(Port, unicode:characters_to_binary(io_lib:format(F, [Email, Code]))),
-  port_close(Port),
+  Text = io_lib:format(
+    "Verification code: ~p\n"
+    "Please entry this code in verification input form in profile",
+    [Code]),
+  mtc_notify:send(email, Email, {"noreply@metalkia.com", "Email verification", Text}),
   Code.
 
 
