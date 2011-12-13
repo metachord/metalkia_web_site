@@ -69,6 +69,8 @@ route(Path, PathInfo) ->
       end
   end.
 
+route_blog(_UserName, undefined, _Streams, _Path, PathInfo) ->
+  {mt_404, PathInfo};
 route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
   Profile = mtc_entry:sget(mt_person, ?a2b(UserName)),
   PathInfo1 =
