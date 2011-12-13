@@ -33,18 +33,21 @@ rules() ->
     {["css", '*'], static_resource, [{root, "./site/static/metalkia/css"}]},
     {["images", '*'], static_resource, [{root, "./site/static/metalkia/images"}]},
     {["nitrogen", '*'], static_resource, [{root, "./site/static/nitrogen"}]},
-    {["mt", '*'], static_resource, [{root, "./site/static/metalkia"}]},
-
-    {[],                   ?MODULE, []},
-    {["profile"],          ?MODULE, []},
-    {["logoff"],           ?MODULE, []},
-    {["facebook"],         ?MODULE, []},
-    {["twitter"],          ?MODULE, []},
-    {["post"],             ?MODULE, []},
-    {["post", post_id],    ?MODULE, []},
-    {["post-add"],         ?MODULE, []},
-    {["blog", blog_id],    ?MODULE, []},
-    {["blog-post-add", blog_id],  ?MODULE, []},
+    {["mt", '*'], static_resource, [{root, "./site/static/metalkia"}]}
+  ] ++
+  [{Path, ?MODULE, []} || Path <- [
+    []
+    , ["profile"]
+    , ["logoff"]
+    , ["facebook"]
+    , ["twitter"]
+    , ["post"]
+    , ["post", post_id]
+    , ["post-add"]
+    , ["blog", blog_id]
+    , ["blog-post-add", blog_id]
+  ]] ++
+  [
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
   ].
 
