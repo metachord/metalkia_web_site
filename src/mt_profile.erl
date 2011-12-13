@@ -120,15 +120,8 @@ form_entry({Mode, Profile, Tag}) ->
   end.
 
 event("check-username") ->
-  UserName = normalize_input(wf:q("input-username")),
-  ?DBG("Check UserName: ~p", [UserName]),
-  %% TODO: Check username stop-list
-  case mtc_entry:sget(mt_person, ?a2b(UserName)) of
-    #mt_person{} ->
-      wf:replace("entry-username", username_entry(UserName, "warning"));
-    _ ->
-      wf:replace("entry-username", username_entry(UserName, "approved"))
-  end;
+  check_username(),
+  ok;
 event("verify-email") ->
   Email = normalize_input(wf:q("input-email")),
   ?DBG("Verify Email: ~p", [Email]),
@@ -157,46 +150,73 @@ event("verify-email-check") ->
       wf:replace("entry-email-verify", email_verify_entry(Code, "warning"))
   end;
 event("save-profile") ->
-  UserName = normalize_input(wf:q("input-username")),
   UserNameValid = wf:user(),
   UserNameValidBin = ?a2b(UserNameValid),
   Name = normalize_input(wf:q("input-name")),
 
   Email = wf:session(email_trusted),
   Password = wf:q("input-password"),
-  %% TODO: Check username stop-list
-  case mtc_entry:sget(mt_person, ?a2b(UserName)) of
-    #mt_person{id = UserNameValidBin} = StoredPerson ->
-      Person = StoredPerson#mt_person{
-        password_sha1 = if Password =/= undefined -> crypto:sha(Password); true -> undefined end,
-        email = ?a2b(Email),
-        name = ?a2b(Name)
-      },
-      ?DBG("Update profile:~n~p", [Person]),
-      mtc_entry:supdate(Person),
-      mtws_common:update_external_profile(UserNameValidBin),
-      wf:flash("Profile updated");
-    #mt_person{id = _Other} ->
-      ?DBG("Bad username: ~p", [UserName]),
-      wf:replace("entry-username", username_entry(UserName, "warning"));
-    _ ->
-      Person = #mt_person{
-        id = ?a2b(UserName),
-        username = ?a2b(UserName),
-        password_sha1 = if Password =/= undefined -> crypto:sha(Password); true -> undefined end,
-        email = ?a2b(Email),
-        name = ?a2b(Name)
-      },
-      ?DBG("Save profile:~n~p", [Person]),
-      MetalkiaId = mtc_entry:sput(Person),
-      wf:user(UserName),
-      mtws_common:set_email(Email),
-      mtws_common:update_external_profile(MetalkiaId),
-      wf:flash("New profile saved")
+  case check_username() of
+    {ok, UserName} ->
+      case mtc_entry:sget(mt_person, ?a2b(UserName)) of
+        #mt_person{id = UserNameValidBin} = StoredPerson ->
+          Person = StoredPerson#mt_person{
+            password_sha1 = if Password =/= undefined -> crypto:sha(Password); true -> undefined end,
+            email = ?a2b(Email),
+            name = ?a2b(Name)
+          },
+          ?DBG("Update profile:~n~p", [Person]),
+          mtc_entry:supdate(Person),
+          mtws_common:update_external_profile(UserNameValidBin),
+          wf:flash("Profile updated");
+        #mt_person{id = _Other} ->
+          ?DBG("Bad username: ~p", [UserName]),
+          wf:replace("entry-username", username_entry(UserName, "warning"));
+        _ ->
+          Person = #mt_person{
+            id = ?a2b(UserName),
+            username = ?a2b(UserName),
+            password_sha1 = if Password =/= undefined -> crypto:sha(Password); true -> undefined end,
+            email = ?a2b(Email),
+            name = ?a2b(Name)
+          },
+          ?DBG("Save profile:~n~p", [Person]),
+          MetalkiaId = mtc_entry:sput(Person),
+          wf:user(UserName),
+          mtws_common:set_email(Email),
+          mtws_common:update_external_profile(MetalkiaId),
+          wf:flash("New profile saved")
+      end;
+    error ->
+      ok
   end.
 
 
 %%
+
+%% Warning: side-effects on cliens-side
+check_username() ->
+  UserName = normalize_input(wf:q("input-username")),
+  ?DBG("Check UserName: ~p", [UserName]),
+  UNRegexp = "^[a-z][a-z_0-9]+$",
+  case re:run(UserName, UNRegexp, [{capture, [0], list}]) of
+    {match, [UserName]} ->
+      %% TODO: Check username stop-list
+      case mtc_entry:sget(mt_person, ?a2b(UserName)) of
+        #mt_person{} ->
+          wf:replace("entry-username", username_entry(UserName, "warning")),
+          error;
+        _ ->
+          wf:replace("entry-username", username_entry(UserName, "approved")),
+          {ok, UserName}
+      end;
+    _ ->
+      wf:flash(wf:f("Username regexp: ~p", [UNRegexp])),
+      wf:replace("entry-username", username_entry(UserName, "warning")),
+      error
+  end.
+
+
 username_entry(UserName, Class) ->
   UserNameValid = wf:user(),
   #panel{id = "entry-username", body = [
