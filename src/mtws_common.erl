@@ -154,7 +154,13 @@ menu() ->
           ]};
         true ->
           []
-      end
+      end,
+      #listitem{body = [
+        #link{url = "#", text = "Help"},
+        #list{class = "subnav", body = [
+          #listitem{body = #link{url = mtc:get_env(url) ++ "/info", text = "Info"}}
+        ]}
+      ]}
     ]}
   ].
 

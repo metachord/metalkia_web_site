@@ -89,6 +89,8 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo, Profile) ->
   case Path of
     "/profile" ->
       {mt_profile, PathInfo1};
+    "/info" ->
+      {mt_info, PathInfo1};
     "/logoff" ->
       {mt_logoff, PathInfo1};
     "/facebook" ->

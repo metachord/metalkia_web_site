@@ -1,5 +1,5 @@
 %% -*- mode: nitrogen -*-
--module (mt_index).
+-module (mt_info).
 
 -export([
   main/0,
@@ -20,10 +20,10 @@ author() ->
   "Metachord".
 
 header() ->
-  "".
+  "Info".
 
 body() ->
-  "".
+  #template { file="./site/templates/metalkia/info.html" }.
 
 event(_) ->
   ok.

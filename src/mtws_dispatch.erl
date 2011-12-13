@@ -46,6 +46,7 @@ rules() ->
     , ["post-add"]
     , ["blog", blog_id]
     , ["blog-post-add", blog_id]
+    , ["info"]
   ]] ++
   [
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
