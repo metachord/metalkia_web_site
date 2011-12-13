@@ -98,6 +98,13 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
       {mt_post, PathInfo2};
     "/post/" ++ _PostArgs ->
       {mt_post, PathInfo1};
+    "/blog/" ++ _PostArgs ->
+      case Streams of
+        [] ->
+          {mt_index, PathInfo1};
+        _ ->
+          {mt_post, PathInfo1}
+      end;
     "/" ->
       case Streams of
         [] ->
@@ -117,21 +124,31 @@ user_blog(PathInfo) ->
   case HostTokensRev of
     [Tld, SiteName | Rest] ->
       %% Request to Metalkia
-      BlogName = default,
-      BlogTitle = "Metalkia (beta)",
+      {BlogName, BlogTitle, Streams} =
+      case dict:find(blog_id, PathInfo) of
+        {ok, BN} ->
+          case mtc_entry:sget(mt_cname, ?a2b(BN)) of
+            #mt_cname{cname = _CName, title = BT, owner = _Owner, streams = BSs} ->
+              {BN, ?a2l(BT), BSs};
+            _ ->
+              {undefined, undefined, []}
+          end;
+        _ ->
+          {"", "Metalkia (beta)", []}
+      end,
       NewPathInfo =
-        lists:foldl(
-          fun({Key, Value}, PI) ->
-              dict:store(Key, Value, PI)
-          end, PathInfo, [
-                          {blog, BlogName},
-                          {blog_title, BlogTitle}
-                         ]),
-      {UserName, Streams} =
+      lists:foldl(
+        fun({Key, Value}, PI) ->
+          dict:store(Key, Value, PI)
+        end, PathInfo, [
+          {blog, BlogName},
+          {blog_title, BlogTitle}
+      ]),
+      UserName =
       case Rest of
-        [UN] -> {UN, [#mt_stream{username = ?a2b(UN), tags = []}]};
-        [] -> {none, []};
-        _ -> {undefined, []}
+        [UN] -> UN;
+        [] -> none;
+        _ -> undefined
       end,
       {UserName, BlogName, Streams, NewPathInfo};
     _ ->
