@@ -136,15 +136,22 @@ menu() ->
       if
         User =/= undefined ->
           #listitem{body = [
-            #link{url = "#", text = "Post"},
-            #list{class = "subnav", body = [
-              case dict:find(blog_id, PathInfo) of
-                {ok, BN} ->
-                  #listitem{body = #link{url = "/blog-post-add/" ++ BN, text = "Add post"}};
-                _ ->
-                  #listitem{body = #link{url = "/post-add", text = "Add post"}}
-              end
-            ]}
+
+            %% #link{url = "#", text = "Post"},
+            %% #list{class = "subnav", body = [
+            %%   case dict:find(blog_id, PathInfo) of
+            %%     {ok, BN} ->
+            %%       #listitem{body = #link{url = "/blog-post-add/" ++ BN, text = "Add post"}};
+            %%     _ ->
+            %%       #listitem{body = #link{url = "/post-add", text = "Add post"}}
+            %%   end
+            %% ]}
+            case dict:find(blog_id, PathInfo) of
+              {ok, BN} ->
+                #link{url = "/blog-post-add/" ++ BN, text = "Add post"};
+              _ ->
+                #link{url = "/post-add", text = "Add post"}
+            end
           ]};
         true ->
           []
