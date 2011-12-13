@@ -17,15 +17,12 @@
 main() -> #template { file="./site/templates/metalkia/bare.html" }.
 
 author() ->
-  ?DBG("Author", []),
   "Metachord".
 
 header() ->
   "".
 
 body() ->
-  PathInfo = wf:path_info(),
-  ?DBG("PathInfo: ~p", [PathInfo]),
   "".
 
 event("logoff") ->

@@ -110,8 +110,6 @@ inner_body(Id) ->
         #mt_person{email = EmailBin} -> ?a2l(EmailBin);
         _ -> undefined
       end,
-
-      ?DBG("Post:~n~p", [Post]),
       [
         #panel{id="pan-"++Id, style="margin-left: 50px;", body = [
           #gravatar{email = Email, rating = "g"},
