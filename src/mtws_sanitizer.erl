@@ -14,7 +14,10 @@
 
 -export([start_link/0]).
 
--export([sanitize/1]).
+-export([
+  sanitize/1,
+  sanitize/2
+]).
 
 -export([
          init/1,
@@ -37,7 +40,10 @@ start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 sanitize(Text) ->
-  gen_server:call(?SERVER, {sanitize, Text}).
+  sanitize("html", Text).
+
+sanitize(OFormat, Text) ->
+  gen_server:call(?SERVER, {sanitize, OFormat, Text}).
 
 %%% gen_server callbacks
 
@@ -46,9 +52,9 @@ init([]) ->
   HS = filename:join([code:priv_dir(App), mtc:get_env(sanitizer)]),
   {ok, #state{port_path = HS}}.
 
-handle_call({sanitize, Text}, _From,
+handle_call({sanitize, OFormat, Text}, _From,
             #state{port_path = HS} = State) ->
-  Port = open_port({spawn, HS}, [{packet, 4}, binary, use_stdio]),
+  Port = open_port({spawn, HS ++ " --oformat " ++ OFormat}, [{packet, 4}, binary, use_stdio]),
   port_command(Port, unicode:characters_to_binary(Text)),
   receive
     {Port, {data, Reply}} ->
