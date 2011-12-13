@@ -119,8 +119,9 @@ inner_body(Id) ->
             #hidden{id="post-id", text=Id},
             #span{body = Post#mt_post.body}
           ]},
-          default_items(Id),
+          #br{},
           share_handlers(),
+          default_items(Id),
           #hr{}
         ]},
         comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments))
