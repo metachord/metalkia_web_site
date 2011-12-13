@@ -111,7 +111,6 @@ menu() ->
       "" ->
         CurrentUrl = dict:fetch(current_url, wf:path_info()),
         CurrentBaseUri = dict:fetch(current_base_uri, wf:path_info()),
-        ?DBG("CurrentUrl: ~p", [CurrentUrl]),
         ["<iframe width=\"0\" height=\"0\" src=\"" ++
           mtc:get_env(url) ++ "/sso" ++
           "?action=auth" ++

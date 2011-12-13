@@ -6,7 +6,6 @@
 -include_lib("nitrogen_core/include/wf.hrl").
 
 init(_Config, State) ->
-  ?PRINT(wf:page_module()),
   case wf:to_list(wf:page_module()) of
     "mt_" ++ _ ->
       {ok, State};
