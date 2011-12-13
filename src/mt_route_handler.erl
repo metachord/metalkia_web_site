@@ -146,7 +146,7 @@ user_blog(PathInfo) ->
               {undefined, undefined, []}
           end;
         _ ->
-          {"", "Metalkia (beta)", []}
+          {"", "Metalkia (beta)", [#mt_stream{username = UserNameBin, tags = []}]}
       end,
       NewPathInfo =
       lists:foldl(
