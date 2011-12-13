@@ -98,6 +98,9 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo) ->
       {mt_post, PathInfo2};
     "/post/" ++ _PostArgs ->
       {mt_post, PathInfo1};
+    "/blog-post-add/" ++ _BlogPostArgs ->
+      PathInfo2 = dict:store(post_id, post_add, PathInfo1),
+      {mt_post, PathInfo2};
     "/blog/" ++ _PostArgs ->
       case Streams of
         [] ->
@@ -124,11 +127,18 @@ user_blog(PathInfo) ->
   case HostTokensRev of
     [Tld, SiteName | Rest] ->
       %% Request to Metalkia
+      UserName =
+      case Rest of
+        [UN] -> UN;
+        [] -> none;
+        _ -> undefined
+      end,
+      UserNameBin = if is_list(UserName) -> ?a2b(UserName); true -> undefined end,
       {BlogName, BlogTitle, Streams} =
       case dict:find(blog_id, PathInfo) of
         {ok, BN} ->
           case mtc_entry:sget(mt_cname, ?a2b(BN)) of
-            #mt_cname{cname = _CName, title = BT, owner = _Owner, streams = BSs} ->
+            #mt_cname{cname = _CName, title = BT, owner = UserNameBin, streams = BSs} ->
               {BN, ?a2l(BT), BSs};
             _ ->
               {undefined, undefined, []}
@@ -144,12 +154,6 @@ user_blog(PathInfo) ->
           {blog, BlogName},
           {blog_title, BlogTitle}
       ]),
-      UserName =
-      case Rest of
-        [UN] -> UN;
-        [] -> none;
-        _ -> undefined
-      end,
       {UserName, BlogName, Streams, NewPathInfo};
     _ ->
       %% Search blog for this CNAME

@@ -44,6 +44,7 @@ rules() ->
     {["post", post_id],    ?MODULE, []},
     {["post-add"],         ?MODULE, []},
     {["blog", blog_id],    ?MODULE, []},
+    {["blog-post-add", blog_id],  ?MODULE, []},
     {['*'], static_resource, [{root, "./site/static/metalkia"}]}
   ].
 

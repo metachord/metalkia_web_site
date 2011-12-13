@@ -98,6 +98,7 @@ profile_link() ->
   end.
 
 menu() ->
+  PathInfo = wf:path_info(),
   User = wf:user(),
   UserName = user_or_name(),
   SignString =
@@ -137,7 +138,12 @@ menu() ->
           #listitem{body = [
             #link{url = "#", text = "Post"},
             #list{class = "subnav", body = [
-              #listitem{body = #link{url = "/post-add", text = "Add post"}}
+              case dict:find(blog_id, PathInfo) of
+                {ok, BN} ->
+                  #listitem{body = #link{url = "/blog-post-add/" ++ BN, text = "Add post"}};
+                _ ->
+                  #listitem{body = #link{url = "/post-add", text = "Add post"}}
+              end
             ]}
           ]};
         true ->
