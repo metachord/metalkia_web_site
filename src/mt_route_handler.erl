@@ -170,7 +170,7 @@ user_blog(PathInfo) ->
                               {blog, BlogName},
                               {blog_title, ?a2l(BlogTitle)}
                              ]),
-          {Owner, BlogName, Streams, NewPathInfo};
+          {Owner, BlogName, Streams, dict:erase(blog_id, NewPathInfo)};
         _ ->
           {undefined, string:join(lists:reverse(HostTokensRev), ".")}
       end
