@@ -98,10 +98,7 @@ main() ->
                       wf:user(binary_to_list(MetalkiaId)),
                       case wf:session(redirect_url) of
                         undefined ->
-                          UserName = binary_to_list(MetalkiaId),
-                          {UScheme, UHost, _UPath, _UArgs, _UPart} = mochiweb_util:urlsplit(mtc:get_env(url)),
-                          UserUrl = mochiweb_util:urlunsplit({UScheme, UserName ++ "." ++ UHost, [], "", ""}),
-                          wf:redirect(UserUrl);
+                          wf:redirect(mtws_common:user_blog(MetalkiaId));
                         Url ->
                           wf:session(redirect_url, undefined),
                           wf:redirect(Url)

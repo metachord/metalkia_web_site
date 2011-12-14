@@ -14,6 +14,9 @@
   url/0,
   base_uri/0,
   user_or_name/0,
+  user_blog/0,
+  user_blog/1,
+  user_blog/2,
   name/0,
   profile_link/0,
   copyright/0,
@@ -44,6 +47,19 @@ blog_link() ->
     {ok, Uri} -> Uri;
     error -> mtc:get_env(url)
   end.
+
+user_blog() ->
+  user_blog(wf:user()).
+
+user_blog(UserName) ->
+  user_blog(UserName, "").
+
+user_blog(undefined, _) ->
+  mtc:get_env(url);
+user_blog(UserName, Path) ->
+  {UScheme, UHost, _UPath, _UArgs, _UPart} = mochiweb_util:urlsplit(mtc:get_env(url)),
+  mochiweb_util:urlunsplit({UScheme, ?a2l(UserName) ++ "." ++ UHost, [Path], "", ""}).
+
 
 url() ->
   case dict:find(current_url, wf:path_info()) of
