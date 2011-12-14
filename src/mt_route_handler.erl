@@ -143,27 +143,38 @@ user_blog(PathInfo) ->
   case HostTokensRev of
     [Tld, SiteName | Rest] when BlogId =:= undefined ->
       %% Request to Metalkia
-      {UserName, Profile} =
+      {UserName, Profile, GoogleAnalytics} =
       case Rest of
         [UN] ->
           case mtc_entry:sget(mt_person, ?a2b(UN)) of
-            #mt_person{} = UP ->
-              {UN, UP};
+            #mt_person{google_analytics = GA} = UP ->
+              {UN, UP, GA};
             _ ->
-              {undefined, undefined}
+              {undefined, undefined, undefined}
           end;
-        [] -> {none, undefined};
-        _ -> {undefined, undefined}
+        [] -> {none, undefined, undefined};
+        _ -> {undefined, undefined, undefined}
       end,
       BlogName = default,
       BlogTitle = mtc:get_env(default_blog_name),
+
+      {GoogleAccount, GoogleHost} =
+      case GoogleAnalytics of
+        #mt_google_analytics{account = GaAccount, host = GaHost} ->
+          {GaAccount, GaHost};
+        _ ->
+          {undefined, undefined}
+      end,
+
       NewPathInfo =
       lists:foldl(
         fun({Key, Value}, PI) ->
           dict:store(Key, Value, PI)
         end, PathInfo, [
           {blog, BlogName},
-          {blog_title, BlogTitle}
+          {blog_title, BlogTitle},
+          {ga_account, GoogleAccount},
+          {ga_host, GoogleHost}
       ]),
       {UserName, BlogName, [], NewPathInfo, Profile};
     _ ->
@@ -176,16 +187,29 @@ user_blog(PathInfo) ->
           BlogId
       end,
       case mtc_entry:sget(mt_cname, list_to_binary(BlogNamePretend)) of
-        #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams} ->
+        #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams,
+          google_analytics = GoogleAnalytics} ->
           BlogName = ?a2l(CName),
+          {GoogleAccount, GoogleHost} =
+          case GoogleAnalytics of
+            #mt_google_analytics{account = GaAccount, host = GaHost} ->
+              {GaAccount, GaHost};
+            _ ->
+              {undefined, undefined}
+          end,
           NewPathInfo =
-            lists:foldl(
-              fun({Key, Value}, PI) ->
-                  dict:store(Key, Value, PI)
+          lists:foldl(
+            fun
+              ({_Key, undefined}, PI) ->
+                PI;
+              ({Key, Value}, PI) ->
+                dict:store(Key, Value, PI)
               end, PathInfo, [
-                              {blog, BlogName},
-                              {blog_title, ?a2l(BlogTitle)}
-                             ]),
+              {blog, BlogName},
+              {blog_title, ?a2l(BlogTitle)},
+              {ga_account, GoogleAccount},
+              {ga_host, GoogleHost}
+          ]),
           Profile = mtc_entry:sget(mt_person, Owner),
           {Owner, BlogName, Streams, dict:erase(blog_id, NewPathInfo), Profile};
         _ ->

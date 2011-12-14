@@ -17,7 +17,11 @@
   name/0,
   profile_link/0,
   copyright/0,
-  menu/0
+  menu/0,
+  %% Google analytics stuff
+  google_analytics/0,
+  ga_account/1,
+  ga_host/1
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -216,6 +220,31 @@ copyright() ->
     error ->
       "© Metalkia, 2011"
   end.
+
+google_analytics() ->
+  PathInfo = wf:path_info(),
+  Account = case dict:find(ga_account, PathInfo) of
+    {ok, AVal} ->
+      AVal;
+    _ -> undefined
+  end,
+  Host = case dict:find(ga_host, PathInfo) of
+    {ok, HVal} ->
+      HVal;
+    _ -> undefined
+  end,
+  if
+    Account =/= undefined ->
+      #template {file="./site/templates/metalkia/google-analytics.tpl", bindings = [{'Val', {Account, Host}}]};
+    true ->
+      ""
+  end.
+
+ga_account({Account, _}) ->
+  Account.
+
+ga_host({_, Host}) ->
+  Host.
 
 -record(session_state, {
   user,
