@@ -250,7 +250,7 @@ email_verification(Email) ->
     "Verification code: ~p\n"
     "Please entry this code in verification input form in profile",
     [Code]),
-  mtc_notify:send(email, Email, {"noreply@metalkia.com", "Email verification", Text}),
+  mtc_notify:send(email, Email, {"noreply@metalkia.com", "Email verification", Text}, []),
   Code.
 
 
