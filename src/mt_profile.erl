@@ -47,7 +47,7 @@ body() ->
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
   if
-    ((RequestedUser =:= none) andalso (Email =/= undefined)) orelse
+    (RequestedUser =:= none) orelse
     RequestedUser =:= User ->
       %% Edit mode
       Profile = undefined,                      % FIXME
