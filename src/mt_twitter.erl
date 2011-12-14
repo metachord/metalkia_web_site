@@ -63,12 +63,12 @@ main() ->
                     lists:foldl(
                       fun({<<"id_str">>, Val}, Tw) -> Tw#mt_twitter{id = Val};
                          ({<<"screen_name">>, Val}, Tw) -> Tw#mt_twitter{screen_name = Val};
-                         ({<<"url">>, Val}, Tw) -> Tw#mt_twitter{url = Val};
+                         ({<<"url">>, Val}, Tw) -> Tw#mt_twitter{url = if Val =:= null -> ""; true -> Val end};
                          ({<<"name">>, Val}, Tw) -> Tw#mt_twitter{name = Val};
                          ({<<"time_zone">>, Val}, Tw) -> Tw#mt_twitter{timezone = if Val =:= null -> "GMT"; true -> Val end};
                          ({<<"utc_offset">>, Val}, Tw) -> Tw#mt_twitter{utc_offset = ?a2i(Val)};
-                         ({<<"description">>, Val}, Tw) -> Tw#mt_twitter{description = Val};
-                         ({<<"lang">>, Val}, Tw) -> Tw#mt_twitter{locale = Val};
+                         ({<<"description">>, Val}, Tw) -> Tw#mt_twitter{description = if Val =:= null -> ""; true -> Val end};
+                         ({<<"lang">>, Val}, Tw) -> Tw#mt_twitter{locale = if Val =:= null -> ""; true -> Val end};
                          (_ParVal, Tw) -> Tw
                       end,
                       #mt_twitter{}, LookupFields),
