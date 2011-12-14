@@ -122,7 +122,7 @@ inner_body(Id) ->
           ]},
           #br{},
           share_handlers(),
-          default_items(Id),
+          default_items(Id, length(Post#mt_post.comments)),
           #hr{}
         ]},
         comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments))
@@ -166,7 +166,7 @@ posts_list() ->
           #panel{body = [
             #panel{class = "post-body", body = Post#mt_post.body}
           ]},
-          default_items(?a2l(Id)),
+          default_items_post(?a2l(Id), length(Post#mt_post.comments)),
           #hr{}
         ]}
       ] ||
@@ -256,7 +256,20 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
     ]}
   ].
 
+default_items_post(Path, CommentsNum) ->
+  [PostId|_Parents] = path_to_parents(Path),
+  #panel{class = "post-handlers", body = [
+    #link{text="Comments" ++
+      if
+        is_integer(CommentsNum) andalso CommentsNum > 0 -> " (" ++ integer_to_list(CommentsNum) ++ ")";
+        true -> ""
+      end, url="/post/"++?a2l(PostId)}
+  ]}.
+
 default_items(Path) ->
+  default_items(Path, undefined).
+
+default_items(Path, CommentsNum) ->
   [PostId|Parents] = path_to_parents(Path),
   User = wf:user(),
   #panel{class = "post-handlers", body = [
@@ -267,6 +280,12 @@ default_items(Path) ->
         #link{id="comment-"++Path, text="Comment", postback="comment-"++Path};
       true ->
         []
+    end,
+    if
+      is_integer(CommentsNum) andalso CommentsNum > 0 ->
+        #span{text = "(" ++ integer_to_list(CommentsNum) ++ ")"};
+      true ->
+        ""
     end
   ]}.
 
