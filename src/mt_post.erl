@@ -171,8 +171,9 @@ posts_list() ->
         ]}
       ] ||
         #mt_post{id = Id} = Post <-
-        [mtc_entry:sget(mt_post, Key) ||
-          Key <- Keys]
+        lists:reverse(lists:keysort(#mt_post.timestamp,
+            [mtc_entry:sget(mt_post, Key) ||
+            Key <- Keys]))
       ];
     _ ->
       []
