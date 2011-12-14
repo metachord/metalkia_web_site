@@ -112,7 +112,10 @@ inner_body(Id) ->
       end,
       [
         #panel{id="pan-"++Id, style="margin-left: 50px;", body = [
-          #gravatar{email = Email, rating = "g"},
+          #link{body = [
+            #gravatar{email = Email, rating = "g"}],
+            url = mtws_common:user_blog(PersonId)
+          },
           #panel{body = [
             #hidden{id="post-id", text=Id},
             #panel{class = "post-body", body = Post#mt_post.body}
