@@ -164,7 +164,7 @@ posts_list() ->
       [[
         #panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
           #panel{body = [
-            #span{body = Post#mt_post.body}
+            #panel{class = "post-body", body = Post#mt_post.body}
           ]},
           default_items(?a2l(Id)),
           #hr{}
