@@ -148,6 +148,26 @@ textarea.post-input {
     height: 400px;
 }
 
+.post-body {
+    width: inherit;
+    padding: 0px 0px 0px 0px;
+    right: 0;
+}
+
+div.post-body p {
+    width: inherit;
+    padding: 0px 0px 0px 0px;
+    right: 0;
+    color: #000;
+    line-height: 1.2em;
+    margin-bottom: 0;
+    text-indent: 0em;
+}
+
+div.post-body p + p {
+    margin-top: 1.2em;
+}
+
 .comment-box {
     /* border: dashed 1px #F0F; */
     min-height: 120px;

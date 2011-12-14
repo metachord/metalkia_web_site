@@ -115,7 +115,7 @@ inner_body(Id) ->
           #gravatar{email = Email, rating = "g"},
           #panel{body = [
             #hidden{id="post-id", text=Id},
-            #span{body = Post#mt_post.body}
+            #panel{class = "post-body", body = Post#mt_post.body}
           ]},
           #br{},
           share_handlers(),
