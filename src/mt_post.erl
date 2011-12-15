@@ -367,7 +367,6 @@ event("add-comment-" ++ Path) ->
       Level = if LevelQ == undefined -> "0"; true -> LevelQ end,
       Text = wf:q("textarea-"++Path),
       [PostId|_] = string:tokens(Path, "-"),
-      ?PRINT([{path, Path}, {post_id, PostId}, {level, Level}, {text, Text}]),
       [_PostId|Parents] = path_to_parents(Path),
 
       SanText = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(iolist_to_binary(["<p>", Text, "</p>"]))) end,
@@ -385,7 +384,6 @@ event("add-comment-" ++ Path) ->
       NewCID = mtc_entry:sput(Comment),
       CID = list_to_integer(binary_to_list(NewCID)),
       NewId = Path++"-"++CID,
-      ?PRINT(NewId),
       wf:insert_bottom("pan-"++Path,
         comment_body(Comment,
           #comment{
