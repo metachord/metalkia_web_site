@@ -45,7 +45,6 @@ body() ->
     {ok, RU} -> RU;
     error -> undefined
   end,
-  ?DBG("RequestedUser: ~p", [RequestedUser]),
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
   if
