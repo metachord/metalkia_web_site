@@ -47,7 +47,6 @@ body() ->
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
   if
-    (RequestedUser =:= none) orelse
     RequestedUser =:= User ->
       %% Edit mode
       Profile = undefined,                      % FIXME
@@ -61,6 +60,9 @@ body() ->
         row(edit, Profile, name),
         #button{text = "Save profile", postback = "save-profile"}
       ];
+    RequestedUser =:= none ->
+      wf:status_code(404),
+      "Profile not found";
     true ->
       %% Readonly mode
       case dict:find(profile, PathInfo) of
