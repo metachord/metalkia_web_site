@@ -103,8 +103,19 @@ inner_body(post_add) ->
   end;
 
 inner_body(Id) ->
+  PathInfo = wf_context:path_info(),
+  PageUserName =
+  case dict:find(username, PathInfo) of
+    {ok, none} -> none;
+    {ok, PgUN} -> list_to_binary(PgUN);
+    _ -> undefined
+  end,
+  ?DBG("PageUserName: ~p", [PageUserName]),
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
-    #mt_post{author = #mt_author{id = PersonId}} = Post ->
+    #mt_post{author = #mt_author{id = PersonId}} = Post
+    when
+      (is_binary(PageUserName) and (PageUserName =:= PersonId)) orelse
+      (PageUserName =:= none) ->
       Email =
       case mtc_entry:sget(mt_person, PersonId) of
         #mt_person{email = EmailBin} -> ?a2l(EmailBin);
