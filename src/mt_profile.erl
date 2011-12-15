@@ -51,7 +51,7 @@ body() ->
     RequestedUser =:= User ->
       %% Edit mode
       Profile = undefined,                      % FIXME
-      [
+      #panel{id = "profile-edit-entries", body = [
         #gravatar{email = Email, rating = "g"},
         #flash{},
         #p{},
@@ -60,7 +60,7 @@ body() ->
         %% row(edit, Profile, password),
         row(edit, Profile, name),
         #button{text = "Save profile", postback = "save-profile"}
-      ];
+      ]};
     RequestedUser =:= undefined ->
       wf:status_code(404),
       "Profile not found";
@@ -68,12 +68,12 @@ body() ->
       %% Readonly mode
       case dict:find(profile, PathInfo) of
         {ok, Profile} ->
-          [
+          #panel{body = [
             #gravatar{email = Profile#mt_person.email, rating = "g"},
             #p{},
             row(view, Profile, username),
             row(view, Profile, name)
-          ];
+          ]};
         error ->
           []
       end
@@ -163,7 +163,11 @@ event("save-profile") ->
 
   Email = wf:session(email_trusted),
   Password = wf:q("input-password"),
+  IsLoggedIn = mtws_common:is_logged_in(),
   case check_username() of
+    _ when not IsLoggedIn ->
+      wf:replace("profile-edit-entries", mtws_common:login_panel()),
+      wf:flash("Please log in using any method");
     {ok, UserName} when Email =/= undefined ->
       case mtc_entry:sget(mt_person, ?a2b(UserName)) of
         #mt_person{id = UserNameValidBin} = StoredPerson ->
