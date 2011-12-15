@@ -16,7 +16,7 @@ main() ->
   User = wf:user(),
   Action = wf:q(action),
   case Action of
-    _ when User =:= undefined ->
+    "auth" when User =:= undefined ->
       "";
     "auth" ->
       ReturnUrl = wf:q(return_url),
