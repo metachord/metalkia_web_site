@@ -17,6 +17,7 @@
   user_blog/0,
   user_blog/1,
   user_blog/2,
+  user_blog/4,
   name/0,
   is_logged_in/0,
   login_panel/0,
@@ -54,13 +55,16 @@ user_blog() ->
   user_blog(wf:user()).
 
 user_blog(UserName) ->
-  user_blog(UserName, "").
+  user_blog(UserName, "", [], []).
 
-user_blog(undefined, _) ->
-  mtc:get_env(url);
 user_blog(UserName, Path) ->
+  user_blog(UserName, Path, [], []).
+
+user_blog(undefined, _, _, _) ->
+  mtc:get_env(url);
+user_blog(UserName, Path, Args, Part) ->
   {UScheme, UHost, _UPath, _UArgs, _UPart} = mochiweb_util:urlsplit(mtc:get_env(url)),
-  mochiweb_util:urlunsplit({UScheme, ?a2l(UserName) ++ "." ++ UHost, [Path], "", ""}).
+  mochiweb_util:urlunsplit({UScheme, ?a2l(UserName) ++ "." ++ UHost, [Path], Args, Part}).
 
 
 url() ->
