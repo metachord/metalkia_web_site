@@ -41,9 +41,11 @@ body() ->
   User = wf:user(),
   RequestedUser =
   case dict:find(username, PathInfo) of
+    {ok, none} -> User;
     {ok, RU} -> RU;
-    error -> none
+    error -> undefined
   end,
+  ?DBG("RequestedUser: ~p", [RequestedUser]),
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
   if
@@ -60,7 +62,7 @@ body() ->
         row(edit, Profile, name),
         #button{text = "Save profile", postback = "save-profile"}
       ];
-    RequestedUser =:= none ->
+    RequestedUser =:= undefined ->
       wf:status_code(404),
       "Profile not found";
     true ->
