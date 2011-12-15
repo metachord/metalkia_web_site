@@ -51,8 +51,8 @@ body() ->
 
   if
     not IsLoggedIn ->
-      login_prompt(),
-      wf:flash("Please log in using any method");
+      wf:flash("Please log in using any method"),
+      login_prompt();
     RequestedUser =:= User ->
       %% Edit mode
       Profile = undefined,                      % FIXME
