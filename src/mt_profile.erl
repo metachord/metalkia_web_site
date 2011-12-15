@@ -57,7 +57,7 @@ body() ->
         #p{},
         row(edit, Profile, username),
         row(edit, Profile, email),
-        row(edit, Profile, password),
+        %% row(edit, Profile, password),
         row(edit, Profile, name),
         #button{text = "Save profile", postback = "save-profile"}
       ];
