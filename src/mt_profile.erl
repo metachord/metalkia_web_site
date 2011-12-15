@@ -145,13 +145,13 @@ event("verify-email") ->
   end;
 event("verify-email-check") ->
   Code = normalize_input(wf:q("input-email-verify")),
-  Email = normalize_input(wf:q("input-email")),
+  Email = wf:session(email_to_verify),
   ?DBG("Verification code: ~p", [Code]),
   CodeSess = wf:session(email_verify_code),
   if
     CodeSess =:= Code ->
       wf:replace("entry-email", email_entry(Email, "approved", true)),
-      wf:session(email_trusted, wf:session(email_to_verify)),
+      wf:session(email_trusted, Email),
       wf:remove("entry-email-verify");
     true ->
       wf:replace("entry-email-verify", email_verify_entry(Code, "warning"))
@@ -173,6 +173,7 @@ event("save-profile") ->
             name = ?a2b(Name)
           },
           ?DBG("Update profile:~n~p", [Person]),
+          mtws_common:set_email(Email),
           mtc_entry:supdate(Person),
           mtws_common:update_external_profile(UserNameValidBin),
           wf:flash("Profile updated");
