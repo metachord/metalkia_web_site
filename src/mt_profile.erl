@@ -166,7 +166,11 @@ event("save-profile") ->
   IsLoggedIn = mtws_common:is_logged_in(),
   case check_username() of
     _ when not IsLoggedIn ->
-      wf:replace("profile-edit-entries", mtws_common:login_panel()),
+      wf:replace("profile-edit-entries",
+        #panel{body = [
+          #flash{},
+          mtws_common:login_panel()
+      ]}),
       wf:flash("Please log in using any method");
     {ok, UserName} when Email =/= undefined ->
       case mtc_entry:sget(mt_person, ?a2b(UserName)) of
