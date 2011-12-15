@@ -46,7 +46,7 @@ author() ->
             #mt_person{username = UserName, name = Name} ->
               if
                 Name =:= undefined -> ?a2l(UserName);
-                true -> unicode:characters_to_list(Name)
+                true -> ?a2l(Name)
               end;
             _ ->
               ""
