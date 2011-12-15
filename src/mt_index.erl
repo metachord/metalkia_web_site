@@ -23,7 +23,7 @@ header() ->
   "".
 
 body() ->
-  "".
+  wf:redirect("/info").
 
 event(_) ->
   ok.
