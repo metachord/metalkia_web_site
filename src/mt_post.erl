@@ -110,7 +110,6 @@ inner_body(Id) ->
     {ok, PgUN} -> list_to_binary(PgUN);
     _ -> undefined
   end,
-  ?DBG("PageUserName: ~p", [PageUserName]),
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
     #mt_post{author = #mt_author{id = PersonId}} = Post
     when
