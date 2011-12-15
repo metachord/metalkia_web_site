@@ -132,7 +132,13 @@ event("verify-email") ->
       wf:session(email_to_verify, Email),
       Code = email_verification(Email),
       wf:session(email_verify_code, Code),
-      wf:insert_after("entry-email", email_verify_entry("", ""))
+      VerifyEntry = wf:q("input-email-verify"),
+      if
+        VerifyEntry =:= undefined ->
+          wf:insert_after("entry-email", email_verify_entry("", ""));
+        true ->
+          ok
+      end
   end;
 event("verify-email-check") ->
   Code = normalize_input(wf:q("input-email-verify")),
