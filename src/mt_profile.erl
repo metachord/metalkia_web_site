@@ -164,7 +164,7 @@ event("save-profile") ->
   Email = wf:session(email_trusted),
   Password = wf:q("input-password"),
   case check_username() of
-    {ok, UserName} ->
+    {ok, UserName} when Email =/= undefined ->
       case mtc_entry:sget(mt_person, ?a2b(UserName)) of
         #mt_person{id = UserNameValidBin} = StoredPerson ->
           Person = StoredPerson#mt_person{
@@ -195,7 +195,9 @@ event("save-profile") ->
           wf:flash("New profile saved")
       end;
     error ->
-      ok
+      ok;
+    _ when Email =:= undefined ->
+      wf:flash("Email required")
   end.
 
 
