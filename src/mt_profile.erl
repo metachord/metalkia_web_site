@@ -47,7 +47,12 @@ body() ->
   end,
   Email = mtc:get_env(test_email, mtws_common:get_email()),
   wf:session(email_trusted, Email),
+  IsLoggedIn = mtws_common:is_logged_in(),
+
   if
+    not IsLoggedIn ->
+      login_prompt(),
+      wf:flash("Please log in using any method");
     RequestedUser =:= User ->
       %% Edit mode
       Profile = undefined,                      % FIXME
@@ -166,11 +171,7 @@ event("save-profile") ->
   IsLoggedIn = mtws_common:is_logged_in(),
   case check_username() of
     _ when not IsLoggedIn ->
-      wf:replace("profile-edit-entries",
-        #panel{body = [
-          #flash{},
-          mtws_common:login_panel()
-      ]}),
+      wf:replace("profile-edit-entries", login_prompt()),
       wf:flash("Please log in using any method");
     {ok, UserName} when Email =/= undefined ->
       case mtc_entry:sget(mt_person, ?a2b(UserName)) of
@@ -264,6 +265,11 @@ email_verification(Email) ->
   mtc_notify:send(email, Email, {"noreply@metalkia.com", "Email verification", Text}, []),
   Code.
 
+login_prompt() ->
+  #panel{body = [
+    #flash{},
+    mtws_common:login_panel()
+  ]}.
 
 normalize_input(Input) ->
   re:replace(string:strip(Input, both), "\\s+", " ", [global, {return, list}]).
