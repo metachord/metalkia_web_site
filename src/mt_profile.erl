@@ -60,7 +60,12 @@ body() ->
         #gravatar{email = Email, rating = "g"},
         #flash{},
         #p{},
-        row(edit, Profile, username),
+        if
+          User =:= undefined ->
+            row(edit, Profile, username);
+          true ->
+            row(view, Profile, username)
+        end,
         row(edit, Profile, email),
         %% row(edit, Profile, password),
         row(edit, Profile, name),
