@@ -13,29 +13,24 @@
 
 
 main() ->
-  ?DBG("User: ~p", [wf:user()]),
+  User = wf:user(),
   Action = wf:q(action),
-  ?DBG("Action: ~p", [Action]),
   case Action of
+    _ when User =:= undefined ->
+      "";
     "auth" ->
       ReturnUrl = wf:q(return_url),
       AuthBaseUri = wf:q(auth_domain),
       case check_domain(AuthBaseUri) of
         true ->
-          case wf:user() of
-            undefined ->
-              %% Need signin
-              "";
-            UserName ->
-              VerificationCode = UserName ++ "__" ++ mtc_util:rand_str(10),
-              mtws_session:put_state(VerificationCode, mtws_common:get_state()),
-              "<script>"
-              "window.top.location = '" ++ AuthBaseUri ++ "/sso" ++
-              "?action=verify" ++
-              "&code=" ++ mtc_util:uri_encode(VerificationCode) ++
-              "&return_url=" ++ mtc_util:uri_encode(ReturnUrl) ++
-              "'</script>"
-          end;
+          VerificationCode = User ++ "__" ++ mtc_util:rand_str(10),
+          mtws_session:put_state(VerificationCode, mtws_common:get_state()),
+          "<script>"
+          "window.top.location = '" ++ AuthBaseUri ++ "/sso" ++
+          "?action=verify" ++
+          "&code=" ++ mtc_util:uri_encode(VerificationCode) ++
+          "&return_url=" ++ mtc_util:uri_encode(ReturnUrl) ++
+          "'</script>";
         _ -> ""
       end;
     "verify" ->
