@@ -19,6 +19,7 @@
   user_blog/2,
   name/0,
   is_logged_in/0,
+  login_panel/0,
   profile_link/0,
   copyright/0,
   menu/0,
@@ -199,6 +200,14 @@ menu() ->
       ]}
     ]}
   ].
+
+login_panel() ->
+  #panel{body = [
+    #list{body = [
+      #listitem{body = mt_facebook:login_panel()},
+      #listitem{body = mt_twitter:login_panel()}
+    ]}
+  ]}.
 
 set_email(Email) ->
   wf:session(user_email, Email).
