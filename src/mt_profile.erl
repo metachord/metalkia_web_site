@@ -69,7 +69,6 @@ body() ->
             #gravatar{email = Profile#mt_person.email, rating = "g"},
             #p{},
             row(view, Profile, username),
-            row(view, Profile, email),
             row(view, Profile, name)
           ];
         error ->
@@ -114,7 +113,6 @@ form_entry({Mode, Profile, Tag}) ->
     view ->
       case Tag of
         username -> Profile#mt_person.username;
-        email -> Profile#mt_person.email;
         name -> Profile#mt_person.name
       end
   end.
