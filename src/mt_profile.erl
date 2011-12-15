@@ -211,14 +211,7 @@ check_username() ->
   case re:run(UserName, UNRegexp, [{capture, [0], list}]) of
     {match, [UserName]} ->
       %% TODO: Check username stop-list
-      case mtc_entry:sget(mt_person, ?a2b(UserName)) of
-        #mt_person{} ->
-          wf:replace("entry-username", username_entry(UserName, "warning")),
-          error;
-        _ ->
-          wf:replace("entry-username", username_entry(UserName, "approved")),
-          {ok, UserName}
-      end;
+      {ok, UserName};
     _ ->
       wf:flash(wf:f("Username regexp: ~p", [UNRegexp])),
       wf:replace("entry-username", username_entry(UserName, "warning")),
