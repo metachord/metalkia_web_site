@@ -18,6 +18,7 @@
   user_blog/1,
   user_blog/2,
   name/0,
+  is_logged_in/0,
   profile_link/0,
   copyright/0,
   menu/0,
@@ -116,6 +117,15 @@ profile_link() ->
           end
       end
   end.
+
+is_logged_in() ->
+  User = wf:user(),
+  FbId = wf:session(facebook_id),
+  TwId = wf:session(twitter_id),
+  (User =/= undefined)
+  orelse (FbId =/= undefined)
+  orelse (TwId =/= undefined)
+  .
 
 menu() ->
   PathInfo = wf:path_info(),
