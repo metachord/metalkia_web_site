@@ -143,6 +143,12 @@ menu() ->
       #listitem{body = [
         #link{url = "#", text = SignString},
         #list{class = "subnav", body = [
+          if
+            User =/= undefined ->
+              #listitem{body = [#link{url = user_blog(User, "/profile"), text = "Profile"}]};
+            true ->
+              []
+          end,
           #listitem{body = mt_facebook:login_panel()},
           #listitem{body = mt_twitter:login_panel()},
           if
