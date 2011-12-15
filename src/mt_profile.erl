@@ -125,7 +125,7 @@ form_entry({Mode, Profile, Tag}) ->
       end;
     view ->
       case Tag of
-        username -> Profile#mt_person.username;
+        username -> case Profile of #mt_person{username = UN} -> UN; _ -> wf:user() end;
         name -> Profile#mt_person.name
       end
   end.
