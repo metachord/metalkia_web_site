@@ -59,9 +59,6 @@ route(Path, PathInfo) ->
       {static_file, Path};
     true ->
       case user_blog(PathInfo) of
-        {undefined, Blog} ->
-          ?ERR("Blog ~p not registered", [Blog]),
-          {mt_index, PathInfo};
         {UserName, BlogName, Streams, NewPathInfo, Profile} ->
           route_blog(UserName, BlogName, Streams, Path, NewPathInfo, Profile);
         _ ->
@@ -70,6 +67,8 @@ route(Path, PathInfo) ->
   end.
 
 route_blog(_UserName, undefined, _Streams, _Path, PathInfo, _Profile) ->
+  {mt_404, PathInfo};
+route_blog(undefined, _BlogName, _Streams, _Path, PathInfo, _Profile) ->
   {mt_404, PathInfo};
 route_blog(UserName, _BlogName, Streams, Path, PathInfo, Profile) ->
   Profile = mtc_entry:sget(mt_person, ?a2b(UserName)),
@@ -128,7 +127,7 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo, Profile) ->
       {mt_index, PathInfo1}
   end.
 
--spec user_blog(dict()) -> {binary() | undefined, binary()}.
+-spec user_blog(dict()) -> {binary() | none | undefined, string() | default, [#mt_stream{}], #mt_person{} | undefined}.
 user_blog(PathInfo) ->
   HostTokensRev = dict:fetch(host_tokens, PathInfo),
   {match, [SiteUrl]} = re:run(mtc:get_env(url), "^(https?://)?(?<HOST>[^/:]+)(:.*)?$", [{capture, ['HOST'], list}]),
@@ -213,7 +212,7 @@ user_blog(PathInfo) ->
           Profile = mtc_entry:sget(mt_person, Owner),
           {Owner, BlogName, Streams, dict:erase(blog_id, NewPathInfo), Profile};
         _ ->
-          {undefined, string:join(lists:reverse(HostTokensRev), "."), undefined}
+          {undefined, string:join(lists:reverse(HostTokensRev), "."), [], undefined}
       end
   end.
 
