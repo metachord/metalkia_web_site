@@ -104,6 +104,7 @@ inner_body(post_add) ->
 
 inner_body(Id) ->
   PathInfo = wf_context:path_info(),
+  User = wf:user(),
   PageUserName =
   case dict:find(username, PathInfo) of
     {ok, none} -> none;
@@ -128,10 +129,15 @@ inner_body(Id) ->
           },
           #panel{body = [
             #hidden{id="post-id", text=Id},
-            #panel{class = "post-body", body = Post#mt_post.body}
+            post_body(Post)
           ]},
           #br{},
           share_handlers(),
+          case ?a2l(PersonId) of
+            User ->
+              authors_handlers(Post);
+            _ -> []
+          end,
           default_items(Id, length(Post#mt_post.comments)),
           #hr{}
         ]},
@@ -176,7 +182,7 @@ posts_list() ->
           #panel{body = [
             #panel{class = "post-body", body = Post#mt_post.body}
           ]},
-          default_items_post(?a2l(Id), length(Post#mt_post.comments)),
+          default_items_post(Post),
           #hr{}
         ]}
       ] ||
@@ -188,6 +194,9 @@ posts_list() ->
     _ ->
       []
   end.
+
+post_body(Post) ->
+  #panel{id = "post-body", class = "post-body", body = Post#mt_post.body}.
 
 comment_tree(Comments) ->
   comment_tree(Comments, []).
@@ -270,7 +279,10 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
     ]}
   ].
 
-default_items_post(Path, CommentsNum) ->
+default_items_post(Post) ->
+  Path = ?a2l(Post#mt_post.id),
+  CommentsNum = length(Post#mt_post.comments),
+
   [PostId|_Parents] = path_to_parents(Path),
   #panel{class = "post-handlers", body = [
     #link{text="Comments" ++
@@ -303,6 +315,11 @@ default_items(Path, CommentsNum) ->
     end
   ]}.
 
+authors_handlers(Post) ->
+  #panel{class = "post-handlers", body = [
+    #link{text = "Edit", postback = {post_edit, Post}}
+  ]}.
+
 share_handlers() ->
   #panel{class = "post-handlers", body = [
     #template{file="./site/templates/metalkia/share-buttons.tpl"}
@@ -320,12 +337,16 @@ post_items() ->
     error ->
       []
   end,
+  post_editor("comment-items", "", TagList, "Submit", "add-post", "Cancel", "cancel-add").
 
-  #panel{id = "comment-items",
+
+post_editor(Id, Body, TagList, Submit, SubmitPostback, Cancel, CancelPostback) ->
+  #panel{id = Id,
     body = [
-      #textarea{id="textarea", class="post-input"},
-      #tagsinput{id="tags-input", text = string:join([unicode:characters_to_list(T) || T <- TagList], ",")},
-      #button{id=submit, text="Submit",postback="add-post"}
+      #textarea{id="textarea", class="post-input", text = Body},
+      #tagsinput{id="tags-input", text = unicode:characters_to_binary(string:join([unicode:characters_to_list(T) || T <- TagList], ","))},
+      #button{id = submit, text = Submit, postback = SubmitPostback},
+      #button{id = cancel, text = Cancel, postback = CancelPostback}
   ]}.
 
 comment_post_items(Id) ->
@@ -335,16 +356,45 @@ comment_post_items(Id) ->
       #button{id=submit, text="Submit",postback="add-comment-" ++ Id}
   ]}.
 
+sanit(T) ->
+  StripList = "[<>=&$#@!*%];\"\'`",
+  re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}, unicode]).
+
+sanitize_fix(Text) ->
+  case re:run(Text, "^\\s*<\\s*p\\s*>.*", [{capture, [0], list}]) of
+    nomatch -> iolist_to_binary(["<p>", Text, "</p>"]);
+    {match, _} -> iolist_to_binary([Text])
+  end.
+
+event({post_edit, Post}) ->
+  wf:replace("post-body",post_editor("post-body", Post#mt_post.body, Post#mt_post.tags, "Save", {save_post, Post}, "Cancel", {cancel_edit, Post})),
+  ok;
+event({cancel_edit, Post}) ->
+  wf:replace("post-body", post_body(Post)),
+  ok;
+event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} = Post}) ->
+  User = wf:user(),
+  UserBin = list_to_binary(User),
+  if
+    PostAuthorId =/= UserBin ->
+      error;
+    true ->
+      Text = wf:q("textarea"),
+      Tags = wf:q("tags-input"),
+      mtc_entry:supdate(Post#mt_post{
+        body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
+        tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")],
+        origin = ?MT_ORIGIN
+      })
+  end,
+  wf:redirect("/post/"++?a2l(PostId)),
+  ok;
 event("add-post") ->
   User = wf:user(),
   if
     User =/= undefined ->
       Text = wf:q("textarea"),
       Tags = wf:q("tags-input"),
-      Sanit = fun(T) ->
-        StripList = "[<>=&$#@!*%];\"\'`",
-        re:replace(mtws_sanitizer:sanitize(T), StripList, "", [global, {return, list}, unicode])
-      end,
 
       ?DBG("Tags: ~p", [Tags]),
       UserName = ?a2b(User),                        % FIXME
@@ -354,9 +404,9 @@ event("add-post") ->
       },
       IdBin = mtc_entry:sput(#mt_post{
         author = Author,
-        body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(iolist_to_binary(["<p>", Text, "</p>"]))) end,
+        body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
         origin = ?MT_ORIGIN,
-        tags = [unicode:characters_to_binary(Sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
+        tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
       }),
       Id = binary_to_list(IdBin),
       wf:redirect("/post/"++Id);
