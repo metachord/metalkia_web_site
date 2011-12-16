@@ -337,7 +337,7 @@ post_items() ->
     error ->
       []
   end,
-  post_editor("comment-items", "", TagList, "Submit", "add-post", "Cancel", "cancel-add").
+  post_editor("comment-items", "", TagList, "Submit", add_post, "Cancel", cancel_add).
 
 
 post_editor(Id, Body, TagList, Submit, SubmitPostback, Cancel, CancelPostback) ->
@@ -389,7 +389,9 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
   end,
   wf:redirect("/post/"++?a2l(PostId)),
   ok;
-event("add-post") ->
+event(cancel_add) ->
+  wf:redirect(mtws_common:user_blog(wf:user()));
+event(add_post) ->
   User = wf:user(),
   if
     User =/= undefined ->
