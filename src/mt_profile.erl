@@ -55,7 +55,7 @@ body() ->
       login_prompt();
     RequestedUser =:= User ->
       %% Edit mode
-      Profile = undefined,                      % FIXME
+      Profile = mtc_entry:sget(mt_person, ?a2b(User)),
       #panel{id = "profile-edit-entries", body = [
         #gravatar{email = Email, rating = "g"},
         #flash{},
@@ -114,7 +114,7 @@ form_entry({Mode, Profile, Tag}) ->
         username ->
           username_entry("", "");
         email ->
-          Email = wf:session(email_trusted),
+          Email = case Profile of #mt_person{email = EM} -> EM; _ ->wf:session(email_trusted) end,
           email_entry(Email, "", false);
         name ->
           Name = mtws_common:name(),
@@ -190,6 +190,7 @@ event("save-profile") ->
           mtws_common:set_email(Email),
           mtc_entry:supdate(Person),
           mtws_common:update_external_profile(UserNameValidBin),
+          wf:session(email_trusted, undefined),
           wf:flash("Profile updated");
         #mt_person{id = _Other} ->
           ?DBG("Bad username: ~p", [UserName]),
@@ -207,6 +208,7 @@ event("save-profile") ->
           wf:user(UserName),
           mtws_common:set_email(Email),
           mtws_common:update_external_profile(MetalkiaId),
+          wf:session(email_trusted, undefined),
           wf:flash("New profile saved")
       end;
     error ->
