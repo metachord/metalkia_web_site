@@ -57,6 +57,7 @@ main() ->
               %% TODO: Get user info, store ID in database
               case mochijson2:decode(MeBody) of
                 {struct, MeFields} ->
+                  FbId = proplists:get_value(<<"id">>, MeFields),
                   FbProfile =
                     lists:foldl(
                       fun({<<"id">>, Val}, Fb) -> Fb#mt_facebook{id = Val};
@@ -75,7 +76,12 @@ main() ->
                           ?DBG("Facebook Unhandled: ~p", [ParVal]),
                           Fb
                       end,
-                      #mt_facebook{}, MeFields),
+                      case mtc_entry:sget(mt_facebook, FbId) of
+                        undefined ->
+                          #mt_facebook{};
+                        StoredFbProfile ->
+                          StoredFbProfile
+                      end, MeFields),
 
                   mtws_common:set_email(binary_to_list(FbProfile#mt_facebook.email)),
                   wf:session(facebook_name, binary_to_list(FbProfile#mt_facebook.name)),

@@ -59,6 +59,7 @@ main() ->
               ?DBG("Twitter lookup reply:~n~p~n~p", [LookupHeaders, LookupBody]),
               case mochijson2:decode(LookupBody) of
                 [{struct, LookupFields}] ->
+                  TwId = proplists:get_value(<<"id_str">>, LookupFields),
                   TwProfile =
                     lists:foldl(
                       fun({<<"id_str">>, Val}, Tw) -> Tw#mt_twitter{id = Val};
@@ -71,7 +72,12 @@ main() ->
                          ({<<"lang">>, Val}, Tw) -> Tw#mt_twitter{locale = if Val =:= null -> ""; true -> Val end};
                          (_ParVal, Tw) -> Tw
                       end,
-                      #mt_twitter{}, LookupFields),
+                      case mtc_entry:sget(mt_twitter, TwId) of
+                        undefined ->
+                          #mt_twitter{};
+                        StoredTwProfile ->
+                          StoredTwProfile
+                      end, LookupFields),
                   FriendsUrl = "https://api.twitter.com/1/friends/ids.json?cursor=-1&stringify_ids=true&screen_name=" ++ ScreenName,
                   Friends =
                     case httpc:request(FriendsUrl) of
