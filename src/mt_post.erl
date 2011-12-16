@@ -229,7 +229,7 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
     #mt_person{username = UN, name = Name, email = EM} ->
       if
         Name =:= undefined -> {?a2l(UN), ?a2l(UN), ?a2l(EM)};
-        true -> {?a2l(UN), unicode:characters_to_list(Name), ?a2l(EM)}
+        true -> {?a2l(UN), Name, ?a2l(EM)}
       end;
     _Other ->
       ?ERR("Unknown person: ~p", [PersonId]),
