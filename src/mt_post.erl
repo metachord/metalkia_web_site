@@ -243,7 +243,11 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
   [
     #panel{id="pan-"++parents_to_path(PostId, Parents), class = "comment-box", style="margin-left: "++integer_to_list(Margin)++"px;", body = [
       #panel{class = "user-identify-box", body = [
-        #span{class = "user-name", body = [#link{text = RealName, url = UserProfileUrl}]},
+        #panel{class = "user-name", body = [
+          #link{body = [
+            #panel{class = "user-real-name", text = RealName},
+            #panel{class = "user-profile-name", text = ["(", UserName, ")"]}
+          ], url = UserProfileUrl}]},
         #panel{class = "user-avatar", body = [#gravatar{email = Email, rating = "g"}]}
       ]},
       #panel{body = [

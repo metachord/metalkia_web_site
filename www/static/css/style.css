@@ -217,17 +217,25 @@ div.post-handlers a {
     float: left;
     margin-left: 0px;
     padding-left: 0px;
+    width: 80px;
 }
 
 .user-avatar {
     float: top;
 }
 
-.user-name {
+.user-identify-box .user-name {
     float: top;
     color: #000000;
     padding: 0px, 0px, 0px;
     font-size: 10px;
+    line-height: 1em;
+}
+
+.user-identify-box .user-name user-real-name {
+}
+
+.user-identify-box .user-name user-profile-name {
 }
 
 pre {
