@@ -220,17 +220,28 @@ event("save-profile") ->
 
 %% Warning: side-effects on cliens-side
 check_username() ->
-  UserName = normalize_input(wf:q("input-username")),
-  ?DBG("Check UserName: ~p", [UserName]),
-  UNRegexp = "^[a-z][a-z_0-9]+$",
-  case re:run(UserName, UNRegexp, [{capture, [0], list}]) of
-    {match, [UserName]} ->
-      %% TODO: Check username stop-list
-      {ok, UserName};
-    _ ->
+  UserInput = wf:q("input-username"),
+  User = wf:user(),
+      UNRegexp = "^[a-z][a-z_0-9]+$",
+  if
+    (User =:= undefined) andalso (UserInput =/= undefined) ->
+      UserName = normalize_input(UserInput),
+      ?DBG("Check UserName: ~p", [UserName]),
+      case re:run(UserName, UNRegexp, [{capture, [0], list}]) of
+        {match, [UserName]} ->
+          %% TODO: Check username stop-list
+          {ok, UserName};
+        _ ->
+          wf:flash(wf:f("Username regexp: ~p", [UNRegexp])),
+          wf:replace("entry-username", username_entry(UserName, "warning")),
+          error
+      end;
+    (User =:= undefined) andalso (UserInput =:= undefined) ->
       wf:flash(wf:f("Username regexp: ~p", [UNRegexp])),
-      wf:replace("entry-username", username_entry(UserName, "warning")),
-      error
+      wf:replace("entry-username", username_entry("", "warning")),
+      error;
+    true ->
+      {ok, User}
   end.
 
 
