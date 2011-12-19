@@ -108,7 +108,7 @@ inner_body(Id) ->
   PageUserName =
   case dict:find(username, PathInfo) of
     {ok, none} -> none;
-    {ok, PgUN} -> list_to_binary(PgUN);
+    {ok, PgUN} -> ?a2b(PgUN);
     _ -> undefined
   end,
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
