@@ -224,7 +224,7 @@ event("save-profile") ->
 check_username() ->
   UserInput = wf:q("input-username"),
   User = wf:user(),
-      UNRegexp = "^[a-z][a-z_0-9]+$",
+      UNRegexp = "^[a-z0-9][a-z0-9_]*[a-z0-9]$",
   if
     (User =:= undefined) andalso (UserInput =/= undefined) ->
       UserName = normalize_input(UserInput),
