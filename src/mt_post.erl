@@ -287,6 +287,8 @@ post_link(PostId) ->
         ["/blog/", BN];
       {ok, {_BN, cname}} ->
         [];
+      {ok, default} ->
+        [];
       error ->
         []
     end,
