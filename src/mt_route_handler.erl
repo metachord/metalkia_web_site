@@ -185,7 +185,18 @@ user_blog(PathInfo) ->
         true ->
           {BlogId, local}
       end,
-      case mtc_entry:sget(mt_cname, list_to_binary(BlogNamePretend)) of
+      CnameKey =
+      case BlogType of
+        local ->
+          UserName =
+          case HostTokensRev of
+            [Tld, SiteName | [Rest]] -> Rest;
+            _ -> []
+          end,
+          {UserName, list_to_binary(BlogNamePretend)};
+        cname -> list_to_binary(BlogNamePretend)
+      end,
+      case mtc_entry:sget(mt_cname, CnameKey) of
         #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams,
           google_analytics = GoogleAnalytics} ->
           BlogName = ?a2l(CName),
