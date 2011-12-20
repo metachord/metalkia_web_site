@@ -178,12 +178,12 @@ user_blog(PathInfo) ->
       {UserName, BlogName, [], NewPathInfo, Profile};
     _ ->
       %% Search blog for this CNAME
-      BlogNamePretend =
+      {BlogNamePretend, BlogType} =
       if
         BlogId =:= undefined ->
-          string:join(lists:reverse(HostTokensRev), ".");
+          {string:join(lists:reverse(HostTokensRev), "."), cname};
         true ->
-          BlogId
+          {BlogId, local}
       end,
       case mtc_entry:sget(mt_cname, list_to_binary(BlogNamePretend)) of
         #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams,
@@ -204,7 +204,7 @@ user_blog(PathInfo) ->
               ({Key, Value}, PI) ->
                 dict:store(Key, Value, PI)
               end, PathInfo, [
-              {blog, BlogName},
+              {blog, {BlogName, BlogType}},
               {blog_title, ?a2l(BlogTitle)},
               {ga_account, GoogleAccount},
               {ga_host, GoogleHost}

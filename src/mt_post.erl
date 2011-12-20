@@ -279,6 +279,20 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
     ]}
   ].
 
+post_link(PostId) ->
+  PathInfo = wf_context:path_info(),
+  ?io2b([
+    case dict:find(blog, PathInfo) of
+      {ok, {BN, local}} ->
+        ["/blog/", BN];
+      {ok, {_BN, cname}} ->
+        [];
+      error ->
+        []
+    end,
+    "/post/", ?a2l(PostId)]).
+
+
 default_items_post(Post) ->
   Path = ?a2l(Post#mt_post.id),
   CommentsNum = length(Post#mt_post.comments),
@@ -289,7 +303,7 @@ default_items_post(Post) ->
       if
         is_integer(CommentsNum) andalso CommentsNum > 0 -> " (" ++ integer_to_list(CommentsNum) ++ ")";
         true -> ""
-      end, url="/post/"++?a2l(PostId)}
+      end, url=post_link(PostId)}
   ]}.
 
 default_items(Path) ->
@@ -299,8 +313,8 @@ default_items(Path, CommentsNum) ->
   [PostId|Parents] = path_to_parents(Path),
   User = wf:user(),
   #panel{class = "post-handlers", body = [
-    #link{text="Link", url="/post/"++?a2l(PostId) ++
-      if length(Parents) > 0 -> [CommentId|_] = lists:reverse(Parents), "#"++?a2l(CommentId); true -> "" end},
+    #link{text="Link", url=?io2b([post_link(PostId),
+      if length(Parents) > 0 -> [CommentId|_] = lists:reverse(Parents), "#"++?a2l(CommentId); true -> "" end])},
     if
       User =/= undefined ->
         #link{id="comment-"++Path, text="Comment", postback="comment-"++Path};
