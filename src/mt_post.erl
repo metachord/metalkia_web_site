@@ -7,8 +7,7 @@
   body/0,
   header/0,
   event/1,
-  author/0,
-  url/0
+  author/0
 ]).
 
 -include_lib("nitrogen_core/include/wf.hrl").
@@ -55,25 +54,6 @@ author() ->
       end;
     _ -> ""
   end.
-
-url() ->
-  PathInfo = wf_context:path_info(),
-  Prefix =
-  case dict:find(blog, PathInfo) of
-    {ok, default} ->
-      mtc:get_env(url);
-    {ok, BlogName} ->
-      BlogName;
-    _ ->
-      mtc:get_env(url)
-  end,
-  case dict:find(post_id, PathInfo) of
-    {ok, PostId} ->
-      Prefix ++ "/post/" ++ PostId;
-    _ ->
-      Prefix
-  end.
-
 
 header() ->
   "".
