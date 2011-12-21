@@ -176,17 +176,29 @@ posts_list() ->
           end
         end ||
           #mt_stream{username = UserName, tags = Tags} <- ReqStreams])),
-
-      [[
-        #panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
-          #panel{body = [
-            #panel{class = "post-body", body = Post#mt_post.body}
-          ]},
-          default_items_post(Post),
-          #hr{}
-        ]}
-      ] ||
-        #mt_post{id = Id} = Post <-
+      [
+        begin
+          BodyToCut =
+          case re:run(Post#mt_post.body, "<mt-cut(\\s*([a-z]+)=[\"\']([^\"\']*?)[\"\']\\s*)*?>", [unicode, global]) of
+            {match, [[{PStart, _PStop}|_]]} ->
+              ?io2b([
+                binary:part(Post#mt_post.body, 0, PStart),
+                "<strong>(<a href=\"", post_link(Post#mt_post.id), "\">"
+                "Read more"
+                "</a>)</strong>"
+              ]);
+            _ ->
+              Post#mt_post.body
+          end,
+          [#panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
+            #panel{body = [
+              #panel{class = "post-body", body = BodyToCut}
+            ]},
+            default_items_post(Post),
+            #hr{}
+          ]}]
+        end
+      || #mt_post{id = Id} = Post <-
         lists:reverse(lists:keysort(#mt_post.timestamp,
             [mtc_entry:sget(mt_post, Key) ||
             Key <- Keys]))

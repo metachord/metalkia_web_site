@@ -59,6 +59,8 @@ def clean_html( fragment ):
                 else:
                     tag.extract()
                     removed = True
+            elif tag.name == 'mt-cut':
+                removed = False
             elif tag.name == 'pre':
                 pass
             elif tag.name not in acceptable_elements:
