@@ -5,6 +5,7 @@
   main/0,
   title/0,
   body/0,
+  feed/0,
   header/0,
   event/1,
   author/0
@@ -16,6 +17,8 @@
 -include_lib("metalkia_core/include/mt_records.hrl").
 -include_lib("metalkia_core/include/mt_log.hrl").
 -include_lib("metalkia_core/include/mt_util.hrl").
+
+-include_lib("xmerl/include/xmerl.hrl").
 
 -include("mtws.hrl").
 
@@ -29,7 +32,120 @@
   level = 0
 }).
 
-main() -> #template { file="./site/templates/metalkia/bare.html" }.
+main() ->
+  PathInfo = wf_context:path_info(),
+  case dict:find(content, PathInfo) of
+    {ok, feed} ->
+      feed();
+    _ ->
+      #template { file="./site/templates/metalkia/bare.html" }
+  end.
+
+feed() ->
+  {Upd, Content} = atom_entries(),
+
+  Header =
+  [
+    #xmlElement{
+      name = generator,
+      attributes = [
+        #xmlAttribute{name = uri, value = "http://metalkia.com"}
+      ],
+      content = [#xmlText{value = "Metalkia Atom Feed"}]
+    },
+    #xmlElement{
+      name = updated,
+      content = [#xmlText{value = ?a2l(mtc_util:ts2rfc3339(Upd))}]
+    },
+    #xmlElement{
+      name = link,
+      attributes = [
+        #xmlAttribute{name = rel, value = "self"},
+        #xmlAttribute{name = type, value = "application/atom+xml"},
+        #xmlAttribute{name = href, value = mtws_common:url()}
+      ]
+    },
+    #xmlElement{
+      name = id,
+      content = [#xmlText{value = mtws_common:url()}]
+    },
+    #xmlElement{
+      name = title,
+      content = [#xmlText{value = mtws_common:blog_name()}]
+    }
+  ],
+
+  Feed =
+  #xmlElement{
+    name = feed,
+    attributes = [
+      #xmlAttribute{name = xmlns,value = "http://www.w3.org/2005/Atom"},
+      #xmlAttribute{name = 'xml:base',value = "http://metalkia.com"},
+      #xmlAttribute{name = 'xml:lang',value = "en"}],
+    content = Header ++ Content
+  },
+  xmerl:export_simple([Feed], xmerl_xml).
+
+atom_entries() ->
+  atom_entries(0, [],
+    lists:keysort(#mt_post.timestamp,
+      [mtc_entry:sget(mt_post, Key) ||
+      Key <- streams_keys()])).
+
+
+atom_entries(Upd, Acc, []) ->
+  {Upd, Acc};
+atom_entries(Upd, Acc, [
+  #mt_post{
+    author = #mt_author{id = AuthorId},
+    timestamp = Published,
+    last_mod = LastMod,
+    title = Title
+  } = Post | Posts]) ->
+  Updated = if LastMod =:= undefined -> Published; true -> LastMod end,
+  PostUrl = mtws_common:base_uri() ++ ?a2l(post_link(Post#mt_post.id)),
+  PostTitle =
+  if
+    Title =:= undefined ->
+      ?io2b(["Post #", ?a2l(Post#mt_post.id)]);
+    true ->
+      Title
+  end,
+
+  Res =
+  #xmlElement{
+    name = entry,
+    attributes = [
+      #xmlAttribute{name = 'xmlns', value = "http://www.w3.org/2005/Atom"},
+      #xmlAttribute{name = 'xmlns:gd', value = "http://schemas.google.com/g/2005"},
+      #xmlAttribute{name = 'xmlns:lang', value = "en"}
+    ],
+    content = [
+      #xmlElement{name = id, content = [#xmlText{value = PostUrl}]},
+      #xmlElement{name = updated, content = [#xmlText{value = ?a2l(mtc_util:ts2rfc3339(Updated))}]},
+      #xmlElement{name = published, content = [#xmlText{value = ?a2l(mtc_util:ts2rfc3339(Published))}]},
+      #xmlElement{name = author, content = [
+        #xmlElement{name = name, content = [#xmlText{value = ?a2l(AuthorId)}]},
+        #xmlElement{name = uri, content = [#xmlText{value = mtws_common:user_blog(AuthorId, ["/profile"])}]}
+      ]},
+      #xmlElement{
+        name = link,
+        attributes = [
+          #xmlAttribute{name = rel, value = "alternate"},
+          #xmlAttribute{name = type, value = "text/html"},
+          #xmlAttribute{name = href, value = PostUrl}
+        ]
+      },
+      #xmlElement{name = title, content = [#xmlText{value = ?a2l(PostTitle)}]},
+      #xmlElement{
+        name = content,
+        attributes = [#xmlAttribute{name = type, value = "html"}],
+        content = [#xmlText{value = ?a2l(cutted_body(Post))}]
+      }
+    ]
+  },
+  NewUpd = max(Updated, Upd),
+  atom_entries(NewUpd, [Res | Acc], Posts).
 
 title() -> mtws_common:blog_name().
 
@@ -128,7 +244,7 @@ inner_body(Id) ->
       "Post not found"
   end.
 
-posts_list() ->
+streams_keys() ->
   PathInfo = wf_context:path_info(),
   case dict:find(streams, PathInfo) of
     {ok, Streams} ->
@@ -142,8 +258,6 @@ posts_list() ->
           end;
         _ -> Streams
       end,
-
-      Keys =
       lists:reverse(lists:umerge(
         [begin
           case Tags of
@@ -155,37 +269,41 @@ posts_list() ->
               lists:umerge([lists:sort(mtc_entry:sget(tags, UserName, Tag)) || Tag <- Tags])
           end
         end ||
-          #mt_stream{username = UserName, tags = Tags} <- ReqStreams])),
-      [
-        begin
-          BodyToCut =
-          case re:run(Post#mt_post.body, "<mt-cut(\\s*([a-z]+)=[\"\']([^\"\']*?)[\"\']\\s*)*?>", [unicode, global]) of
-            {match, [[{PStart, _PStop}|_]]} ->
-              ?io2b([
-                binary:part(Post#mt_post.body, 0, PStart),
-                "<strong>(<a href=\"", post_link(Post#mt_post.id), "\">"
-                "Read more"
-                "</a>)</strong>"
-              ]);
-            _ ->
-              Post#mt_post.body
-          end,
-          [#panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
-            #panel{body = [
-              #panel{class = "post-body", body = BodyToCut}
-            ]},
-            default_items_post(Post),
-            #hr{}
-          ]}]
-        end
-      || #mt_post{id = Id} = Post <-
-        lists:reverse(lists:keysort(#mt_post.timestamp,
-            [mtc_entry:sget(mt_post, Key) ||
-            Key <- Keys]))
-      ];
-    _ ->
-      []
+          #mt_stream{username = UserName, tags = Tags} <- ReqStreams]));
+    _ -> []
   end.
+
+cutted_body(Post) ->
+  case re:run(Post#mt_post.body, "<mt-cut(\\s*([a-z]+)=[\"\']([^\"\']*?)[\"\']\\s*)*?>", [unicode, global]) of
+    {match, [[{PStart, _PStop}|_]]} ->
+      ?io2b([
+        binary:part(Post#mt_post.body, 0, PStart),
+        "<strong>(<a href=\"", post_link(Post#mt_post.id), "\">"
+        "Read more"
+        "</a>)</strong>"
+      ]);
+    _ ->
+      Post#mt_post.body
+  end.
+
+
+posts_list() ->
+  Keys = streams_keys(),
+  [
+    begin
+      [#panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
+        #panel{body = [
+          #panel{class = "post-body", body = cutted_body(Post)}
+        ]},
+        default_items_post(Post),
+        #hr{}
+      ]}]
+    end
+  || #mt_post{id = Id} = Post <-
+    lists:reverse(lists:keysort(#mt_post.timestamp,
+        [mtc_entry:sget(mt_post, Key) ||
+        Key <- Keys]))
+  ].
 
 post_body(Post) ->
   #panel{id = "post-body", class = "post-body", body = Post#mt_post.body}.

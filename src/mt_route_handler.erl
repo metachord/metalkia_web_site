@@ -100,10 +100,16 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo, Profile) ->
     ["/", "post-add"] ->
       PathInfo2 = dict:store(post_id, post_add, PathInfo1),
       {mt_post, PathInfo2};
+    ["/", "feed"] ->
+      PathInfo2 = dict:store(content, feed, PathInfo1),
+      {mt_post, PathInfo2};
     ["/", "post" | _] ->
       {mt_post, PathInfo1};
     ["/", "blog", _BN, "post-add"] ->
       PathInfo2 = dict:store(post_id, post_add, PathInfo1),
+      {mt_post, PathInfo2};
+    ["/", "blog", _BN, "feed"] ->
+      PathInfo2 = dict:store(content, feed, PathInfo1),
       {mt_post, PathInfo2};
     ["/", "blog" | _] ->
       case Streams of
