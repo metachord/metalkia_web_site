@@ -47,9 +47,11 @@ blog_name() ->
   end.
 
 blog_link() ->
-  case dict:find(current_base_uri, wf:path_info()) of
-    {ok, Uri} -> Uri;
-    error -> mtc:get_env(url)
+  case dict:find(blog_id, wf:path_info()) of
+    {ok, BlogId} when is_list(BlogId) ->
+      "/blog/" ++ BlogId;
+    _ ->
+      "/"
   end.
 
 user_blog() ->
