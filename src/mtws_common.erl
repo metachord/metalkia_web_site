@@ -188,7 +188,7 @@ menu() ->
             %% ]}
             case dict:find(blog_id, PathInfo) of
               {ok, BN} ->
-                #link{url = "/blog-post-add/" ++ BN, text = "Add post"};
+                #link{url = "/blog/" ++ BN ++ "/post-add", text = "Add post"};
               _ ->
                 #link{url = "/post-add", text = "Add post"}
             end

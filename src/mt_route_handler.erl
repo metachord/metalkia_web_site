@@ -85,33 +85,34 @@ route_blog(UserName, _BlogName, Streams, Path, PathInfo, Profile) ->
                       {profile, Profile},
                       {streams, Streams}
                      ]),
-  case Path of
-    "/profile" ->
+  SPath = filename:split(Path),
+  case SPath of
+    ["/", "profile"] ->
       {mt_profile, PathInfo1};
-    "/info" ->
+    ["/", "info"] ->
       {mt_info, PathInfo1};
-    "/logoff" ->
+    ["/", "logoff"] ->
       {mt_logoff, PathInfo1};
-    "/facebook" ->
+    ["/", "facebook"] ->
       {mt_facebook, PathInfo1};
-    "/twitter" ->
+    ["/", "twitter"] ->
       {mt_twitter, PathInfo1};
-    "/post-add" ->
+    ["/", "post-add"] ->
       PathInfo2 = dict:store(post_id, post_add, PathInfo1),
       {mt_post, PathInfo2};
-    "/post/" ++ _PostArgs ->
+    ["/", "post" | _] ->
       {mt_post, PathInfo1};
-    "/blog-post-add/" ++ _BlogPostArgs ->
+    ["/", "blog", _BN, "post-add"] ->
       PathInfo2 = dict:store(post_id, post_add, PathInfo1),
       {mt_post, PathInfo2};
-    "/blog/" ++ _PostArgs ->
+    ["/", "blog" | _] ->
       case Streams of
         [] ->
           {mt_index, PathInfo1};
         _ ->
           {mt_post, PathInfo1}
       end;
-    "/" ->
+    ["/"] ->
       case Streams of
         [] ->
           if
@@ -221,7 +222,7 @@ user_blog(PathInfo) ->
               {ga_host, GoogleHost}
           ]),
           Profile = mtc_entry:sget(mt_person, Owner),
-          {Owner, BlogName, Streams, dict:erase(blog_id, NewPathInfo), Profile};
+          {Owner, BlogName, Streams, NewPathInfo, Profile};
         _ ->
           {undefined, string:join(lists:reverse(HostTokensRev), "."), [], undefined}
       end

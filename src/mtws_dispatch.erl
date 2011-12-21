@@ -46,7 +46,7 @@ rules() ->
     , ["post-add"]
     , ["blog", blog_id]
     , ["blog", blog_id, "post", post_id]
-    , ["blog-post-add", blog_id]
+    , ["blog", blog_id, "post-add"]
     , ["info"]
   ]] ++
   [
