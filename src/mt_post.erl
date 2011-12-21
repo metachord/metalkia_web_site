@@ -398,7 +398,15 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
   wf:redirect("/post/"++?a2l(PostId)),
   ok;
 event(cancel_add) ->
-  wf:redirect(mtws_common:user_blog(wf:user()));
+  PathInfo = wf_context:path_info(),
+  Url =
+  case dict:find(blog_id, PathInfo) of
+    {ok, BN} ->
+      mtws_common:user_blog(wf:user(), ["/blog/", BN]);
+    _ ->
+      mtws_common:user_blog(wf:user())
+  end,
+  wf:redirect(Url);
 event(add_post) ->
   User = wf:user(),
   if
@@ -419,7 +427,15 @@ event(add_post) ->
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
       }),
       Id = binary_to_list(IdBin),
-      wf:redirect("/post/"++Id);
+      PathInfo = wf_context:path_info(),
+      Url =
+      case dict:find(blog_id, PathInfo) of
+        {ok, BN} ->
+          mtws_common:user_blog(wf:user(), ["/blog/", BN, "/post/", Id]);
+        _ ->
+          mtws_common:user_blog(wf:user(), ["/post/", Id])
+      end,
+      wf:redirect(Url);
     true ->
       pass
   end;
