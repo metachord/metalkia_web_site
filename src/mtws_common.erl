@@ -13,6 +13,7 @@
   blog_link/0,
   url/0,
   base_uri/0,
+  feed_url/0,
   user_or_name/0,
   user_blog/0,
   user_blog/1,
@@ -74,6 +75,15 @@ url() ->
     error ->
       mtc:get_env(url)
   end.
+
+feed_url() ->
+  case dict:find(blog_id, wf:path_info()) of
+    {ok, BlogId} when is_list(BlogId) ->
+      "/blog/" ++ BlogId ++ "/feed";
+    _ ->
+      "/feed"
+  end.
+
 
 %% TODO: use same one from webmachine when seth/base_uri will be merged in upstream
 base_uri() ->
