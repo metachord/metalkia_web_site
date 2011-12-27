@@ -27,6 +27,7 @@
   menu/0,
   %% Google analytics stuff
   google_analytics/0,
+  google_analytics_site/0,
   ga_account/1,
   ga_host/1
 ]).
@@ -294,6 +295,14 @@ google_analytics() ->
     Account =/= undefined ->
       #template {file="./site/templates/metalkia/google-analytics.tpl", bindings = [{'Val', {Account, Host}}]};
     true ->
+      ""
+  end.
+
+google_analytics_site() ->
+  case mtc:get_env(google) of
+    {Account, Host} ->
+      #template {file="./site/templates/metalkia/google-analytics.tpl", bindings = [{'Val', {Account, Host}}]};
+    _ ->
       ""
   end.
 
