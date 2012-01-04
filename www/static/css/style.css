@@ -184,6 +184,11 @@ div.post-body p + p {
     margin-top: 1.2em;
 }
 
+.comment-add-box textarea {
+    width: 500px;
+    height: 200px;
+}
+
 .comment-box {
     border: solid 1px #bbccbb;
     min-height: 120px;
