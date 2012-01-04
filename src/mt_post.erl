@@ -296,6 +296,18 @@ posts_list() ->
       [#panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
         #panel{body = [
           #panel{class = "post", body = [
+            #panel{class = "post-author-compact", body = [
+              begin
+                #mt_person{name = RealName} = mtc_entry:sget(mt_person, Post#mt_post.author#mt_author.id),
+                {N, UN} = if
+                  RealName =/= undefined orelse RealName =:= <<>> ->
+                    {Post#mt_post.author#mt_author.id, Post#mt_post.author#mt_author.id};
+                  true ->
+                    {RealName, Post#mt_post.author#mt_author.id}
+                end,
+                #link{body = N, url = mtws_common:user_blog(UN, ["/profile"])}
+              end
+            ]},
             #link{body = post_date(Post), url = post_link(Post#mt_post.id)},
             #panel{class = "post-title", body = [#link{body = Post#mt_post.title, url = post_link(?a2l(Post#mt_post.id))}]},
             #panel{class = "post-body", body = [cutted_body(Post)]}
