@@ -212,17 +212,19 @@ inner_body(Id) ->
     when
       (is_binary(PageUserName) and (PageUserName =:= PersonId)) orelse
       (PageUserName =:= none) ->
-      Email =
+      {Email, RealName} =
       case mtc_entry:sget(mt_person, PersonId) of
-        #mt_person{email = EmailBin} -> ?a2l(EmailBin);
-        _ -> undefined
-      end,
+        #mt_person{email = EmailBin, name = NameBin} -> {?a2l(EmailBin), ?a2l(NameBin)};
+        _ -> {undefined, ""}
+        end,
       [
-        #panel{id="pan-"++Id, style="margin-left: 50px;", body = [
+        #panel{id="pan-"++Id, class="post-author", style="margin-left: 50px;", body = [
           #link{body = [
             #gravatar{email = Email, rating = "g"}],
             url = mtws_common:user_blog(PersonId)
           },
+          user_name_profile(PersonId, RealName),
+          #link{body = post_date(Post), url = post_link(Post#mt_post.id)},
           #panel{body = [
             #hidden{id="post-id", text=Id},
             post_body(Post)
@@ -294,6 +296,7 @@ posts_list() ->
       [#panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
         #panel{body = [
           #panel{class = "post", body = [
+            #link{body = post_date(Post), url = post_link(Post#mt_post.id)},
             #panel{class = "post-title", body = [#link{body = Post#mt_post.title, url = post_link(?a2l(Post#mt_post.id))}]},
             #panel{class = "post-body", body = [cutted_body(Post)]}
           ]}
@@ -313,6 +316,23 @@ post_body(Post) ->
     #panel{class = "post-title", body = Post#mt_post.title},
     #panel{class = "post-body", body = [Post#mt_post.body]}
   ]}.
+
+ts2str(T) ->
+  {{Y,M,D},{H,Min,Sec}} = mtc_util:ts2dt(T),
+  io_lib:format("~4..0b/~2..0b/~2..0b ~2..0b:~2..0b:~2..0b", [Y, M, D, H, Min, Sec]).
+
+
+post_date(#mt_post{timestamp = Ts, last_mod = LastMod}) ->
+  if
+    (Ts =:= LastMod) orelse (LastMod =:= undefined) ->
+      #panel{class = "post-date", body = [ts2str(Ts)]};
+    true ->
+      #panel{class = "post-date", body = [ts2str(Ts), [" (mod: ", ts2str(LastMod), ")"]]}
+  end.
+
+comment_date(#mt_comment{timestamp = Ts} = Comment) ->
+  ?DBG("Comment: ~p", [Comment]),
+  #panel{class = "comment-date", body = [ts2str(Ts)]}.
 
 comment_tree(Comments) ->
   comment_tree(Comments, []).
@@ -339,7 +359,7 @@ comment_tree([#mt_comment_ref{parents = _Parents, comment_key = CKey}|Comments],
 
 comment_body(#mt_comment{author = #mt_author{id = PersonId},
                          body = Body
-                        },
+                        } = Comment,
              #comment{post_id = PostId,
                       id = Id,
                       parents = Parents,
@@ -360,19 +380,10 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
       ?ERR("Unknown person: ~p", [PersonId]),
       {"", "", ""}
   end,
-
-  %% {"http","metalkia.com","/test/ttt","a=55","asd"}
-  {UScheme, UHost, _UPath, _UArgs, _UPart} = mochiweb_util:urlsplit(mtc:get_env(url)),
-  UserProfileUrl = mochiweb_util:urlunsplit({UScheme, UserName ++ "." ++ UHost, ["/profile"], "", ""}),
-
   [
     #panel{id="pan-"++parents_to_path(PostId, Parents), class = "comment-box", style="margin-left: "++integer_to_list(Margin)++"px;", body = [
       #panel{class = "user-identify-box", body = [
-        #panel{class = "user-name", body = [
-          #link{body = [
-            #panel{class = "user-real-name", text = RealName},
-            #panel{class = "user-profile-name", text = ["(", UserName, ")"]}
-          ], url = UserProfileUrl}]},
+        user_name_profile(UserName, RealName),
         #panel{class = "user-avatar", body = [#gravatar{email = Email, rating = "g"}]}
       ]},
       #panel{body = [
@@ -388,12 +399,22 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
           "class=\"comment-anchor-link link\" "
           "target=\"_self\">" ++ "#"++binary_to_list(PostId)++"/"++Anchor ++ "</a>"
         },
+        #link{body = comment_date(Comment), url = "#"++Anchor},
         #panel{class = "comment-body", body = Body}
       ]},
       #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
       default_items(parents_to_path(PostId, Parents))
     ]}
   ].
+
+user_name_profile(UserName, RealName) ->
+  UserProfileUrl = mtws_common:user_blog(UserName, ["/profile"]),
+  #panel{class = "user-name", body = [
+    #link{body = [
+      #panel{class = "user-real-name", text = RealName},
+      #panel{class = "user-profile-name", text = ["(", UserName, ")"]}
+    ], url = UserProfileUrl}
+  ]}.
 
 post_link(PostId) ->
   PathInfo = wf_context:path_info(),
@@ -572,6 +593,7 @@ event("add-comment-" ++ Path) ->
         post_id = ?a2b(PostId),
         author = Author,
         body = SanText,
+        timestamp = mtc_util:timestamp(),
         parents = Parents
       },
       NewCID = mtc_entry:sput(Comment),
