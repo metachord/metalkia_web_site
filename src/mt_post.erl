@@ -293,7 +293,10 @@ posts_list() ->
     begin
       [#panel{id="pan-"++?a2l(Id), style="margin-left: 50px;", body = [
         #panel{body = [
-          #panel{class = "post-body", body = cutted_body(Post)}
+          #panel{class = "post", body = [
+            #panel{class = "post-title", body = [#link{body = Post#mt_post.title, url = post_link(?a2l(Post#mt_post.id))}]},
+            #panel{class = "post-body", body = [cutted_body(Post)]}
+          ]}
         ]},
         default_items_post(Post),
         #hr{}
@@ -306,7 +309,10 @@ posts_list() ->
   ].
 
 post_body(Post) ->
-  #panel{id = "post-body", class = "post-body", body = Post#mt_post.body}.
+  #panel{id = "post", class = "post", body = [
+    #panel{class = "post-title", body = Post#mt_post.title},
+    #panel{class = "post-body", body = [Post#mt_post.body]}
+  ]}.
 
 comment_tree(Comments) ->
   comment_tree(Comments, []).
@@ -463,12 +469,14 @@ post_items() ->
     error ->
       []
   end,
-  post_editor("comment-items", "", TagList, "Submit", add_post, "Cancel", cancel_add).
+  post_editor("comment-items", "", "", TagList, "Submit", add_post, "Cancel", cancel_add).
 
 
-post_editor(Id, Body, TagList, Submit, SubmitPostback, Cancel, CancelPostback) ->
+post_editor(Id, Title, Body, TagList, Submit, SubmitPostback, Cancel, CancelPostback) ->
   #panel{id = Id,
     body = [
+      #textbox{id="post-title", text = Title},
+      #br{},
       #textarea{id="textarea", class="post-input", text = Body},
       #tagsinput{id="tags-input", text = unicode:characters_to_binary(string:join([unicode:characters_to_list(T) || T <- TagList], ","))},
       #button{id = submit, text = Submit, postback = SubmitPostback},
@@ -493,10 +501,10 @@ sanitize_fix(Text) ->
   end.
 
 event({post_edit, Post}) ->
-  wf:replace("post-body",post_editor("post-body", Post#mt_post.body, Post#mt_post.tags, "Save", {save_post, Post}, "Cancel", {cancel_edit, Post})),
+  wf:replace("post",post_editor("post", Post#mt_post.title, Post#mt_post.body, Post#mt_post.tags, "Save", {save_post, Post}, "Cancel", {cancel_edit, Post})),
   ok;
 event({cancel_edit, Post}) ->
-  wf:replace("post-body", post_body(Post)),
+  wf:replace("post", post_body(Post)),
   ok;
 event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} = Post}) ->
   User = wf:user(),
@@ -505,9 +513,11 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
     PostAuthorId =/= UserBin ->
       error;
     true ->
+      Title = wf:q("post-title"),
       Text = wf:q("textarea"),
       Tags = wf:q("tags-input"),
       mtc_entry:supdate(Post#mt_post{
+        title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Title))) end,
         body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")],
         origin = ?MT_ORIGIN
@@ -529,6 +539,7 @@ event(add_post) ->
   User = wf:user(),
   if
     User =/= undefined ->
+      Title = wf:q("post-title"),
       Text = wf:q("textarea"),
       Tags = wf:q("tags-input"),
 
@@ -540,6 +551,7 @@ event(add_post) ->
       },
       IdBin = mtc_entry:sput(#mt_post{
         author = Author,
+        title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Title))) end,
         body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
         origin = ?MT_ORIGIN,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
