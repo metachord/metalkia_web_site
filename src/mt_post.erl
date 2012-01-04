@@ -231,6 +231,7 @@ inner_body(Id) ->
           ]},
           #br{},
           share_handlers(),
+          #br{},
           case ?a2l(PersonId) of
             User ->
               authors_handlers(Post);
