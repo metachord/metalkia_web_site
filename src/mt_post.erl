@@ -521,7 +521,9 @@ comment_post_items(Id) ->
   #panel{id = "comment-items-"++Id,
     body = [
       #textarea{id="textarea-"++Id},
-      #button{id=submit, text="Submit",postback="add-comment-" ++ Id}
+      #br{},
+      #button{id=submit, text="Submit",postback="add-comment-" ++ Id},
+      #button{text="Cancel",postback="cancel-comment-" ++ Id}
   ]}.
 
 sanit(T) ->
@@ -626,6 +628,15 @@ event("add-comment-" ++ Path) ->
       pass
   end;
 
+event(("cancel-comment-" ++ Id)) ->
+  User = wf:user(),
+  if
+    User =/= undefined ->
+      Target = "comment-" ++ Id,
+      wf:replace("comment-items-" ++ Id, #link{id=Target, text="Comment", postback=Target});
+    true ->
+      pass
+  end;
 event(("comment-" ++ Id) = Target) ->
   User = wf:user(),
   if
