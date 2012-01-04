@@ -247,6 +247,10 @@ div.post-handlers a {
     line-height: 1em;
 }
 
+.post-author-compact a {
+    color: #aabbaa;
+}
+
 .user-identify-box .user-name {
     float: top;
     color: #000000;
