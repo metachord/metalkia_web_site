@@ -526,15 +526,7 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
   wf:redirect("/post/"++?a2l(PostId)),
   ok;
 event(cancel_add) ->
-  PathInfo = wf_context:path_info(),
-  Url =
-  case dict:find(blog_id, PathInfo) of
-    {ok, BN} ->
-      mtws_common:user_blog(wf:user(), ["/blog/", BN]);
-    _ ->
-      mtws_common:user_blog(wf:user())
-  end,
-  wf:redirect(Url);
+  wf:redirect(redirect_url());
 event(add_post) ->
   User = wf:user(),
   if
@@ -556,16 +548,7 @@ event(add_post) ->
         origin = ?MT_ORIGIN,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
       }),
-      Id = binary_to_list(IdBin),
-      PathInfo = wf_context:path_info(),
-      Url =
-      case dict:find(blog_id, PathInfo) of
-        {ok, BN} ->
-          mtws_common:user_blog(wf:user(), ["/blog/", BN, "/post/", Id]);
-        _ ->
-          mtws_common:user_blog(wf:user(), ["/post/", Id])
-      end,
-      wf:redirect(Url);
+      wf:redirect(redirect_url(IdBin));
     true ->
       pass
   end;
@@ -623,3 +606,17 @@ path_to_parents(Path) ->
 
 parents_to_path(PostId, Parents) ->
   binary_to_list(PostId) ++ "-" ++ string:join([integer_to_list(P) || P <- Parents], "-").
+
+redirect_url() ->
+  redirect_url(undefined).
+redirect_url(Id) ->
+  PathInfo = wf_context:path_info(),
+  PostSuff = if Id =/= undefined -> ["/post/", ?a2l(Id)]; true -> ["/"] end,
+  case {dict:find(blog_id, PathInfo), dict:find(blog, PathInfo)} of
+    {{ok, BN}, _} ->
+      mtws_common:user_blog(wf:user(), ["/blog", BN, PostSuff]);
+    {_, {ok, {_BlogName, cname}}} ->
+      PostSuff;
+    _ ->
+      mtws_common:user_blog(wf:user(), PostSuff)
+  end.
