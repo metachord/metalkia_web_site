@@ -300,7 +300,7 @@ posts_list() ->
               begin
                 #mt_person{name = RealName} = mtc_entry:sget(mt_person, Post#mt_post.author#mt_author.id),
                 {N, UN} = if
-                  RealName =/= undefined orelse RealName =:= <<>> ->
+                  RealName =/= undefined orelse RealName =/= <<>> ->
                     {Post#mt_post.author#mt_author.id, Post#mt_post.author#mt_author.id};
                   true ->
                     {RealName, Post#mt_post.author#mt_author.id}
