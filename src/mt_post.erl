@@ -343,8 +343,7 @@ post_date(#mt_post{timestamp = Ts, last_mod = LastMod}) ->
       #panel{class = "post-date", body = [ts2str(Ts), [" (mod: ", ts2str(LastMod), ")"]]}
   end.
 
-comment_date(#mt_comment{timestamp = Ts} = Comment) ->
-  ?DBG("Comment: ~p", [Comment]),
+comment_date(#mt_comment{timestamp = Ts}) ->
   #panel{class = "comment-date", body = [ts2str(Ts)]}.
 
 comment_tree(Comments) ->
