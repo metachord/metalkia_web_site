@@ -239,6 +239,7 @@ inner_body(Id) ->
           default_items(Id, length(Post#mt_post.comments)),
           #hr{}
         ]},
+        #panel{id="hpan-"++Id},
         comment_tree(lists:keysort(#mt_comment_ref.parents, Post#mt_post.comments))
       ];
     _ ->
@@ -416,7 +417,8 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
       ]},
       #hidden{id="level-"++parents_to_path(PostId, Parents), text=Level},
       default_items(parents_to_path(PostId, Parents))
-    ]}
+    ]},
+    #panel{id="hpan-"++parents_to_path(PostId, Parents)}
   ].
 
 user_name_profile(UserName, RealName) ->
@@ -611,7 +613,7 @@ event("add-comment-" ++ Path) ->
       NewCID = mtc_entry:sput(Comment),
       CID = list_to_integer(binary_to_list(NewCID)),
       NewId = Path++"-"++CID,
-      wf:insert_bottom("pan-"++Path,
+      wf:insert_bottom("hpan-"++Path,
         comment_body(Comment,
           #comment{
             post_id = ?a2b(PostId),
