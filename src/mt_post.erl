@@ -517,7 +517,7 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
       Text = wf:q("textarea"),
       Tags = wf:q("tags-input"),
       mtc_entry:supdate(Post#mt_post{
-        title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Title))) end,
+        title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize("text", sanitize_fix(Title))) end,
         body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")],
         origin = ?MT_ORIGIN
@@ -543,7 +543,7 @@ event(add_post) ->
       },
       IdBin = mtc_entry:sput(#mt_post{
         author = Author,
-        title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Title))) end,
+        title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize("text", sanitize_fix(Title))) end,
         body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
         origin = ?MT_ORIGIN,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
