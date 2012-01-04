@@ -154,6 +154,16 @@ textarea.post-input {
     height: 400px;
 }
 
+.post-title {
+    font-family: serif;
+    font-size: 2em;
+    margin-bottom: 1em;
+}
+
+div.post-title a {
+    color: inherit;
+}
+
 .post-body {
     width: inherit;
     padding: 0px 0px 0px 0px;
