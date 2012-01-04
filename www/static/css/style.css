@@ -222,11 +222,23 @@ div.post-body p + p {
 }
 
 .post-handlers {
-    float: top;
+    float: none;
     font-size: 9px;
-    margin-bottom: 0px;
+    height: 18px;
+    line-height: 25px;
     color: #88F;
 }
+
+.comment-box .post-handlers {
+    float: none;
+    font-size: 9px;
+    height: 18px;
+    line-height: 0px;
+    color: #88F;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
 
 div.post-handlers a {
     padding: 1px 3px 2px;
@@ -240,7 +252,7 @@ div.post-handlers a {
     float: left;
     margin-left: 0px;
     padding-left: 0px;
-    width: 80px;
+    width: 100px;
 }
 
 .user-avatar {
