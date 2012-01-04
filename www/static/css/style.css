@@ -237,6 +237,16 @@ div.post-handlers a {
     float: top;
 }
 
+.post-author .user-name {
+    float: inherit;
+    margin-left: 0px;
+    padding-left: 0px;
+    color: #000000;
+    padding: 0px, 0px, 0px;
+    font-size: 10px;
+    line-height: 1em;
+}
+
 .user-identify-box .user-name {
     float: top;
     color: #000000;
@@ -249,6 +259,20 @@ div.post-handlers a {
 }
 
 .user-identify-box .user-name user-profile-name {
+}
+
+.post-date {
+    font-size: 0.7em;
+    font-style: italic;
+    float: right;
+    color: #88aaaa;
+}
+
+.comment-date {
+    font-size: 0.7em;
+    font-style: italic;
+    float: right;
+    color: #99bbbb;
 }
 
 pre {
