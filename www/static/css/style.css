@@ -185,9 +185,14 @@ div.post-body p + p {
 }
 
 .comment-box {
-    /* border: dashed 1px #F0F; */
+    border: solid 1px #bbccbb;
     min-height: 120px;
     line-height: inherit;
+    margin-bottom: 5px;
+}
+
+.comment-box:hover {
+    background-color: #f0f0f0;
 }
 
 .comment-body {
