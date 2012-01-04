@@ -614,7 +614,7 @@ redirect_url(Id) ->
   PostSuff = if Id =/= undefined -> ["/post/", ?a2l(Id)]; true -> ["/"] end,
   case {dict:find(blog_id, PathInfo), dict:find(blog, PathInfo)} of
     {{ok, BN}, _} ->
-      mtws_common:user_blog(wf:user(), ["/blog", BN, PostSuff]);
+      mtws_common:user_blog(wf:user(), ["/blog/", BN, PostSuff]);
     {_, {ok, {_BlogName, cname}}} ->
       PostSuff;
     _ ->
