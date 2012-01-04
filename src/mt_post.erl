@@ -518,7 +518,7 @@ post_editor(Id, Title, Body, TagList, Submit, SubmitPostback, Cancel, CancelPost
   ]}.
 
 comment_post_items(Id) ->
-  #panel{id = "comment-items-"++Id,
+  #panel{id = "comment-items-"++Id, class = "comment-add-box",
     body = [
       #textarea{id="textarea-"++Id},
       #br{},
