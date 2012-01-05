@@ -594,7 +594,7 @@ event(add_post) ->
         author = Author,
         title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize("text", sanitize_fix(Title))) end,
         body = Text,
-        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(Format, if Format =:= "html" -> sanitize_fix(Text); true -> Text end)) end,
+        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(Format, if Format =:= "html" -> sanitize_fix(Text); true -> ?a2b(Text) end)) end,
         format = mt_format(Format),
         origin = ?MT_ORIGIN,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
