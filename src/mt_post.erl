@@ -278,16 +278,17 @@ streams_keys() ->
   end.
 
 cutted_body(Post) ->
-  case re:run(Post#mt_post.body, "<mt-cut(\\s*([a-z]+)=[\"\']([^\"\']*?)[\"\']\\s*)*?>", [unicode, global]) of
+  Body = if Post#mt_post.body_html =:= undefined -> Post#mt_post.body; true -> Post#mt_post.body_html end,
+  case re:run(Body, "<mt-cut(\\s*([a-z]+)=[\"\']([^\"\']*?)[\"\']\\s*)*?>", [unicode, global]) of
     {match, [[{PStart, _PStop}|_]]} ->
       ?io2b([
-        binary:part(Post#mt_post.body, 0, PStart),
+        binary:part(Body, 0, PStart),
         "<strong>(<a href=\"", post_link(Post#mt_post.id), "\">"
         "Read more"
         "</a>)</strong>"
       ]);
     _ ->
-      Post#mt_post.body
+      Body
   end.
 
 
@@ -326,9 +327,10 @@ posts_list() ->
   ].
 
 post_body(Post) ->
+  Body = if Post#mt_post.body_html =:= undefined -> Post#mt_post.body; true -> Post#mt_post.body_html end,
   #panel{id = "post", class = "post", body = [
     #panel{class = "post-title", body = Post#mt_post.title},
-    #panel{class = "post-body", body = [Post#mt_post.body]}
+    #panel{class = "post-body", body = Body}
   ]}.
 
 ts2str(T) ->
@@ -370,9 +372,7 @@ comment_tree([#mt_comment_ref{parents = _Parents, comment_key = CKey}|Comments],
   end,
   comment_tree(Comments, Tree ++ [E]).
 
-comment_body(#mt_comment{author = #mt_author{id = PersonId},
-                         body = Body
-                        } = Comment,
+comment_body(#mt_comment{author = #mt_author{id = PersonId}} = Comment,
              #comment{post_id = PostId,
                       id = Id,
                       parents = Parents,
@@ -393,6 +393,7 @@ comment_body(#mt_comment{author = #mt_author{id = PersonId},
       ?ERR("Unknown person: ~p", [PersonId]),
       {"", "", ""}
   end,
+  Body = if Comment#mt_comment.body_html =:= undefined -> Comment#mt_comment.body; true -> Comment#mt_comment.body_html end,
   [
     #panel{id="pan-"++parents_to_path(PostId, Parents), class = "comment-box", style="margin-left: "++integer_to_list(Margin)++"px;", body = [
       #panel{class = "user-identify-box", body = [
@@ -555,7 +556,8 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
       Tags = wf:q("tags-input"),
       mtc_entry:supdate(Post#mt_post{
         title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize("text", sanitize_fix(Title))) end,
-        body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
+        body = Text,
+        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")],
         origin = ?MT_ORIGIN
       })
@@ -581,7 +583,8 @@ event(add_post) ->
       IdBin = mtc_entry:sput(#mt_post{
         author = Author,
         title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize("text", sanitize_fix(Title))) end,
-        body = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
+        body = Text,
+        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
         origin = ?MT_ORIGIN,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
       }),
@@ -608,7 +611,8 @@ event("add-comment-" ++ Path) ->
       Comment = #mt_comment{
         post_id = ?a2b(PostId),
         author = Author,
-        body = SanText,
+        body = Text,
+        body_html = SanText,
         timestamp = mtc_util:timestamp(),
         parents = Parents
       },
