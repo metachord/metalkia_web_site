@@ -14,29 +14,33 @@ parser.add_argument('--oformat', nargs='?', default="html",
 
 args = parser.parse_args()
 
-if args.oformat == "html":
-    acceptable_elements = ['a', 'abbr', 'acronym', 'address', 'area', 'b', 'big',
-                           'blockquote', 'br', 'button', 'caption', 'center', 'cite', 'code', 'col',
-                           'colgroup', 'dd', 'del', 'dfn', 'dir', 'div', 'dl', 'dt', 'em',
-                           'font', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img',
-                           'ins', 'kbd', 'label', 'legend', 'li', 'map', 'menu', 'ol',
-                           'p', 'pre', 'q', 's', 'samp', 'small', 'span', 'strike',
-                           'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th',
-                           'thead', 'tr', 'tt', 'u', 'ul', 'var']
+acceptable_elements = ['a', 'abbr', 'acronym', 'address', 'area', 'b', 'big',
+                       'blockquote', 'br', 'button', 'caption', 'center', 'cite', 'code', 'col',
+                       'colgroup', 'dd', 'del', 'dfn', 'dir', 'div', 'dl', 'dt', 'em',
+                       'font', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img',
+                       'ins', 'kbd', 'label', 'legend', 'li', 'map', 'menu', 'ol',
+                       'p', 'pre', 'q', 's', 'samp', 'small', 'span', 'strike',
+                       'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th',
+                       'thead', 'tr', 'tt', 'u', 'ul', 'var']
 
-    acceptable_attributes = ['abbr', 'accept', 'accept-charset', 'accesskey',
-                             'action', 'align', 'alt', 'axis', 'border', 'cellpadding', 'cellspacing',
-                             'char', 'charoff', 'charset', 'checked', 'cite', 'clear', 'cols',
-                             'colspan', 'color', 'compact', 'coords', 'datetime', 'dir',
-                             'enctype', 'for', 'headers', 'height', 'href', 'hreflang', 'hspace',
-                             'id', 'ismap', 'label', 'lang', 'longdesc', 'maxlength', 'method',
-                             'multiple', 'name', 'nohref', 'noshade', 'nowrap', 'prompt',
-                             'rel', 'rev', 'rows', 'rowspan', 'rules', 'scope', 'shape', 'size',
-                             'span', 'src', 'start', 'style', 'summary', 'tabindex', 'target', 'title', 'type',
-                             'usemap', 'valign', 'value', 'vspace', 'width']
-elif args.oformat == "text":
+acceptable_attributes = ['abbr', 'accept', 'accept-charset', 'accesskey',
+                         'action', 'align', 'alt', 'axis', 'border', 'cellpadding', 'cellspacing',
+                         'char', 'charoff', 'charset', 'checked', 'cite', 'clear', 'cols',
+                         'colspan', 'color', 'compact', 'coords', 'datetime', 'dir',
+                         'enctype', 'for', 'headers', 'height', 'href', 'hreflang', 'hspace',
+                         'id', 'ismap', 'label', 'lang', 'longdesc', 'maxlength', 'method',
+                         'multiple', 'name', 'nohref', 'noshade', 'nowrap', 'prompt',
+                         'rel', 'rev', 'rows', 'rowspan', 'rules', 'scope', 'shape', 'size',
+                         'span', 'src', 'start', 'style', 'summary', 'tabindex', 'target', 'title', 'type',
+                         'usemap', 'valign', 'value', 'vspace', 'width']
+
+if args.oformat == "text":
     acceptable_elements = []
     acceptable_attributes = []
+elif args.oformat == "html":
+    pass
+elif args.oformat == "markdown":
+    import markdown
 
 BeautifulSoup.QUOTE_TAGS = ['pre', 'code']
 
@@ -106,12 +110,14 @@ def clean_text(text):
     return text
 
 inlen = struct.unpack('>I', sys.stdin.read(4))
-intext = sys.stdin.read(inlen[0])
+intext = unicode(sys.stdin.read(inlen[0]), "utf-8")
 
 if args.oformat == "html":
     outtext = clean_html(intext).encode('utf-8')
+elif args.oformat == "markdown":
+    outtext = clean_html(markdown.markdown(intext)).encode('utf-8')
 elif args.oformat == "text":
-    outtext = clean_text(intext)
+    outtext = clean_text(intext).encode('utf-8')
 
 outlen = len(outtext)
 
