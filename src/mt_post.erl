@@ -571,8 +571,7 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
         origin = ?MT_ORIGIN
       })
   end,
-  wf:redirect("/post/"++?a2l(PostId)),
-  ok;
+  wf:redirect(redirect_url(PostId));
 event(cancel_add) ->
   wf:redirect(redirect_url());
 event(add_post) ->
