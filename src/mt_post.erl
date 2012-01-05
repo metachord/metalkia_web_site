@@ -505,16 +505,23 @@ post_items() ->
     error ->
       []
   end,
-  post_editor("comment-items", "", "", TagList, "Submit", add_post, "Cancel", cancel_add).
+  Title = "",
+  Body = "",
+  Format = "html",                              % TODO: get from profile
+  post_editor("comment-items", Title, Body, Format, TagList, "Submit", add_post, "Cancel", cancel_add).
 
 
-post_editor(Id, Title, Body, TagList, Submit, SubmitPostback, Cancel, CancelPostback) ->
+post_editor(Id, Title, Body, Format, TagList, Submit, SubmitPostback, Cancel, CancelPostback) ->
   #panel{id = Id,
     body = [
       #textbox{id="post-title", text = Title},
       #br{},
       #textarea{id="textarea", class="post-input", text = Body},
       #tagsinput{id="tags-input", text = unicode:characters_to_binary(string:join([unicode:characters_to_list(T) || T <- TagList], ","))},
+      #br{},
+      #dropdown{id=input_format, options =
+        [#option{text=TVal, value=Val, selected=Val=:=Format} || {TVal, Val} <- [{"HTML", "html"}, {"Markdown", "markdown"}]]},
+      #br{},
       #button{id = submit, text = Submit, postback = SubmitPostback},
       #button{id = cancel, text = Cancel, postback = CancelPostback}
   ]}.
@@ -539,7 +546,7 @@ sanitize_fix(Text) ->
   end.
 
 event({post_edit, Post}) ->
-  wf:replace("post",post_editor("post", Post#mt_post.title, Post#mt_post.body, Post#mt_post.tags, "Save", {save_post, Post}, "Cancel", {cancel_edit, Post})),
+  wf:replace("post",post_editor("post", Post#mt_post.title, Post#mt_post.body, mt_format(Post#mt_post.format), Post#mt_post.tags, "Save", {save_post, Post}, "Cancel", {cancel_edit, Post})),
   ok;
 event({cancel_edit, Post}) ->
   wf:replace("post", post_body(Post)),
@@ -554,11 +561,13 @@ event({save_post, #mt_post{id = PostId, author = #mt_author{id = PostAuthorId}} 
       Title = wf:q("post-title"),
       Text = wf:q("textarea"),
       Tags = wf:q("tags-input"),
+      Format = wf:q(input_format),
       mtc_entry:supdate(Post#mt_post{
         title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize("text", sanitize_fix(Title))) end,
         body = Text,
-        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
+        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(Format, if Format =:= "html" -> sanitize_fix(Text); true -> ?a2b(Text) end)) end,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")],
+        format = mt_format(Format),
         origin = ?MT_ORIGIN
       })
   end,
@@ -573,6 +582,7 @@ event(add_post) ->
       Title = wf:q("post-title"),
       Text = wf:q("textarea"),
       Tags = wf:q("tags-input"),
+      Format = wf:q(input_format),
 
       ?DBG("Tags: ~p", [Tags]),
       UserName = ?a2b(User),                        % FIXME
@@ -584,7 +594,8 @@ event(add_post) ->
         author = Author,
         title = case Title of undefined -> Title; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize("text", sanitize_fix(Title))) end,
         body = Text,
-        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(sanitize_fix(Text))) end,
+        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(Format, if Format =:= "html" -> sanitize_fix(Text); true -> Text end)) end,
+        format = mt_format(Format),
         origin = ?MT_ORIGIN,
         tags = [unicode:characters_to_binary(sanit(unicode:characters_to_binary(T))) || T <- string:tokens(unicode:characters_to_list(list_to_binary(Tags)), ",")]
       }),
@@ -670,4 +681,18 @@ redirect_url(Id) ->
       PostSuff;
     _ ->
       mtws_common:user_blog(wf:user(), PostSuff)
+  end.
+
+mt_format(Format) ->
+  case Format of
+    "markdown" ->
+      ?mtc_schema_Mt_format_MARKDOWN;
+    "html" ->
+      ?mtc_schema_Mt_format_HTML;
+    ?mtc_schema_Mt_format_MARKDOWN ->
+      "markdown";
+    ?mtc_schema_Mt_format_HTML ->
+      "html";
+    undefined ->
+      "html"
   end.
