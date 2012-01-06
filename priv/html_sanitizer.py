@@ -67,6 +67,8 @@ def clean_html( fragment ):
                 removed = False
             elif tag.name == 'pre':
                 pass
+            elif tag.name == 'div' and dict(tag.attrs)[u'class'] == 'codehilite':
+                removed = False
             elif tag.name not in acceptable_elements:
                 tag.extract() # remove the bad ones
                 removed = True
@@ -115,7 +117,7 @@ intext = unicode(sys.stdin.read(inlen[0]), "utf-8")
 if args.oformat == "html":
     outtext = clean_html(intext).encode('utf-8')
 elif args.oformat == "markdown":
-    outtext = clean_html(markdown.markdown(intext)).encode('utf-8')
+    outtext = clean_html(markdown.markdown(intext, ['codehilite'])).encode('utf-8')
 elif args.oformat == "text":
     outtext = clean_text(intext).encode('utf-8')
 
