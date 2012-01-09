@@ -147,7 +147,22 @@ atom_entries(Upd, Acc, [
   NewUpd = max(Updated, Upd),
   atom_entries(NewUpd, [Res | Acc], Posts).
 
-title() -> mtws_common:blog_name().
+title() ->
+  PathInfo = wf_context:path_info(),
+  [mtws_common:blog_name(),
+    case dict:find(post_id, PathInfo) of
+      {ok, post_add} ->
+        [": ", "New post"];
+      {ok, Id} ->
+        case mtc_entry:sget(mt_post, ?a2b(Id)) of
+          #mt_post{title = undefined} ->
+            [": ", "#", Id];
+          #mt_post{title = Title} ->
+            [": ", Title]
+        end;
+      _ ->
+        []
+    end].
 
 author() ->
   %% FIXME: possible store author name in context?
