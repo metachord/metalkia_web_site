@@ -1,4 +1,6 @@
 User-agent: *
-Disallow: /
+Disallow: /logoff
+Disallow: /post-add
+Disallow: /blog/*/post-add
 Disallow: /facebook
 Disallow: /twitter
