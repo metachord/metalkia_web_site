@@ -522,7 +522,7 @@ post_items() ->
   end,
   Title = "",
   Body = "",
-  Format = "html",                              % TODO: get from profile
+  Format = "markdown",                          % TODO: get from profile
   post_editor("comment-items", Title, Body, Format, TagList, "Submit", add_post, "Cancel", cancel_add).
 
 
