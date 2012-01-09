@@ -19,6 +19,7 @@
   user_blog/1,
   user_blog/2,
   user_blog/4,
+  html_notify/3,
   name/0,
   is_logged_in/0,
   login_panel/0,
@@ -311,6 +312,105 @@ ga_account({Account, _}) ->
 
 ga_host({_, Host}) ->
   Host.
+
+html_notify(
+  #mt_post{
+    id = PostId,
+    author = #mt_author{
+      id = _PostAuthorId
+    },
+    comments = CommentRefs
+  },
+  #mt_comment{
+    id = CommentId,
+    parents = Parents,
+    author = #mt_author{
+      id = CommentAuthorId
+    },
+    body = CommentBody},
+  PostLink) ->
+
+  %% TODO: add message composer system
+  Subject = "Reply on #" ++ ?a2l(PostId),
+
+  PrevParents =
+  case lists:reverse(Parents) of
+    [] -> [];
+    [_|PrevParentsRev] -> lists:reverse(PrevParentsRev)
+  end,
+
+  Blockquote = fun(T) ->
+    [
+      "<blockquote style='border-left: #000040 2px solid; margin-left: 0px; margin-right: 0px; padding-left: 15px; padding-right: 0px'>",
+      T,
+      "</blockquote>"
+    ]
+  end,
+
+  ParentHeader =
+  case lists:reverse(PrevParents) of
+    [] ->
+      ?DBG("Empty previous parents list", []),
+      %% Reply on post
+      [];
+    [ParentCid|_] ->
+      %% Reply on comment
+      ?DBG("ParentCid: ~p", [ParentCid]),
+      [ParentCKey] = [PKey || #mt_comment_ref{id = PCid, comment_key = PKey} <- CommentRefs, PCid =:= ParentCid],
+      case mtc_entry:sget(mt_comment, ?a2b(ParentCKey)) of
+        #mt_comment{author = #mt_author{id = ParentAuthorId}, body = ParentCommentBody} ->
+          case mtc_entry:sget(mt_person, ParentAuthorId) of
+            #mt_person{name = ParentAuthorName} ->
+              iolist_to_binary([
+                "<a href=\"" ++ mtws_common:user_blog(ParentAuthorId, ["/profile"]) ++ "\">",
+                if (ParentAuthorName =/= undefined) andalso (ParentAuthorName =/= <<>>) -> ParentAuthorName; true -> ParentAuthorId end,
+                "</a> wrote:",
+                Blockquote(ParentCommentBody)
+              ]);
+            _ -> ""
+          end;
+        _ -> ""
+      end
+  end,
+
+
+  Header =
+  case mtc_entry:sget(mt_person, CommentAuthorId) of
+    #mt_person{name = CommentAuthorName} ->
+      iolist_to_binary([
+        "<a href=\"" ++ mtws_common:user_blog(CommentAuthorId, ["/profile"]) ++ "\">",
+        if CommentAuthorName =/= undefined -> CommentAuthorName; true -> CommentAuthorId end,
+        "</a> replied:",
+        Blockquote(CommentBody)
+      ]);
+    _ -> ""
+  end,
+
+  NotifyBody = iolist_to_binary(
+    [
+      ParentHeader,
+      "<br />",
+      Header,
+      "\n"
+      "<p><a href=\"" ++ PostLink ++ "#" ++ ?a2l(CommentId) ++ "\">"
+      "Link"
+      "</a></p>"
+  ]),
+
+  NotifyText = mtws_sanitizer:sanitize("text", NotifyBody),
+  NotifyHtml = NotifyBody,
+
+
+  InReplyTo = iolist_to_binary(
+    [
+      "<", "comment-", ?a2l(PostId),
+      case lists:reverse(PrevParents) of [] -> []; [ParId|_] -> ["-", ?a2l(ParId)] end,
+      "@" ++ mtc:get_env(mail_domain), ">"
+    ]
+  ),
+  Headers = [{"In-Reply-To", InReplyTo}],
+  {PrevParents, Subject, {NotifyText, NotifyHtml}, Headers}.
+
 
 -record(session_state, {
   user,

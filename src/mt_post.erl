@@ -626,7 +626,14 @@ event("add-comment-" ++ Path) ->
         timestamp = mtc_util:timestamp(),
         parents = Parents
       },
-      NewCID = mtc_entry:sput(Comment),
+
+      PostUrl = mtws_common:base_uri() ++ ?a2l(post_link(PostId)),
+      NotifyCompFun =
+      fun(P, C) ->
+        mtws_common:html_notify(P, C, PostUrl)
+      end,
+
+      NewCID = mtc_entry:sput(Comment, NotifyCompFun),
       CID = list_to_integer(binary_to_list(NewCID)),
       NewId = Path++"-"++CID,
       wf:insert_bottom("hpan-"++Path,
