@@ -44,7 +44,7 @@ elif args.oformat == "markdown":
 
 BeautifulSoup.QUOTE_TAGS = ['pre', 'code']
 
-def clean_html( fragment ):
+def clean_html( fragment, quirks=True ):
     while True:
         soup = BeautifulSoup( fragment )
         removed = False
@@ -75,7 +75,7 @@ def clean_html( fragment ):
             else: # it might have bad attributes
                 if not len(tag.contents):
                     pass
-                else:
+                elif quirks:
                     stopNode = tag.contents[-1]
                     strings = []
                     current = tag.contents[0]
@@ -117,7 +117,7 @@ intext = unicode(sys.stdin.read(inlen[0]), "utf-8")
 if args.oformat == "html":
     outtext = clean_html(intext).encode('utf-8')
 elif args.oformat == "markdown":
-    outtext = clean_html(markdown.markdown(intext, ['codehilite'])).encode('utf-8')
+    outtext = clean_html(markdown.markdown(intext, ['codehilite']), quirks=False).encode('utf-8')
 elif args.oformat == "text":
     outtext = clean_text(intext).encode('utf-8')
 
