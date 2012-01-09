@@ -541,10 +541,13 @@ post_editor(Id, Title, Body, Format, TagList, Submit, SubmitPostback, Cancel, Ca
       #button{id = cancel, text = Cancel, postback = CancelPostback}
   ]}.
 
-comment_post_items(Id) ->
+comment_post_items(Id, Format) ->
   #panel{id = "comment-items-"++Id, class = "comment-add-box",
     body = [
       #textarea{id="textarea-"++Id},
+      #br{},
+      #dropdown{id=input_format, options =
+        [#option{text=TVal, value=Val, selected=Val=:=Format} || {TVal, Val} <- [{"HTML", "html"}, {"Markdown", "markdown"}]]},
       #br{},
       #button{id=submit, text="Submit",postback="add-comment-" ++ Id},
       #button{text="Cancel",postback="cancel-comment-" ++ Id}
@@ -624,10 +627,10 @@ event("add-comment-" ++ Path) ->
       LevelQ = wf:q("level-"++Path),
       Level = if LevelQ == undefined -> "0"; true -> LevelQ end,
       Text = wf:q("textarea-"++Path),
+      Format = wf:q(input_format),
       [PostId|_] = string:tokens(Path, "-"),
       [_PostId|Parents] = path_to_parents(Path),
 
-      SanText = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(iolist_to_binary(["<p>", Text, "</p>"]))) end,
       UserName = ?a2b(wf:user()),                   % FIXME
       Author = #mt_author{
         id = UserName,
@@ -637,7 +640,8 @@ event("add-comment-" ++ Path) ->
         post_id = ?a2b(PostId),
         author = Author,
         body = Text,
-        body_html = SanText,
+        body_html = case Text of undefined -> Text; _ -> unicode:characters_to_binary(mtws_sanitizer:sanitize(Format, if Format =:= "html" -> sanitize_fix(Text); true -> ?a2b(Text) end)) end,
+        format = mt_format(Format),
         timestamp = mtc_util:timestamp(),
         parents = Parents
       },
@@ -678,7 +682,8 @@ event(("comment-" ++ Id) = Target) ->
   User = wf:user(),
   if
     User =/= undefined ->
-      wf:replace(Target, comment_post_items(Id));
+      Format = "markdown",                      % TODO: get from profile
+      wf:replace(Target, comment_post_items(Id, Format));
     true ->
       pass
   end.
