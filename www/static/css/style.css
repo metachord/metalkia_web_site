@@ -252,6 +252,10 @@ div.comment-body blockquote p{
     font:16px 'Times New Roman';
 }
 
+div.comment-body ol, div.comment-body ul{
+    float: left;
+}
+
 .comment-anchor {
     /* border: dashed 1px #DDD; */
     /* line-height: 0px; */
