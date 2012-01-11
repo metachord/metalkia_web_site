@@ -188,7 +188,7 @@ div.post-body p {
     right: 0;
     color: #000;
     line-height: 1.2em;
-    margin-bottom: 0;
+    margin-bottom: 1.2em;
     text-indent: 0em;
 }
 
@@ -196,6 +196,9 @@ div.post-body p + p {
     margin-top: 1.2em;
 }
 
+div.post-body ol, div.post-body ul{
+    margin-bottom: 1.2em;
+}
 
 div.post-body blockquote {
     border-left: solid 3px #333;
