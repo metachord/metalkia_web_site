@@ -190,6 +190,7 @@ div.post-body p {
     line-height: 1.2em;
     margin-bottom: 1.2em;
     text-indent: 0em;
+    text-align: justify;
 }
 
 div.post-body p + p {
