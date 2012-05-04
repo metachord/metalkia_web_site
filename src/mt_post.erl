@@ -216,17 +216,14 @@ inner_body(post_add) ->
 inner_body(Id) ->
   PathInfo = wf_context:path_info(),
   User = wf:user(),
-  PageUserName =
+  _PageUserName =
   case dict:find(username, PathInfo) of
     {ok, none} -> none;
     {ok, PgUN} -> ?a2b(PgUN);
     _ -> undefined
   end,
   case mtc_entry:sget(mt_post, ?a2b(Id)) of
-    #mt_post{author = #mt_author{id = PersonId}} = Post
-    when
-      (is_binary(PageUserName) and (PageUserName =:= PersonId)) orelse
-      (PageUserName =:= none) ->
+    #mt_post{author = #mt_author{id = PersonId}} = Post ->
       {Email, RealName} =
       case mtc_entry:sget(mt_person, PersonId) of
         #mt_person{email = EmailBin, name = NameBin} -> {?a2l(EmailBin), ?a2l(NameBin)};
