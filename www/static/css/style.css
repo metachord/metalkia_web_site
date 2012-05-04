@@ -32,6 +32,11 @@ body {
     margin-top: 40px;
 }
 
+.container-fluid > .content {
+    margin-left: 50px;
+    margin-right: 50px;
+}
+
 h1 {
     /* font-family: Arial, sans-serif; */
     font-weight: bold;
