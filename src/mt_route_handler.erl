@@ -149,17 +149,17 @@ user_blog(PathInfo) ->
   case HostTokensRev of
     [Tld, SiteName | Rest] when BlogId =:= undefined ->
       %% Request to Metalkia
-      {UserName, Profile, GoogleAnalytics} =
+      {UserName, Profile, GoogleAnalytics, YandexMetrika} =
       case Rest of
         [UN] ->
           case mtc_entry:sget(mt_person, ?a2b(UN)) of
-            #mt_person{google_analytics = GA} = UP ->
-              {UN, UP, GA};
+            #mt_person{google_analytics = GA, yandex_metrika = YM} = UP ->
+              {UN, UP, GA, YM};
             _ ->
-              {undefined, undefined, undefined}
+              {undefined, undefined, undefined, undefined}
           end;
-        [] -> {none, undefined, undefined};
-        _ -> {undefined, undefined, undefined}
+        [] -> {none, undefined, undefined, undefined};
+        _ -> {undefined, undefined, undefined, undefined}
       end,
       BlogName = default,
       BlogTitle = mtc:get_env(default_blog_name),
@@ -172,6 +172,14 @@ user_blog(PathInfo) ->
           {undefined, undefined}
       end,
 
+      {YandexID} =
+      case YandexMetrika of
+        #mt_yandex_metrika{id = YmID} ->
+          {YmID};
+        _ ->
+          {undefined}
+      end,
+
       NewPathInfo =
       lists:foldl(
         fun({Key, Value}, PI) ->
@@ -179,6 +187,7 @@ user_blog(PathInfo) ->
         end, PathInfo, [
           {blog, BlogName},
           {blog_title, BlogTitle},
+          {ym_id, YandexID},
           {ga_account, GoogleAccount},
           {ga_host, GoogleHost}
       ]),
@@ -205,7 +214,7 @@ user_blog(PathInfo) ->
       end,
       case mtc_entry:sget(mt_cname, CnameKey) of
         #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams,
-          google_analytics = GoogleAnalytics} ->
+                  google_analytics = GoogleAnalytics, yandex_metrika = YandexMetrika} ->
           BlogName = ?a2l(CName),
           {GoogleAccount, GoogleHost} =
           case GoogleAnalytics of
@@ -214,6 +223,15 @@ user_blog(PathInfo) ->
             _ ->
               {undefined, undefined}
           end,
+
+          {YandexID} =
+          case YandexMetrika of
+            #mt_yandex_metrika{id = YmID} ->
+              {YmID};
+            _ ->
+              {undefined}
+          end,
+
           NewPathInfo =
           lists:foldl(
             fun
@@ -224,6 +242,7 @@ user_blog(PathInfo) ->
               end, PathInfo, [
               {blog, {BlogName, BlogType}},
               {blog_title, ?a2l(BlogTitle)},
+              {ym_id, YandexID},
               {ga_account, GoogleAccount},
               {ga_host, GoogleHost}
           ]),

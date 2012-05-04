@@ -26,6 +26,10 @@
   profile_link/0,
   copyright/0,
   menu/0,
+  %% Yandex metrika stuff
+  yandex_metrika/0,
+  yandex_metrika_site/0,
+  ym_id/1,
   %% Google analytics stuff
   google_analytics/0,
   google_analytics_site/0,
@@ -279,6 +283,32 @@ copyright() ->
     error ->
       "© Metalkia, 2011"
   end.
+
+
+yandex_metrika() ->
+  PathInfo = wf:path_info(),
+  YMID = case dict:find(ym_id, PathInfo) of
+    {ok, ID} ->
+      ID;
+    _ -> undefined
+  end,
+  if
+    YMID =/= undefined ->
+      #template {file="./site/templates/metalkia/yandex-metrika.tpl", bindings = [{'Val', {YMID}}]};
+    true ->
+      ""
+  end.
+
+yandex_metrika_site() ->
+  case mtc:get_env(yandex) of
+    {YMID} ->
+      #template {file="./site/templates/metalkia/yandex-metrika.tpl", bindings = [{'Val', {YMID}}]};
+    _ ->
+      ""
+  end.
+
+ym_id({ID}) ->
+  ID.
 
 google_analytics() ->
   PathInfo = wf:path_info(),
