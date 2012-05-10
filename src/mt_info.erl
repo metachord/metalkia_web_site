@@ -20,7 +20,7 @@ author() ->
   "Metachord".
 
 header() ->
-  "Info".
+  "".
 
 body() ->
   #template { file="./site/templates/metalkia/info.html" }.
