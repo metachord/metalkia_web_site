@@ -158,7 +158,10 @@ title() ->
           #mt_post{title = undefined} ->
             [": ", "#", Id];
           #mt_post{title = Title} ->
-            [": ", Title]
+            [": ", Title];
+          _Other ->
+            ?ERR("Bad post entry for id ~p: ~p", [Id, _Other]),
+            []
         end;
       _ ->
         []
