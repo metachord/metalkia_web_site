@@ -1,3 +1,7 @@
+%%% @copyright  2012 Metachord Ltd.
+%%% @author     Max Treskin <mtreskin@metachord.com>
+
+
 %% -*- mode: nitrogen -*-
 -module(nitrogen_app).
 -behaviour(application).

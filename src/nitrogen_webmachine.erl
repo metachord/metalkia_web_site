@@ -1,3 +1,7 @@
+%%% @copyright  2012 Metachord Ltd.
+%%% @author     Max Treskin <mtreskin@metachord.com>
+
+
 %% @author author <author@example.com>
 %% @copyright YYYY author.
 %% @doc Example webmachine_resource.

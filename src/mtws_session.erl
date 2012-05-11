@@ -1,3 +1,7 @@
+%%% @copyright  2012 Metachord Ltd.
+%%% @author     Max Treskin <mtreskin@metachord.com>
+
+
 %%%-------------------------------------------------------------------
 %%% @author Maxim Treskin <mtreskin@metachord.com>
 %%% @copyright (C) 2011, Maxim Treskin

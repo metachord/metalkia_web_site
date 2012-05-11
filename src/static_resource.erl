@@ -1,3 +1,7 @@
+%%% @copyright  2012 Metachord Ltd.
+%%% @author     Max Treskin <mtreskin@metachord.com>
+
+
 %% @author Bryan Fink <bryan@basho.com>
 %% @author Andy Gross <andy@basho.com>
 %% @author Justin Sheehy <justin@basho.com>

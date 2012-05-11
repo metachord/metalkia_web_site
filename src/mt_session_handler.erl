@@ -1,12 +1,16 @@
-% Nitrogen Web Framework for Erlang
-% Copyright (c) 2008-2010 Rusty Klophaus
-% See MIT-LICENSE for licensing information.
+%%% @copyright  2012 Metachord Ltd.
+%%% @author     Max Treskin <mtreskin@metachord.com>
 
-% This is a "simple as possible" session handler. Unfortunately,
-% due to time constraints, had to leave out some great code
-% contributed by Dave Peticolas that fit Nitrogen sessions
-% into a gen_server. My code below is far inferior.
-% Someone please make it better! - Rusty
+%%%% Based on:
+%%% Nitrogen Web Framework for Erlang
+%%% Copyright (c) 2008-2010 Rusty Klophaus
+%%% See MIT-LICENSE for licensing information.
+%%
+%%% This is a "simple as possible" session handler. Unfortunately,
+%%% due to time constraints, had to leave out some great code
+%%% contributed by Dave Peticolas that fit Nitrogen sessions
+%%% into a gen_server. My code below is far inferior.
+%%% Someone please make it better! - Rusty
 
 -module (mt_session_handler).
 -include_lib("nitrogen_core/include/wf.hrl").

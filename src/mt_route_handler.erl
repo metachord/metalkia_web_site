@@ -1,6 +1,5 @@
-% Nitrogen Web Framework for Erlang
-% Copyright (c) 2008-2010 Rusty Klophaus
-% See MIT-LICENSE for licensing information.
+%%% @copyright  2012 Metachord Ltd.
+%%% @author     Max Treskin <mtreskin@metachord.com>
 
 -module (mt_route_handler).
 -behaviour (route_handler).

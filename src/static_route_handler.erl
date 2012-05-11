@@ -1,12 +1,16 @@
-% Nitrogen Web Framework for Erlang
-% Copyright (c) 2008-2010 Rusty Klophaus
-% See MIT-LICENSE for licensing information.
+%%% @copyright  2012 Metachord Ltd.
+%%% @author     Max Treskin <mtreskin@metachord.com>
+
+%%%% Based on:
+%%% Nitrogen Web Framework for Erlang
+%%% Copyright (c) 2008-2010 Rusty Klophaus
+%%% See MIT-LICENSE for licensing information.
 
 -module (static_route_handler).
 -behaviour (route_handler).
 -include_lib ("nitrogen_core/include/wf.hrl").
 -export ([
-    init/2, 
+    init/2,
     finish/2
 ]).
 
@@ -21,5 +25,5 @@ init(PageModule, State) ->
     wf_context:page_module(PageModule),
     {ok, State}.
 
-finish(_Config, State) -> 
+finish(_Config, State) ->
     {ok, State}.
