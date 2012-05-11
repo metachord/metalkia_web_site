@@ -2,14 +2,6 @@
 %%% @author     Max Treskin <mtreskin@metachord.com>
 
 
-%%%-------------------------------------------------------------------
-%%% @author Maxim Treskin <mtreskin@metachord.com>
-%%% @copyright (C) 2011, Maxim Treskin
-%%% @doc
-%%%
-%%% @end
-%%% Created : 24 Nov 2011 by Maxim Treskin <mtreskin@metachord.com>
-%%%-------------------------------------------------------------------
 -module(mtws_sanitizer).
 
 -behaviour(gen_server).
