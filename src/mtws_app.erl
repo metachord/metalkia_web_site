@@ -22,6 +22,9 @@ start() ->
   [application:start(A) ||
     A <-
       [
+       compiler,
+       syntax_tools,
+       lager,
        crypto,
        public_key,
        ssl,
