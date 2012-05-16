@@ -58,7 +58,7 @@ def clean_html( fragment, quirks=True ):
             elif tag.name == 'iframe':
                 if re.match("https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/", dict(tag.attrs)[u'src']):
                     removed = False
-                if re.match("https?:\/\/(?:www\.)?slideshare\.net\/slideshow\/embed_code\/\d+", dict(tag.attrs)[u'src']):
+                elif re.match("https?:\/\/(?:www\.)?slideshare\.net\/slideshow\/embed_code\/\d+", dict(tag.attrs)[u'src']):
                     removed = False
                 else:
                     tag.extract()
