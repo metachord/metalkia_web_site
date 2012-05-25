@@ -26,8 +26,20 @@ author() ->
 header() ->
   "".
 
+
 body() ->
-  wf:redirect("/info").
+    {ok, Users} = mtriak:list_keys(<<"persons">>),
+    UL = #list{body = [#listitem{body = #link{text = UN, url = mtws_common:user_blog(UN)}} || UN <- lists:sort(Users)]},
+
+    {ok, CNames} = mtriak:list_keys(<<"cnames">>),
+    CL = #list{body = [#listitem{body = #link{text = CN, url = iolist_to_binary(["http://", CN])}} || CN <- lists:sort(CNames)]},
+    #panel{class = "link-list", body = [
+        #panel{class = "link-list-users", body = [#panel{class = "link-list-header", body = [<<"User blogs">>]}, UL]},
+        #panel{class = "link-list-cnames", body = [#panel{class = "link-list-header", body = [<<"Domain blogs">>]}, CL]}
+    ]}.
+
+
+
 
 event(_) ->
   ok.
