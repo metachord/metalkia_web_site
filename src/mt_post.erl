@@ -164,7 +164,7 @@ title() ->
           #mt_post{title = Title} ->
             [": ", Title];
           _Other ->
-            ?ERR("Bad post entry for id ~p: ~p", [Id, _Other]),
+            ?ERR("Bad post entry for id ~p: ~p (url: ~p)", [Id, _Other, mtws_common:url()]),
             []
         end;
       _ ->
