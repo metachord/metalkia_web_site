@@ -52,6 +52,8 @@ def clean_html( fragment, quirks=True ):
             if tag.name == 'script':
                 if re.match("https?:\/\/(?:www\.)?gist\.github\.com\/\d+\.js", dict(tag.attrs)[u'src']):
                     removed = False
+                if re.match("(https?:)?\/\/speakerdeck.com\/assets\/embed\.js", dict(tag.attrs)[u'src']):
+                    removed = False
                 else:
                     tag.extract()
                     removed = True
