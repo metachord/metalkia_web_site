@@ -32,15 +32,16 @@ body {
     margin-top: 40px;
 }
 
-.container-fluid {
+.container{
     position: relative;
     min-width: 100%;
     padding-left: 0%;
     padding-right: 0%;
+    margin-left: 10px;
     zoom: 1;
 }
 
-.container-fluid > .content {
+.container> .content {
     margin-left: 50px;
     margin-right: 50px;
 }
