@@ -200,7 +200,7 @@ user_blog(PathInfo) ->
         true ->
           {BlogId, local}
       end,
-      CnameKey =
+      {CnameKey, GAPretend, YMPretend} =
       case BlogType of
         local ->
           UserName =
@@ -208,8 +208,15 @@ user_blog(PathInfo) ->
             [Tld, SiteName | [Rest]] -> Rest;
             _ -> []
           end,
-          {UserName, list_to_binary(BlogNamePretend)};
-        cname -> list_to_binary(BlogNamePretend)
+          {GARecPretend, YMRecPretend} =
+          case mtc_entry:sget(mt_person, ?a2b(UserName)) of
+             #mt_person{google_analytics = GA, yandex_metrika = YM} ->
+                 {GA, YM};
+             _ ->
+                 {undefined, undefined}
+          end,
+          {{UserName, list_to_binary(BlogNamePretend)}, GARecPretend, YMRecPretend};
+        cname -> {list_to_binary(BlogNamePretend), undefined, undefined}
       end,
       case mtc_entry:sget(mt_cname, CnameKey) of
         #mt_cname{cname = CName, title = BlogTitle, owner = Owner, streams = Streams,
@@ -219,6 +226,9 @@ user_blog(PathInfo) ->
           case GoogleAnalytics of
             #mt_google_analytics{account = GaAccount, host = GaHost} ->
               {GaAccount, GaHost};
+            _ when is_record(GAPretend, mt_google_analytics) ->
+              #mt_google_analytics{account = GaAccount, host = GaHost} = GAPretend,
+              {GaAccount, GaHost};
             _ ->
               {undefined, undefined}
           end,
@@ -226,6 +236,9 @@ user_blog(PathInfo) ->
           {YandexID} =
           case YandexMetrika of
             #mt_yandex_metrika{id = YmID} ->
+              {YmID};
+            _ when is_record(YMPretend, mt_yandex_metrika) ->
+              #mt_yandex_metrika{id = YmID} = YMPretend,
               {YmID};
             _ ->
               {undefined}
