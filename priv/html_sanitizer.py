@@ -50,17 +50,17 @@ def clean_html( fragment, quirks=True ):
         removed = False
         for tag in soup.findAll(True): # find all tags
             if tag.name == 'script':
-                if re.match("https?:\/\/(?:www\.)?gist\.github\.com\/\d+\.js", dict(tag.attrs)[u'src']):
+                if re.match("^https?:\/\/(?:www\.)?gist\.github\.com\/\d+\.js$", dict(tag.attrs)[u'src']):
                     removed = False
-                if re.match("(https?:)?\/\/speakerdeck.com\/assets\/embed\.js", dict(tag.attrs)[u'src']):
+                if re.match("^(https?:)?\/\/speakerdeck.com\/assets\/embed\.js$", dict(tag.attrs)[u'src']):
                     removed = False
                 else:
                     tag.extract()
                     removed = True
             elif tag.name == 'iframe':
-                if re.match("https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/", dict(tag.attrs)[u'src']):
+                if re.match("^https?:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/$", dict(tag.attrs)[u'src']):
                     removed = False
-                elif re.match("https?:\/\/(?:www\.)?slideshare\.net\/slideshow\/embed_code\/\d+", dict(tag.attrs)[u'src']):
+                elif re.match("^https?:\/\/(?:www\.)?slideshare\.net\/slideshow\/embed_code\/\d+$", dict(tag.attrs)[u'src']):
                     removed = False
                 else:
                     tag.extract()
